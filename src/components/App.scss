@@ -1,0 +1,55 @@
+.body {
+  width: 360px;
+}
+.App {
+  padding: 0px 12px;
+  font-family: Montserrat;
+  font-size: 12px;
+  font-weight: 500;
+  color: #000;
+  width: 360px;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 336px;
+    height: 32px;
+    background-color: #fff;
+  }
+
+  .header-divider {
+    width: 313px;
+    border: solid 1px #979797;
+  }
+
+  .divider {
+    width: 313px;
+    border: solid 1px #72bfca;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: right;
+    margin: 21px 0;
+
+    .clear-data-button {
+      border: none;
+      color: #72bfca;
+      background-color: white;
+    }
+    .get-data-button {
+      width: 82px;
+      height: 31px;
+      margin: 0 0 0 13px;
+      border-radius: 3px;
+      border: solid 1px #000;
+      background-color: #fff;
+      color: #000;
+      margin-right: 15px;
+    }
+  }
+}
