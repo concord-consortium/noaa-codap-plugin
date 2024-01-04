@@ -1,7 +1,7 @@
 {
-  "name": "codap-plugin-starter-project",
+  "name": "codap-noaa-plugin",
   "version": "0.0.1",
-  "description": "Concord Consortium Starter CODAP Plugin",
+  "description": "CODAP NOAA Weather Plugin",
   "main": "index.js",
   "browserslist": "> 0.2%, last 5 versions, Firefox ESR, not dead, not ie > 0",
   "jest": {
