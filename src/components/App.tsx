@@ -16,6 +16,7 @@ import { DateRange } from "./date-range";
 import { AttributesSelector } from "./attribute-selector";
 import { InfoModal } from "./info-modal";
 import InfoIcon from "../assets/icon-info.svg";
+import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
 
 const kPluginName = "NOAA Weather Station Data";
 const kVersion = "0014";
@@ -98,6 +99,7 @@ export const App = () => {
       {showInfo &&
         <InfoModal setShowInfo={setShowInfo}/>
       }
+      <StateCounterDemoToBeRemoved />
     </div>
   );
 };
