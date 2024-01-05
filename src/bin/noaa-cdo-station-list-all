@@ -1,0 +1,46 @@
+#!/bin/bash
+# Outputs a list of stations within one degree of
+# lat/long point with identifiers suitable for GSOM and Daily Summary datasets.
+# Requires curl.
+# Requires a CDO Token obtainable through the CDO website.
+# CDO Token should be placed in ~/.noaa_rc
+#
+# This doesn't seem to be working as intended. The output is a list of json filenames and not a list of stations
+PROGNAME=$(basename $0)
+DIRNAME=$(dirname $0)
+
+USAGE="$PROGNAME lat long"
+
+. $DIRNAME/.noaa_rc
+. ~/.noaa_rc
+
+#if [ $# != 2 ]; then
+#  echo usage: $USAGE
+#  exit 1
+#fi
+
+TOKEN_PHRASE="token: $CDO_TOKEN"
+URL="$CDO_URL$CDO_ENDPOINT_STATIONS"
+
+function getSample() {
+  curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1" > $2
+  # curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1"
+}
+
+mkdir ~/Temp/${PROGNAME}_$$
+i=1
+offset=$i
+while [ $i -lt 59 ] ; do
+f=~/Temp/${PROGNAME}_$$/stations_${i}.json
+# echo $offset $f
+getSample $offset $f
+# getSample $offset
+i=$(expr $i + 1)
+offset=$(expr $i \* 1000 + 1)
+done
+
+jq -s '.' ~/Temp/${PROGNAME}_$$/*.json | jq [.[].results[]]
+
+# rm -r /tmp/${PROGNAME}_$$
+
+#curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000"
