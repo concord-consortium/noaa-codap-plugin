@@ -6,13 +6,21 @@ export const AttributesSelector = () => {
   const [selected, setSelected] = useState("standard");
   const attributes = ["All", "Average temperature", "Precipitation", "Max temperature", "Min temperature",
                         "Snowfall", "Average wind speed"];
+
+  const handleToggleUnits = () => {
+    if (selected === "standard") {
+      setSelected("metric");
+    } else {
+      setSelected("standard");
+    }
+  }; 
   return (
     <div className="attribute-selection-container">
       <div className="attribute-selection-header">
         <span>Attributes</span>
         <div className="units-selection">
           <label>Units</label>
-          <button>standard</button>
+          <button onClick={handleToggleUnits}>standard</button>
         </div>
         <div className="attribute-selection">
           { attributes.map(attr => {
