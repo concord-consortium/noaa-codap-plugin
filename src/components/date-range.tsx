@@ -3,13 +3,13 @@ import React, { useState } from "react";
 import "./date-range.scss";
 
 export const DateRange = () => {
-  const [selectedFrequency, setSelectedFrequency] = useState("monthly");
+  const [selectedFrequency, setSelectedFrequency] = useState("daily");
   const frequency = ["hourly", "daily", "monthly"];
 
   const handleFrequencySelection = (e: React.MouseEvent) => {
     const target = e.target as HTMLButtonElement;
     setSelectedFrequency(target.value);
-  }
+  };
 
   return (
     <div className="date-range-container">
