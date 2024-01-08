@@ -1,108 +1,95 @@
-# CODAP Plugin Starter Project
+# CODAP NOAA Weather Plugin
 
-This is a bare-bones React project, created with the `--typescript` version of [Create React App](https://github.com/facebook/create-react-app), and left un-ejected. This is simply a trivial React view with the libraries for using the [CODAP Plugin API](https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-Plugin-API).
+## Building
+```
+% npm install
+% npm run build
+```
 
-## Development
+## Updating the Station Dataset
 
-### Copying a starter project
+The station dataset starts with a filtered, merged view of the NOAA ISD
+(Integrated Station Data) data set, to which it adds correlated GHCN (Global
+Historical Climatology Network) ids. To regenerate this data:
+```shell script
+# fetch the current ISD dataset
+./bin/noaa-get-isd-weather-stations > /tmp/hourly-weather-stations.json
 
-1. Create a new public repository for your project (e.g. `new-repository`)
-2. Create a clone of the starter repo
+# fetch the current GHCN station data
+./bin/noaa-cdo-station-list-all > /tmp/cdo-station-list.json
+
+# create a merged dataset
+./bin/noaa-merge-station-data /tmp/hourly-weather-stations.json \
+    /tmp/cdo-station-list.json > assets/data/weather-stations.json
+```
+*Important*: The second script, noaa-cdo-station-list-all, requires an access token.
+This can be obtained for no cost from https://www.ncdc.noaa.gov/cdo-web/webservices/v2.
+Once obtained, this token should be placed in a text file named, .noaa_rc, in
+the current working directory or your home directory.
+Like:
+```shell script
+CDO_TOKEN=[your token]
+```
+
+Execution of these scripts requires the following programs to be present in your
+shell execution environment:
+* curl (standard on Macs)
+* jq (available through Homebrew on Macs)
+* csvjson (available through NPM)
+* node
+
+## NOAA APIs
+
+This plugin uses various NOAA APIs and resources, both for preparing static
+datasets the plugin relies on and, at runtime, to fetch historical weather data.
+
+### Links
+
+The following URLs describe the NCEI API's in use by this plugin.
+
+* https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
+
+  This document describes the basic NOAA Data Access API. It is a basically
+  unrestricted API that does not require an API key. Here is a typical request:
+
     ```
-    git clone --single-branch https://github.com/concord-consortium/codap-plugin-starter-project.git new-repository
-    ```
-3. Update the starter repo
+    https://www.ncei.noaa.gov/access/services/data/v1\
+      ?dataset=daily-summaries&stations=USW00014755\
+      &startDate=2020-08-01&endDate=2020-09-01\
+     &format=json&dataTypes=TMAX,TMIN&units=metric
+   ```
+   * Query parameters
+      * **dataset**: the dataset we are requesting: 'daily-summaries' or 'global-summary-of-the-month'
+      * **stations**: a station identifier: the particular scheme depends on the dataset
+      * **startDate, endDate**: must be in yyyy-mm-dd format
+      * **format**: we request 'json', but 'csv' is also available
+      * **units**: 'metric' or 'standard'
+      * **dataTypes**: basically properties. Dependent on dataset
 
-    First, update and run the starter project:
-    ```
-    cd new-repository
-    npm install
-    npm update
-    npm start
-    ```
-    The browser should automatically open [localhost:3000](http://localhost:3000). Checking for the words "Hello World".
-    Also verify that the test suite still passes:
-    ```
-    npm run test
-    ```
+* https://www.ncei.noaa.gov/access/services/support/v3/datasets/{dataset-name}.json
 
-4. Next, re-initialize the repo to create a new history
-    ```
-    rm -rf .git
-    git init
-    ```
-5. Create an initial commit for your new project
-    ```
-    git add .
-    git commit -m "Initial commit"
-    ```
-6. Push to your new repository
-    ```
-    git remote add origin https://github.com/concord-consortium/new-repository.git
-    git push -u origin master
-    ```
-7. Open your new repository and update all instances of `codap-plugin-starter-project` to `new-repository`.
-   Note: this will do some of the configuration for Travis deployment to S3, but you'll still need to follow
-   the instructions [here](https://docs.google.com/document/d/e/2PACX-1vTpYjbGmUMxk_FswUmapK_RzVyEtm1WdnFcNByp9mqwHnp0nR_EzRUOiubuUCsGwzQgOnut_UiabYOM/pub).
-8. Your new repository is ready! Remove this section of the `README`, and follow the steps below to use it.
+  Returns information about particular dataset, including supported datatypes.
 
-### Initial steps
+* https://www1.ncdc.noaa.gov/pub/data/noaa/isd-history.csv
 
-1. Clone this repo and `cd` into it
-2. Run `npm install` to pull dependencies
-3. Run `npm start` to run `webpack-dev-server` in development mode with hot module replacement
+  Returns a historic list of weather stations in the Integrated Surface Data set.
+  These stations contribute to the Hourly dataset.
+  The list is updated regularly.
 
-## Testing the plugin in CODAP
+### Docs
 
-Currently there is no trivial way to load a plugin running on a local server with `http` into the online CODAP, which forces `https`. One simple solution is to download the latest `build_[...].zip` file from https://codap.concord.org/releases/zips/, extract it to a folder and run it locally. If CODAP is running on port 8080, and this project is running by default on 3000, you can go to
+The following documents are included within this codeline and may provide
+helpful background.
 
-http://127.0.0.1:8080/static/dg/en/cert/index.html?di=http://localhost:3000
+* docs/isd-format-document.pdf
 
-to see the plugin running in CODAP.
+  This is a NOAA document describing the Integrated Surface Data File Format.
+  It is applicable to Hourly data format, though not directly to the CSV or JSON versions.
+  It describes a flat file format where each row is an observation. There is a
+  portion with required elements at fixed character positions and a portion with
+  keyed optional properties, I believe separated by spaces.
 
-# Create React App Readme
+* docs/CSV_HELP.pdf
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+  How to understand ISD Format conversion to CSV file format. Somewhat helpful.
 
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
