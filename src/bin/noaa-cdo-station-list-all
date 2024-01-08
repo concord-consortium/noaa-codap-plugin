@@ -5,7 +5,6 @@
 # Requires a CDO Token obtainable through the CDO website.
 # CDO Token should be placed in ~/.noaa_rc
 #
-# This doesn't seem to be working as intended. The output is a list of json filenames and not a list of stations
 PROGNAME=$(basename $0)
 DIRNAME=$(dirname $0)
 
@@ -24,23 +23,21 @@ URL="$CDO_URL$CDO_ENDPOINT_STATIONS"
 
 function getSample() {
   curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1" > $2
-  # curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1"
 }
 
-mkdir ~/Temp/${PROGNAME}_$$
+mkdir /tmp/${PROGNAME}_$$
 i=1
 offset=$i
 while [ $i -lt 59 ] ; do
-f=~/Temp/${PROGNAME}_$$/stations_${i}.json
-# echo $offset $f
+f=/tmp/${PROGNAME}_$$/stations_${i}.json
+echo $offset $f
 getSample $offset $f
-# getSample $offset
 i=$(expr $i + 1)
 offset=$(expr $i \* 1000 + 1)
 done
 
-jq -s '.' ~/Temp/${PROGNAME}_$$/*.json | jq [.[].results[]]
+jq -s '.' /tmp/${PROGNAME}_$$/*.json | jq [.[].results[]]
 
-# rm -r /tmp/${PROGNAME}_$$
+rm -r /tmp/${PROGNAME}_$$
 
 #curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000"

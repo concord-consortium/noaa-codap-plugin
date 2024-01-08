@@ -2,7 +2,7 @@
 #
 # NCEI Data API
 #
-# Documentation about NCEI Data API:
+# Documentation about NCEI Data API: 
 # https://www.ncei.noaa.gov/support/access-data-service-api-user-documentation
 # NCEI URL
 NOAA_URL=https://www.ncei.noaa.gov
@@ -14,7 +14,7 @@ NOAA_ENDPOINT_DATASETS=access/services/support/v3/datasets
 # HOMR API
 #
 # Documention about HOMR API (Historical Observing Metadata Repository)
-# NCEI's integrated station history database
+# NCEI's integrated station history database 
 # URL: https://www.ncdc.noaa.gov/homr/api
 
 # Base URL
@@ -28,7 +28,6 @@ HOMR_SEARCH_ENDPOINT=search
 # Requires registration for CDO_TOKEN
 CDO_URL=https://www.ncdc.noaa.gov/cdo-web/api/v2/
 CDO_ENDPOINT_STATIONS=stations
-CDO_TOKEN=HKjboUoMsEyuLemRNktylohfsMJKAlPc
 
 #
 # ISD History
