@@ -7,17 +7,8 @@ import LocationIcon from "../assets/images/icon-location.svg";
 import CurrentLocationIcon from "../assets/images/icon-current-location.svg";
 
 import "./location-picker.scss";
-// import { useStateContext } from "../hooks/use-state";
 
-// type LocationType = {
-//   lat: number, long: number, name: string
-// };
-
-// const kGeonamesService = "https://secure.geonames.org/search";
-// const kGeolocService = "https://secure.geonames.org/findNearbyPlaceNameJSON";
-// const kMinQueryInterval = 800;
 const kDefaultMaxRows = 4;
-// const kMinNameLength = 3;
 const kPlaceholderText = "Enter location or identifier here";
 
 const kClassSelectOption = "location-selector-option";
@@ -59,34 +50,21 @@ export const LocationPicker = () => {
     }, []);
 
     function handleKeyDown(ev: React.KeyboardEvent<HTMLDivElement>) {
-      console.log("in handleKeyDown ev.key", ev.key);
-      // let option = selectionListEl.current?.querySelector("." + kClassCandidate);
       if (ev.key === "Enter") {
         if (locationInputEl.current) {
           autoComplete(locationInputEl.current)
-            .then ((placeList) => {
-                      setLocationPossibilities(placeList);
-                      console.log("placeList length", placeList.length);
-                      placeList.length > 0 && setShowSelectionList(true);
-                      setIsEditing(false);
-                      setSelectedLocation(undefined);
+            .then ((placeList: IPlace[] | undefined) => {
+                      if (placeList) {
+                        setLocationPossibilities(placeList);
+                        console.log("placeList length", placeList.length);
+                        placeList.length > 0 && setShowSelectionList(true);
+                        setIsEditing(false);
+                        setSelectedLocation(undefined);
+                      }
                   });
 
         }
         ev.stopPropagation();
-        // else {
-        //   console.log("in handleKeyDown ev.target", ev.target);
-        //   // setSelectedLocation(ev.target);
-        //   setShowSelectionList(false);
-        // }
-        //  else {
-        //   if (option) {
-        //     inputEl.value = option.innerText;
-        //     selectedPlace = placeList[Number(option.attributes.dataix.value)];
-        //     selectionHandler(selectedPlace);
-        //     selectionListEl.classList.add(kClassHidden);
-        //   }
-        // }
       } else if (ev.key === "ArrowDown") {
         if (!showSelectionList) {
           let currentCandidateEl = locationSelectionListEl.current?.querySelector("." + kClassCandidate );
@@ -134,26 +112,14 @@ export const LocationPicker = () => {
         setSelectedLocation(locationPossibilities[selectedLocIdx]);
         setShowSelectionList(false);
       }
-
-      // if (target.classList.contains(kClassSelectOption)) {
-      //   inputEl.value = target.innerText;
-      //   selectedPlace = placeList[Number(target.attributes.dataix.value)];
-      //   selectionHandler(selectedPlace);
-      // }
-      // classList.add(kClassHidden);
     }
 
-  const handleHover = (ev: React.MouseEvent<HTMLDivElement>) => {
-    const target = ev.target;
-    console.log("handleHover target", target);
-    // if (target.classList.contains(kClassSelectOption)) {
-    //   selectionListEl.current?.querySelectorAll("." + kClassCandidate).forEach(function (el) {
-    //     el.classList.remove(kClassCandidate);
-    //   });
-    //   target.classList.add(kClassCandidate);
-    //   ev.stopPropagation();
-    // }
+  const handleFindCurrentLocation = async() => {
+    navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
+      setSelectedLocation({name: "current location", lat: position.coords.latitude, long: position.coords.longitude});
+    });
   };
+
 console.log("input value", locationInputEl.current?.value);
   return (
     <div className="location-picker-container">
@@ -181,13 +147,12 @@ console.log("input value", locationInputEl.current?.value);
           <div
             ref={locationSelectionListEl}
             className={classnames("location-selection-list", {"short" : showMapButton, "show": showSelectionList})}
-            onMouseOver={handleHover}
             onClick={handlePlaceNameSelection}
             onKeyDown={handleKeyDown}
             tabIndex={0}
           >
             <div className="list-current-location">
-              <div className="current-location-wrapper">
+              <div className="current-location-wrapper" onClick={handleFindCurrentLocation}>
                 <CurrentLocationIcon className="current-location-icon"/>
                 <span className="current-location">Use current location</span>
               </div>
