@@ -1,14 +1,17 @@
 import React from "react";
+import { useStateContext } from "../hooks/use-state";
 
 import "./info-modal.scss";
 
-interface IProps {
-  setShowInfo: (show: boolean) => void
-}
-export const InfoModal = ({setShowInfo}: IProps) => {
+export const InfoModal = () => {
+  const {setState} = useStateContext();
+
   const handleCloseModal = () => {
-    setShowInfo(false);
+    setState(draft => {
+      draft.showModal = undefined;
+    });
   };
+
   return (
     <div className="info-modal">
       <div className="modal-header">
