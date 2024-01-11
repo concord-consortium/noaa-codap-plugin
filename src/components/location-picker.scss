@@ -50,7 +50,8 @@
         }
 
         .location-input {
-          border: none !important;
+          outline: transparent;
+          border: transparent;
           width: 100%;
           height: 100%;
           box-sizing: border-box;
@@ -58,9 +59,6 @@
           &::placeholder {
             font-style: italic;
             color: #c6c6c6;
-          }
-          &:focus-visible {
-            border: none;
           }
         }
         .selected-loc-intro {
@@ -73,10 +71,11 @@
         position: relative;
         width: 313px;
         height: 97px;
-        margin: 0 13px ;
         box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.5);
         background-color: #fff;
         visibility: hidden;
+        list-style-type: none;
+        margin: 0;
 
         &.short {
           width: 275px;
@@ -84,36 +83,26 @@
         &.show {
           visibility: visible;
           z-index: 5;
+          width: 275px;
         }
 
-        .list-current-location {
-          display: block;
+        .current-location-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          margin-left: -31px;
+          margin-top: 6px;
 
-          .current-location-wrapper {
-            position: absolute;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            margin-left: 9px;
-
-            .current-location-icon {
-              margin: 6px 8px 3px 0;
-            }
-            .current-location {
-              color: #72bfca;
-            }
+          .current-location-icon {
+            margin-right: 8px;
+          }
+          .current-location {
+            color: #72bfca;
           }
         }
 
-        .location-selector-options {
-          display: block;
-          position: absolute;
-          top: 23px;
-          left: 20px;
-
-          .location-selector-option {
-            margin: 3px 13px;
-          }
+        .location-selector-option {
+          margin: 2px -5px;
         }
       }
     }
@@ -130,7 +119,7 @@
       position: relative;
       top: -49px;
       padding: 0;
-      left: -20px;
+      right: 32px;
     }
   }
 }
