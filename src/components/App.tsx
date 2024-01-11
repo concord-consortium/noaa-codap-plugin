@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   initializePlugin,
   /*
@@ -12,13 +12,16 @@ import {
   ClientNotification,
   */
 } from "@concord-consortium/codap-plugin-api";
-import "./App.scss";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range";
 import { AttributesSelector } from "./attribute-selector";
 import { InfoModal } from "./info-modal";
 import InfoIcon from "../assets/icon-info.svg";
 import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
+import { useStateContext } from "../hooks/use-state";
+import { DataReturnWarning } from "./data-return-warning";
+
+import "./App.scss";
 
 const kPluginName = "NOAA Weather Station Data";
 const kVersion = "0014";
@@ -32,7 +35,8 @@ export const App = () => {
   // const [codapResponse, setCodapResponse] = useState<any>(undefined);
   // const [listenerNotification, setListenerNotification] = useState<string>();
   // const [dataContext, setDataContext] = useState<any>(null);
-  const [showInfo, setShowInfo] = useState(false);
+  const {state, setState} = useStateContext();
+  const {showModal} = state;
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
@@ -82,7 +86,16 @@ export const App = () => {
   */
 
   const handleOpenInfo = () => {
-    setShowInfo(true);
+    setState(draft => {
+      draft.showModal = "info";
+    });
+  };
+
+  const handleGetData = () => {
+    // for now just show the warning
+    setState(draft => {
+      draft.showModal = "data-return-warning";
+    });
   };
 
   return (
@@ -100,11 +113,10 @@ export const App = () => {
       <div className="divider" />
       <div className="footer">
         <button className="clear-data-button">Clear Data</button>
-        <button className="get-data-button">Get Data</button>
+        <button className="get-data-button" onClick={handleGetData}>Get Data</button>
       </div>
-      {showInfo &&
-        <InfoModal setShowInfo={setShowInfo}/>
-      }
+      {showModal === "info" && <InfoModal />}
+      {showModal === "data-return-warning" && <DataReturnWarning />}
       <StateCounterDemoToBeRemoved />
     </div>
   );
