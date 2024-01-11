@@ -77,14 +77,13 @@
         visibility: hidden;
         list-style-type: none;
         margin: 0;
-
-        &.short {
-          width: 275px;
-        }
         &.show {
           visibility: visible;
           z-index: 5;
           width: 275px;
+        }
+        &.short {
+          width: 236px;
         }
 
         .current-location-wrapper {
@@ -93,6 +92,9 @@
           align-items: center;
           margin-left: -31px;
           margin-top: 6px;
+          &.geoname-candidate {
+            background-color: #ddeff1;
+          }
 
           .current-location-icon {
             margin-right: 8px;
@@ -103,7 +105,17 @@
         }
 
         .location-selector-option {
-          margin: 2px -5px;
+          margin-top: 2px;
+          margin-left: -31px;
+          width: 100%;
+
+          &.geoname-candidate {
+            background-color: #ddeff1;
+          }
+
+          .location-name {
+            padding-left: 31px;
+          }
         }
       }
     }
