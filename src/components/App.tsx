@@ -1,8 +1,5 @@
 import React, { useEffect } from "react";
 import {
-  createDataContext,
-  createTable,
-  getDataContext,
   initializePlugin,
 } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
@@ -22,34 +19,14 @@ const kInitialDimensions = {
   width: 360,
   height: 495
 };
-const kDataContextName = "WeatherData";
 
 export const App = () => {
-  const [dataContext, setDataContext] = useState<any>(null);
-  const [showInfo, setShowInfo] = useState(false);
+  const {state, setState} = useStateContext();
+  const {showModal} = state;
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
   }, []);
-
-  const handleOpenTable = async () => {
-    await createTable(dataContext, kDataContextName);
-  };
-
-  const handleCreateData = async() => {
-    const existingDataContext = await getDataContext(kDataContextName);
-    let createDC;
-    if (!existingDataContext.success) {
-      createDC = await createDataContext(kDataContextName);
-      setDataContext(createDC.values);
-    }
-  };
-
-  const handleGetData = () => {
-    handleCreateData();
-    handleOpenTable();
-  };
-  */
 
   const handleOpenInfo = () => {
     setState(draft => {
