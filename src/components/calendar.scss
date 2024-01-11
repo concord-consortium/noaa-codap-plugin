@@ -1,0 +1,55 @@
+$teal-dark: #177991;
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+  align-self: center;
+  width: 100%;
+  &.selected {
+    background-color: #ddeff1;
+  }
+  .calendar-header {
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .select-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    .arrow {
+      width: 10px;
+      margin-top: 3px;
+      &.back {
+        margin-left: 2px;
+      }
+      &.forward {
+        margin-right: 2px;
+      }
+      svg {
+        width: 10px;
+        fill: $teal-dark;
+      }
+    }
+    .select-container {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      .select {
+        border: 1px solid rgba(23, 121, 145, 0.75);
+        border-radius: 3px;
+        height: 18px;
+        box-sizing: border-box;
+        &.year {
+          padding: 1px 5px;
+          background-color: white;
+          font-family: "Roboto", sans-serif;
+        }
+      }
+    }
+  }
+
+}

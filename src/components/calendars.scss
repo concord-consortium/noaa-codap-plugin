@@ -1,0 +1,29 @@
+.modal {
+  position: absolute;
+  top: calc(50% - 35px);
+  left: 10px;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: -1px 4px 8px #666;
+  .calendar-container {
+    display: flex;
+    width: 342px;
+    height: 258px;
+    background-color: white;
+    border-radius: 8;
+    .calendar-column {
+      width: 171px;
+      height: 208px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      &.selected {
+        background-color: #ddeff1;
+      }
+    };
+  }
+}

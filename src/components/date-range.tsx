@@ -1,28 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { IFrequency } from "../types";
 
 import "./date-range.scss";
+import { useStateContext } from "../hooks/use-state";
+import { DateCalendar } from "@mui/x-date-pickers";
+import { DateSelector } from "./date-selector";
+import { Calendars } from "./calendars";
 
 export const DateRange = () => {
-  const [selectedFrequency, setSelectedFrequency] = useState("daily");
-  const frequency = ["hourly", "daily", "monthly"];
+  const { state, setState } = useStateContext();
+  const { frequency, startDate, endDate } = state;
+  const [selectedCalendar, setSelectedCalendar] = React.useState<string>(); // "start" | "end"
+  const [showCalendars, setShowCalendars] = React.useState(false);
+  const frequencies = ["hourly", "daily", "monthly"] as IFrequency[];
 
-  const handleFrequencySelection = (e: React.MouseEvent) => {
-    const target = e.target as HTMLButtonElement;
-    setSelectedFrequency(target.value);
+  const handleSetFrequency = (frequency: IFrequency) => {
+    setState(draft => {
+      draft.frequency = frequency;
+    });
   };
+
+  const handleSetStartDate = (date: Date) => {
+    setState(draft => {
+      draft.startDate = date;
+    });
+  };
+
+  const handleSetEndDate = (date: Date) => {
+    setState(draft => {
+      draft.startDate = date;
+    });
+  };
+
+  const handleOpenCalendar = (calendar: string) => {
+    setSelectedCalendar(calendar);
+    setShowCalendars(true);
+  }
+
+  useEffect(() => {
+    console.log("selectedCalendars", selectedCalendar, showCalendars);
+  }, [selectedCalendar, showCalendars])
 
   return (
     <div className="date-range-container">
       <div className="date-range-header">
         <span>Date Range</span>
         <div className="data-frequency-selection">
-          {frequency.map(freq => {
+          {frequencies.map(freq => {
             return (
               <button
                 key={freq}
-                className={`frequency-selection ${selectedFrequency === freq ? "selected" : ""}`}
+                className={`frequency-selection ${frequency === freq ? "selected" : ""}`}
                 value={freq}
-                onClick={handleFrequencySelection}>
+                onClick={() => handleSetFrequency(freq)}>
                 {freq}
               </button>
             );
@@ -30,9 +60,22 @@ export const DateRange = () => {
         </div>
       </div>
       <div className="date-picker-container">
-        <div className="date-picker"></div>
+        <DateSelector
+          onOpen={() => handleOpenCalendar("start")}
+          value={startDate}
+          placeholder="Start date"
+        />
         <span>to</span>
-        <div className="date-picker"></div>
+        <DateSelector
+          onOpen={() => handleOpenCalendar("start")}
+          value={endDate}
+          placeholder="End date"
+        />
+        { showCalendars &&
+          <Calendars
+            selectedCalendar={selectedCalendar}
+          />
+        }
       </div>
     </div>
   );
