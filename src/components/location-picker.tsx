@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
-import { IPlace, autoComplete } from "../utils/geonameSearch";
+import { IPlace, autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import OpenMapIcon from "../assets/images/icon-map.svg";
 import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
@@ -125,10 +125,14 @@ export const LocationPicker = () => {
 
   const handleFindCurrentLocation = async() => {
     navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
-      setSelectedLocation({name: "current location", lat: position.coords.latitude, long: position.coords.longitude});
-      setShowMapButton(true);
-      setIsEditing(false);
-      setShowSelectionList(false);
+      const lat = position.coords.latitude;
+      const long = position.coords.longitude;
+      geoLocSearch(lat, long).then((currPosName) => {
+        setSelectedLocation({name: currPosName, lat, long});
+        setShowMapButton(true);
+        setIsEditing(false);
+        setShowSelectionList(false);
+      });
     });
   };
 

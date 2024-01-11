@@ -1,6 +1,6 @@
 
 const kGeonamesService = "https://secure.geonames.org/search";
-// const kGeolocService = "https://secure.geonames.org/findNearbyPlaceNameJSON";
+const kGeolocService = "https://secure.geonames.org/findNearbyPlaceNameJSON";
 // const kMinQueryInterval = 800;
 const kDefaultMaxRows = 4;
 const kGeonamesUser = "codap";
@@ -43,29 +43,30 @@ async function geoNameSearch(searchString: string, maxRows?: number): Promise<IP
 
 export const autoComplete = async(inputEl: HTMLInputElement) => {
   let thisQuery = inputEl.value;
-  console.log("in autoComplete");
   try {
     let placeList = await geoNameSearch(thisQuery);
     placeList = placeList || [];
-    console.log("placeList", placeList);
     return placeList;
   } catch {
     console.error(`Could not fetch locations`);
   }
 };
 
-export const getGeolocation: Record<string, any> = async() => {
-  return new Promise(function (resolve, reject) {
-    if (navigator.geolocation && navigator.geolocation.getCurrentPosition) {
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        resolve(pos.coords);
-      }, function (err) {
-        console.warn(
-            `Weather Plugin.getGeolocation failed: ${err.code}, ${err.message}`);
-        reject(err.message);
-      });
+// Finds a geo name from lat/long
+export const geoLocSearch = async (lat: number, long: number) => {
+  const userClause = `username=${kGeonamesUser}`;
+  const locClause = `lat=${lat}&lng=${long}`;
+  const filterClause = `cities=cities15000`; // filter cities with population less than 15000.
+  const url = `${kGeolocService}?${[locClause, userClause, filterClause].join("&")}`;
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      return `${data?.geonames?.[0]?.name}, ${data?.geonames?.[0]?.adminCode1}` || "Unknown Location";
     } else {
-      reject("The GeoLocation API is not supported on this browser");
+      return Promise.reject(response.statusText);
     }
-  });
+  } catch (error) {
+    return Promise.reject(error);
+  }
 };
