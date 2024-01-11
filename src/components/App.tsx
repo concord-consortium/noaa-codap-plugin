@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
+  initializePlugin,
+  /*
   createDataContext,
   createItems,
   createNewCollection,
   createTable,
   getAllItems,
   getDataContext,
-  initializePlugin,
   addComponentListener,
   ClientNotification,
+  */
 } from "@concord-consortium/codap-plugin-api";
 import "./App.scss";
 import { LocationPicker } from "./location-picker";
@@ -24,17 +26,18 @@ const kInitialDimensions = {
   width: 360,
   height: 495
 };
-const kDataContextName = "WeatherData";
+// const kDataContextName = "WeatherData";
 
 export const App = () => {
-  const [codapResponse, setCodapResponse] = useState<any>(undefined);
-  const [listenerNotification, setListenerNotification] = useState<string>();
-  const [dataContext, setDataContext] = useState<any>(null);
+  // const [codapResponse, setCodapResponse] = useState<any>(undefined);
+  // const [listenerNotification, setListenerNotification] = useState<string>();
+  // const [dataContext, setDataContext] = useState<any>(null);
   const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
 
+    /*
     // this is an example of how to add a notification listener to a CODAP component
     // for more information on listeners and notifications, see
     // https://github.com/concord-consortium/codap/wiki/CODAP-Data-Interactive-Plugin-API#documentchangenotice
@@ -44,8 +47,10 @@ export const App = () => {
       }
     };
     addComponentListener(createTableListener);
+    */
   }, []);
 
+  /*
   const handleOpenTable = async () => {
     const res = await createTable(dataContext, kDataContextName);
     setCodapResponse(res);
@@ -74,6 +79,7 @@ export const App = () => {
     New items created: ${JSON.stringify(createI)}`
                     );
   };
+  */
 
   const handleOpenInfo = () => {
     setShowInfo(true);
