@@ -66,6 +66,7 @@ export interface IState {
   units: IUnits;
   attributes: string[];
   filters: IFilter[];
+  showModal?: "info" | "data-return-warning";
   counterToTestStateChanges: number;
 }
 
