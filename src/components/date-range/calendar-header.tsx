@@ -8,9 +8,10 @@ import "./calendar-header.scss";
 
 interface ICalendarHeader {
   calendarType: "start" | "end";
+  handleSelectCalendar: () => void;
 }
 
-export const CalendarHeader = ({calendarType}: ICalendarHeader) =>
+export const CalendarHeader = ({calendarType, handleSelectCalendar}: ICalendarHeader) =>
   {  const { state, setState } = useStateContext();
   const {startDate, endDate} = state;
 
@@ -38,22 +39,26 @@ export const CalendarHeader = ({calendarType}: ICalendarHeader) =>
     const newYear = (month === 11) ? year + 1 : year;
     const newMonth = (month + 1) % 12;
     handleSetDate(new Date(newYear, newMonth, day));
+    handleSelectCalendar();
   };
 
   const handlePrevious = () => {
     const newYear = (month === 0) ? year - 1 : year;
     const newMonth = (month === 0) ? 11 : month - 1;
     handleSetDate(new Date(newYear, newMonth, day));
+    handleSelectCalendar();
   };
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMonth = Number(e.target.value);
     handleSetDate(new Date(year, newMonth, day));
+    handleSelectCalendar();
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newYear = Number(e.target.value);
     handleSetDate(new Date(newYear, month, day));
+    handleSelectCalendar();
   };
 
   return (

@@ -1,22 +1,25 @@
+@import "../vars.scss";
+
 .modal {
   position: absolute;
   top: calc(50% - 35px);
   left: 10px;
   display: flex;
+  flex-direction: column;
   align-self: center;
   justify-content: center;
   align-items: center;
   border-radius: 8px;
-  box-shadow: -1px 4px 8px #666;
+  box-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.25);
   .calendar-container {
     display: flex;
     width: 342px;
-    height: 258px;
+    height: 224;
     background-color: white;
     border-radius: 8;
     .calendar-column {
       width: 171px;
-      height: 208px;
+      height: 224;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -24,5 +27,40 @@
         background-color: #ddeff1;
       }
     };
+  }
+  .calendar-footer {
+    display: flex;
+    height: 50px;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+    padding: 6px;
+    align-items: center;
+    background-color: white;
+    .station-information {
+      display: flex;
+      flex-direction: column;
+      font-size: 10px;
+      .station-name {
+        text-transform: uppercase;
+      }
+      .station-dates {
+        color: $teal-dark;
+        span {
+          background-color: $teal-medium;
+        }
+      }
+    }
+    .close-calendar {
+      cursor: pointer;
+      border: 1px solid $teal-dark-75;
+      background-color: white;
+      width: 82px;
+      height: 30px;
+      border-radius: 3px;
+      &:hover {
+        background-color: $teal-light-12;
+      }
+    }
   }
 }

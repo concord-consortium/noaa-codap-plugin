@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { IFrequency } from "../../types";
 import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
@@ -39,13 +39,17 @@ export const DateRange = () => {
 
   const handleOpenCalendar = (calendar: string) => {
     setSelectedCalendar(calendar);
-    configureDates();
     setShowCalendars(true);
+
+    if (!startDate && !endDate) {
+      configureDates();
+    }
   };
 
-  useEffect(() => {
-    console.log("selectedCalendars", selectedCalendar, showCalendars);
-  }, [selectedCalendar, showCalendars]);
+  const handleCloseCalendars = () => {
+    setShowCalendars(false);
+    setSelectedCalendar(undefined);
+  }
 
   return (
     <div className="date-range-container">
@@ -81,7 +85,11 @@ export const DateRange = () => {
         />
         {
           showCalendars &&
-          <Calendars selectedCalendar={selectedCalendar} handleSelectCalendar={(calendar: string) => setSelectedCalendar(calendar)}/>
+          <Calendars
+            selectedCalendar={selectedCalendar}
+            closeCalendars={handleCloseCalendars}
+            handleSelectCalendar={(calendar: string) => setSelectedCalendar(calendar)}
+          />
         }
       </div>
     </div>

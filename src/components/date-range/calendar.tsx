@@ -100,7 +100,7 @@ export const Calendar = ({calendarType, handleSelectCalendar}: ICalendar) => {
 
   return (
     <>
-      <CalendarHeader calendarType={calendarType}/>
+      <CalendarHeader calendarType={calendarType} handleSelectCalendar={handleSelectCalendar}/>
       <table className={`table-calendar`}>
         <thead className={`thead-month`}>
           <tr>

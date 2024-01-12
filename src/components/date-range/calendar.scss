@@ -13,8 +13,10 @@
     width: 20px;
     height: 20px;
   }
-  .day-picker {
+  td {
     border: 1px solid $teal-light-25;
+  }
+  .day-picker {
     cursor: pointer;
     &.selected {
       background-color: $teal-dark;
