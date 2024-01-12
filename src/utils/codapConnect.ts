@@ -25,7 +25,6 @@ export const addNotificationHandler = (action: string, resource: string, handler
 
 /**
  *
- * todo: Refactor to make the module generic
  * @param stationNames {[string]}
  * @return {Promise<void>}
  */
@@ -33,12 +32,11 @@ export const selectStations = async(stationNames: any) => {
   if (!stationNames) {
       return;
   }
-  const dsName = "US-Weather-Stations";
-  const collectionName = "US Weather Stations";
+
   const req = stationNames.map((stationName: any) => {
      return {
          action: "get",
-         resource: `dataContext[${dsName}].collection[${collectionName}].caseSearch[name==${stationName}]`
+         resource: `dataContext[${kStationsDatasetName}].collection[${kStationsCollectionName}].caseSearch[name==${stationName}]`
      };
   });
   const reply = (await codapInterface.sendRequest(req)) as unknown as any[];
@@ -49,7 +47,7 @@ export const selectStations = async(stationNames: any) => {
       });
   await codapInterface.sendRequest({
       action: "create",
-      resource: `dataContext[${dsName}].selectionList`,
+      resource: `dataContext[${kStationsDatasetName}].selectionList`,
       values: selectionList
   });
 }

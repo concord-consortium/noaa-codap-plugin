@@ -12,7 +12,7 @@ import { useStateContext } from "../hooks/use-state";
 import { DataReturnWarning } from "./data-return-warning";
 
 import "./App.scss";
-import { adjustStationDataset, getWeatherStations, kStationsDatasetName } from "../utils/getWeatherStations";
+import { adjustStationDataset, getWeatherStations, kStationsCollectionName, kStationsDatasetName } from "../utils/getWeatherStations";
 import { addNotificationHandler, createStationsDataset, selectStations } from "../utils/codapConnect";
 
 const kPluginName = "NOAA Weather Station Data";
@@ -58,11 +58,12 @@ export const App = () => {
       }
     }
     addNotificationHandler("notify",
-    `dataContextChangeNotice[${kStationsDatasetName}]`, stationSelectionHandler);
+      `dataContextChangeNotice[${kStationsDatasetName}]`, stationSelectionHandler);
 
-// Set up notification handler to respond to Weather Station selection
-   addNotificationHandler("notify",
-    `dataContextChangeNotice[${kStationsDatasetName}]`, noaaWeatherSelectionHandler );  }, []);
+    // Set up notification handler to respond to Weather Station selection
+    addNotificationHandler("notify",
+      `dataContextChangeNotice[${kStationsDatasetName}]`, noaaWeatherSelectionHandler);
+  }, []);
 
   const handleOpenInfo = () => {
     setState(draft => {
