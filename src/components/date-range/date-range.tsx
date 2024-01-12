@@ -49,7 +49,7 @@ export const DateRange = () => {
   const handleCloseCalendars = () => {
     setShowCalendars(false);
     setSelectedCalendar(undefined);
-  }
+  };
 
   return (
     <div className="date-range-container">
