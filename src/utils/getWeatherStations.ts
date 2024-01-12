@@ -101,3 +101,45 @@ export const adjustStationDataset = (dataset: IWeatherStation[]) => {
     });
   }
 };
+
+async function findNearestActiveStation(lat, long, fromDate, toDate) {
+  if (typeof fromDate === "string") {
+    fromDate = new Date(fromDate);
+  }
+  if (typeof toDate === "string") {
+    toDate = new Date(toDate);
+  }
+  let fromSecs = fromDate/1000;
+  let toSecs = toDate/1000;
+  let result = await codapConnect.queryCases(constants.StationDSName,
+      constants.StationDSTitle,
+      `greatCircleDistance(latitude, longitude, ${lat}, ${long})=
+      min(greatCircleDistance(latitude, longitude, ${lat}, ${long}),
+      ((${fromSecs}<maxdate or maxdate='present') and (${toSecs}>mindate)))`);
+  if (result.success) {
+    if (Array.isArray(result.values)) {
+      // noinspection JSPotentiallyInvalidTargetOfIndexedPropertyAccess
+      return result.values[0];
+    } else {
+      return result.values;
+    }
+  }
+}
+
+async function setNearestActiveStation (location, startDate, endDate) {
+  if (!location || !startDate || !endDate) {
+    return;
+  }
+  console.log(`Location: ${JSON.stringify(location)} start: ${startDate}, end: ${endDate}`);
+  let nearestStation = await findNearestActiveStation(location.latitude,
+      location.longitude, startDate, endDate);
+  if (nearestStation) {
+    let station = nearestStation.values;
+    state.selectedStation = station;
+    await codapConnect.selectStations([state.selectedStation.name]);
+    await codapConnect.centerAndZoomMap("Map",
+        [location.latitude, location.longitude], 9);
+    // updateView();
+    // updateTimezone(station);
+  }
+}
