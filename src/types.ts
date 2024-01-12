@@ -57,6 +57,21 @@ export interface IPlace {
   long: number;
 }
 
+export interface IWeatherStation {
+  country: string; // "US"
+  state: string; // 2 char state name
+  latitude: number;
+  longitude: number;
+  name: string;
+  elevation:number;
+  ICAO: string; // "KMWN"
+  mindate: string; // "1973-01-01"
+  maxdate: string; // "1973-01-01" || "present",
+  isdID: string; // "72613014755,72613099999",
+  ghcndID: string; // "USW00014755"
+  ranges: Record<string, string | number>[]
+}
+
 export interface IState {
   location?: IPlace;
   weatherStation?: string;

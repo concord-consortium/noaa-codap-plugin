@@ -12,6 +12,8 @@ import { useStateContext } from "../hooks/use-state";
 import { DataReturnWarning } from "./data-return-warning";
 
 import "./App.scss";
+import { adjustStationDataset, getWeatherStations, kStationsDatasetName } from "../utils/getWeatherStations";
+import { addNotificationHandler, createStationsDataset, selectStations } from "../utils/codapConnect";
 
 const kPluginName = "NOAA Weather Station Data";
 const kVersion = "0014";
@@ -26,7 +28,41 @@ export const App = () => {
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
-  }, []);
+    getWeatherStations().then(stations => {
+      adjustStationDataset(stations);
+      createStationsDataset(stations);
+    });
+
+    const stationSelectionHandler = async(req: any) => {
+      if (req.values.operation === "selectCases") {
+        let result = req.values.result;
+        let myCase = result && result.cases && result.cases[0];
+        if (myCase) {
+          // let station = myCase.values;
+          state.weatherStation = myCase.values;
+          // ui.setTransferStatus('success', 'Selected new weather station');
+          // updateView();
+          // updateTimezone(station);
+        }
+      }
+    };
+    async function noaaWeatherSelectionHandler(req: any) {
+      if (req.values.operation === "selectCases") {
+        const myCases = req.values.result && req.values.result.cases;
+        const myStations = myCases && myCases.filter(function (myCase: any) {
+          return (myCase.collection.name === kStationsDatasetName);
+        }).map(function (myCase: any) {
+          return (myCase.values.where);
+        });
+        await selectStations(myStations);
+      }
+    }
+    addNotificationHandler("notify",
+    `dataContextChangeNotice[${kStationsDatasetName}]`, stationSelectionHandler);
+
+// Set up notification handler to respond to Weather Station selection
+   addNotificationHandler("notify",
+    `dataContextChangeNotice[${kStationsDatasetName}]`, noaaWeatherSelectionHandler );  }, []);
 
   const handleOpenInfo = () => {
     setState(draft => {
