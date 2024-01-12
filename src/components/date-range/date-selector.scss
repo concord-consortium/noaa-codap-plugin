@@ -1,0 +1,29 @@
+@import '../vars.scss';
+
+.date-selector {
+  width: 138px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  border: 1px solid $teal-dark;
+  border-radius: 3px;
+  box-sizing: border-box;
+  font-size: 12px;
+  background-color: white;
+  color: #000;
+  padding-left: 7px;
+  padding-right: 7px;
+  cursor: pointer;
+  svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    fill: $teal-dark;
+  }
+  &.selected {
+    background-color: $teal-light-25;
+  }
+  &.placeholder {
+    font-style: italic;
+  }
+}

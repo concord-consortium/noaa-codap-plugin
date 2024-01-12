@@ -1,9 +1,9 @@
-@import "vars.scss";
+@import "../vars.scss";
 
 .date-range-container {
   height: 73px;
   padding: 8px 0px;
-  width: $inner-container-width;
+  width:s $inner-container-width;
   background-color: #fff;
 
   .date-range-header {
@@ -49,6 +49,7 @@
     align-items: center;
     justify-content: space-around;
     padding: 0px 12px;
+    gap: 5px;
     .date-picker {
       box-sizing: border-box;
       width: 143px;

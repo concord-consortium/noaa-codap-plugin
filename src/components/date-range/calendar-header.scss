@@ -1,4 +1,4 @@
-$teal-dark: #177991;
+@import "../vars.scss";
 
 .header-container {
   display: flex;
@@ -23,6 +23,7 @@ $teal-dark: #177991;
     .arrow {
       width: 10px;
       margin-top: 3px;
+      cursor: pointer;
       &.back {
         margin-left: 2px;
       }
@@ -51,5 +52,4 @@ $teal-dark: #177991;
       }
     }
   }
-
 }

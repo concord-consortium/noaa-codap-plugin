@@ -1,22 +1,22 @@
-import React, { useEffect } from "react";
-import { IFrequency } from "../types";
-
-import "./date-range.scss";
-import { useStateContext } from "../hooks/use-state";
-import { DateCalendar } from "@mui/x-date-pickers";
+import React, { useEffect, useState } from "react";
+import { IFrequency } from "../../types";
+import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
+import { constants } from "../../constants";
+
+import "./date-range.scss";
 
 export const DateRange = () => {
   const { state, setState } = useStateContext();
   const { frequency, startDate, endDate } = state;
-  const [selectedCalendar, setSelectedCalendar] = React.useState<string>(); // "start" | "end"
-  const [showCalendars, setShowCalendars] = React.useState(false);
+  const [selectedCalendar, setSelectedCalendar] = useState<string>(); // "start" | "end"
+  const [showCalendars, setShowCalendars] = useState(false);
   const frequencies = ["hourly", "daily", "monthly"] as IFrequency[];
 
-  const handleSetFrequency = (frequency: IFrequency) => {
+  const handleSetFrequency = (freq: IFrequency) => {
     setState(draft => {
-      draft.frequency = frequency;
+      draft.frequency = freq;
     });
   };
 
@@ -28,18 +28,24 @@ export const DateRange = () => {
 
   const handleSetEndDate = (date: Date) => {
     setState(draft => {
-      draft.startDate = date;
+      draft.endDate = date;
     });
   };
 
+  function configureDates() {
+    handleSetStartDate(constants.defaultDates[frequency].start);
+    handleSetEndDate(constants.defaultDates[frequency].end);
+  }
+
   const handleOpenCalendar = (calendar: string) => {
     setSelectedCalendar(calendar);
+    configureDates();
     setShowCalendars(true);
-  }
+  };
 
   useEffect(() => {
     console.log("selectedCalendars", selectedCalendar, showCalendars);
-  }, [selectedCalendar, showCalendars])
+  }, [selectedCalendar, showCalendars]);
 
   return (
     <div className="date-range-container">
@@ -64,17 +70,18 @@ export const DateRange = () => {
           onOpen={() => handleOpenCalendar("start")}
           value={startDate}
           placeholder="Start date"
+          isSelected={selectedCalendar === "start"}
         />
         <span>to</span>
         <DateSelector
-          onOpen={() => handleOpenCalendar("start")}
+          onOpen={() => handleOpenCalendar("end")}
           value={endDate}
           placeholder="End date"
+          isSelected={selectedCalendar === "end"}
         />
-        { showCalendars &&
-          <Calendars
-            selectedCalendar={selectedCalendar}
-          />
+        {
+          showCalendars &&
+          <Calendars selectedCalendar={selectedCalendar} handleSelectCalendar={(calendar: string) => setSelectedCalendar(calendar)}/>
         }
       </div>
     </div>

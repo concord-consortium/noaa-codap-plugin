@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
-import { DateRange } from "./date-range";
+import { DateRange } from "./date-range/date-range";
 import { AttributesSelector } from "./attribute-selector";
 import { InfoModal } from "./info-modal";
 import InfoIcon from "../assets/icon-info.svg";
 import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
-import { useStateContext } from "../hooks/use-state";
-import { IFrequency } from "../types";
 
 import "./App.scss";
 
