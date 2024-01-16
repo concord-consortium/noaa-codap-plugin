@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
@@ -6,6 +6,7 @@ import { AttributesSelector } from "./attribute-selector";
 import { InfoModal } from "./info-modal";
 import InfoIcon from "../assets/icon-info.svg";
 import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
+import { useStateContext } from "../hooks/use-state";
 
 import "./App.scss";
 
@@ -15,17 +16,19 @@ const kInitialDimensions = {
   width: 360,
   height: 495
 };
-const kDataContextName = "WeatherData";
 
 export const App = () => {
-  const [showInfo, setShowInfo] = useState(false);
+  const {state, setState} = useStateContext();
+  const { showModal } = state;
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
   }, []);
 
   const handleOpenInfo = () => {
-    setShowInfo(true);
+    setState(draft => {
+      draft.showModal = "info";
+    });
   };
 
   return (
@@ -41,13 +44,11 @@ export const App = () => {
       <div className="divider" />
       <AttributesSelector />
       <div className="divider" />
-      <div className="footer">
+      <div className="fooster">
         <button className="clear-data-button">Clear Data</button>
         <button className="get-data-button">Get Data</button>
       </div>
-      {showInfo &&
-        <InfoModal setShowInfo={setShowInfo}/>
-      }
+      {showModal === "info" && <InfoModal />}
       <StateCounterDemoToBeRemoved />
     </div>
   );
