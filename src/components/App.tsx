@@ -44,7 +44,7 @@ export const App = () => {
       <div className="divider" />
       <AttributesSelector />
       <div className="divider" />
-      <div className="fooster">
+      <div className="footer">
         <button className="clear-data-button">Clear Data</button>
         <button className="get-data-button">Get Data</button>
       </div>
