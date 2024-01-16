@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IFrequency } from "../../types";
 import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
 import { constants } from "../../constants";
+import WarningIcon from "../../assets/icon-warning.svg";
+import ExitIcon from "../../assets/icon-exit.svg";
 
 import "./date-range.scss";
 
@@ -12,7 +14,26 @@ export const DateRange = () => {
   const { frequency, startDate, endDate } = state;
   const [selectedCalendar, setSelectedCalendar] = useState<string>(); // "start" | "end"
   const [showCalendars, setShowCalendars] = useState(false);
+  const [showWarningIcon, setShowWarningIcon] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
   const frequencies = ["hourly", "daily", "monthly"] as IFrequency[];
+
+  useEffect(() => {
+    if (endDate && startDate && frequency) {
+      const ONE_DAY = 24 * 3600 * 1000; // one day in milliseconds
+      const ONE_HOUR = 3600 * 1000; // one hour in milliseconds
+      const timeDifference = endDate.getTime() - startDate.getTime();
+      const frequencyFactor = frequency === "monthly" ? ONE_DAY * 30 : frequency === "hourly" ? ONE_HOUR : ONE_DAY;
+      const expectedEntries = Math.ceil(timeDifference / frequencyFactor);
+      if (expectedEntries > 5000) {
+        setShowWarningIcon(true);
+      } else {
+        setShowWarningIcon(false)
+      }
+    } else {
+      setShowWarningIcon(false);
+    }
+  }, [frequency, startDate, endDate]);
 
   const handleSetFrequency = (freq: IFrequency) => {
     setState(draft => {
@@ -49,12 +70,15 @@ export const DateRange = () => {
   const handleCloseCalendars = () => {
     setShowCalendars(false);
     setSelectedCalendar(undefined);
+    if (showWarningIcon) {
+      setShowWarningModal(true);
+    }
   };
 
   return (
     <div className="date-range-container">
       <div className="date-range-header">
-        <span>Date Range</span>
+        <div className="title">Date Range {showWarningIcon && <WarningIcon/>}</div>
         <div className="data-frequency-selection">
           {frequencies.map(freq => {
             return (
@@ -92,6 +116,24 @@ export const DateRange = () => {
           />
         }
       </div>
+      {
+        showWarningModal &&
+          <div className="warning-modal">
+            <div className="warning-container">
+              <div className="warning-header">
+                <div className="warning-title">Data Return Warning</div>
+                <div className="warning-exit" onClick={() => setShowWarningModal(false)}><ExitIcon/></div>
+              </div>
+              <div className="warning-body">
+                Your current range is likely to return too many results, which
+                may affect application performance.
+              </div>
+              <div className="warning-footer">
+                <button className="warning-button" onClick={() => setShowWarningModal(false)}>Close</button>
+              </div>
+            </div>
+          </div>
+        }
     </div>
   );
 };
