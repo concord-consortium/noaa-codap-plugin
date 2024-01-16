@@ -28,7 +28,7 @@ export const DateRange = () => {
       if (expectedEntries > 5000) {
         setShowWarningIcon(true);
       } else {
-        setShowWarningIcon(false)
+        setShowWarningIcon(false);
       }
     } else {
       setShowWarningIcon(false);
