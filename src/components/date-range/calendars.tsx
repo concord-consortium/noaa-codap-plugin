@@ -4,7 +4,7 @@ import { Calendar } from "./calendar";
 import { useStateContext } from "../../hooks/use-state";
 
 interface ICalendarsProps {
-  selectedCalendar: string|undefined;
+  selectedCalendar: string | undefined;
   handleSelectCalendar: (calendar: string) => void;
   closeCalendars: () => void;
 }
