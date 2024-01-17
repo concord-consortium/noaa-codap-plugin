@@ -1,4 +1,51 @@
 .attribute-selection-container {
+  margin-top: 12px;
+
+  .attribute-selection-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    .attribute-title {
+      font-style: bold;
+    }
+    .units-selection {
+      display: flex;
+      align-items: center;
+      position: relative;
+      right: 11px;
+
+      .units-label {
+        font-family: "Montserrat", sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+        color: #959595;
+        margin-right: 6px;
+      }
+      .units-toggle {
+        display: flex;
+        align-items: center;
+        width: 71px;
+        height: 16px;
+        border: none;
+        background-color: rgba(114, 191, 202, 0.25);
+        color: #177991;
+        font-size: 10px;
+        font-weight: 500;
+        padding: 0 0 0 12px;
+        .toggle-icon {
+          margin-left: 6px;
+          position: absolute;
+          right: 2px;
+        }
+      }
+    }
+
+
+
+
+  }
+
   .attribute-selection{
     display: flex;
     flex-wrap: wrap;
