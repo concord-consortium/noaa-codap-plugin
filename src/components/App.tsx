@@ -7,7 +7,6 @@ import { DateRange } from "./date-range";
 import { AttributesSelector } from "./attribute-selector";
 import { InfoModal } from "./info-modal";
 import InfoIcon from "../assets/images/icon-info.svg";
-import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
 import { useStateContext } from "../hooks/use-state";
 import { DataReturnWarning } from "./data-return-warning";
 
@@ -60,7 +59,6 @@ export const App = () => {
       </div>
       {showModal === "info" && <InfoModal />}
       {showModal === "data-return-warning" && <DataReturnWarning />}
-      <StateCounterDemoToBeRemoved />
     </div>
   );
 };

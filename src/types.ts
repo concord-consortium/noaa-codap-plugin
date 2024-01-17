@@ -67,7 +67,6 @@ export interface IState {
   attributes: string[];
   filters: IFilter[];
   showModal?: "info" | "data-return-warning";
-  counterToTestStateChanges: number;
 }
 
 export const DefaultState: IState = {
@@ -75,5 +74,4 @@ export const DefaultState: IState = {
   units: "standard",
   attributes: [],
   filters: [],
-  counterToTestStateChanges: 0,
 };
