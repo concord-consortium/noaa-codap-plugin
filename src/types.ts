@@ -51,9 +51,14 @@ export interface IBelowMeanFilter extends IBaseFilter {
 }
 export type IFilter = IEqualsFilter | DoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
 
+export interface IPlace {
+  name: string;
+  lat: number;
+  long: number;
+}
 
 export interface IState {
-  location?: string;
+  location?: IPlace;
   weatherStation?: string;
   frequency: IFrequency;
   startDate?: Date;

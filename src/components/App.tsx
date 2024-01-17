@@ -4,7 +4,7 @@ import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
 import { AttributesSelector } from "./attribute-selector";
 import { InfoModal } from "./info-modal";
-import InfoIcon from "../assets/icon-info.svg";
+import InfoIcon from "../assets/images/icon-info.svg";
 import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
 import { useStateContext } from "../hooks/use-state";
 

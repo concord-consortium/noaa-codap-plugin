@@ -35,7 +35,7 @@ Execution of these scripts requires the following programs to be present in your
 shell execution environment:
 * curl (standard on Macs)
 * jq (available through Homebrew on Macs)
-* csvjson (available through NPM)
+* csvtojson (available through NPM)
 * node
 
 ## NOAA APIs

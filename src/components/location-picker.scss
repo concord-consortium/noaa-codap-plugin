@@ -1,5 +1,6 @@
 .location-picker-container {
   height: 71px;
+  width: 336px;
 
   .location-header {
     display: flex;
@@ -7,7 +8,7 @@
     align-items: center;
     justify-content: space-between;
     height: 16px;
-    margin: 9px 24px 5px 0;
+    margin: 9px 24px 0 0;
 
     .selected-weather-station {
       padding: 2px 2px 2px 8px;
@@ -22,17 +23,101 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    
-    .location-input {
+    margin: 5px 0 0 12px;
+    position: relative;
+
+    .location-input-selection {
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      width: 275px;
-      height: 32px;
-      margin: 5.1px 4px 0 12px;
-      border-radius: 3px;
-      border: solid 1px rgba(23, 121, 145, 0.75);
-      background-color: #fff;
+      flex-direction: column;
+
+      .location-input-wrapper {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 312px;
+        height: 30px;
+        border-radius: 3px;
+        border: solid 1px rgba(23, 121, 145, 0.75);
+        background-color: #fff;
+        &.short {
+          width: 275px;
+        }
+        &.editing {
+          background-color: rgba(114, 191, 202, 0.25);
+        }
+
+        svg {
+          margin: 0 7px;
+        }
+
+        .location-input {
+          outline: transparent;
+          border: transparent;
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
+          background-color: transparent;
+          &::placeholder {
+            font-style: italic;
+            color: #c6c6c6;
+          }
+        }
+        .selected-loc-intro {
+          color: #c6c6c6;
+        }
+      }
+
+      .location-selection-list {
+        display: block;
+        position: relative;
+        width: 313px;
+        height: 97px;
+        box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.5);
+        background-color: #fff;
+        visibility: hidden;
+        list-style-type: none;
+        margin: 0;
+        &.show {
+          visibility: visible;
+          z-index: 5;
+          width: 275px;
+        }
+        &.short {
+          width: 236px;
+        }
+
+        .current-location-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          margin-left: -31px;
+          margin-top: 6px;
+          &.geoname-candidate {
+            background-color: #ddeff1;
+          }
+
+          .current-location-icon {
+            margin-right: 8px;
+          }
+          .current-location {
+            color: #72bfca;
+          }
+        }
+
+        .location-selector-option {
+          margin-top: 2px;
+          margin-left: -31px;
+          width: 100%;
+
+          &.geoname-candidate {
+            background-color: #ddeff1;
+          }
+
+          .location-name {
+            padding-left: 31px;
+          }
+        }
+      }
     }
 
     .map-button {
@@ -44,6 +129,10 @@
       border-radius: 3px;
       border: solid 1px rgba(23, 121, 145, 0.75);
       background-color: #fff;
+      position: absolute;
+      padding: 0;
+      top: 0;
+      right: 12px;
     }
   }
 }
