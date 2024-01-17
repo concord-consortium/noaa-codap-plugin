@@ -180,7 +180,7 @@ export const LocationPicker = () => {
   return (
     <div className="location-picker-container">
       <div className="location-header">
-        <span>Location</span>
+        <span className="location-title">Location</span>
         { selectedLocation && !isEditing &&
           <div className="selected-weather-station">
             { state.weatherStation &&

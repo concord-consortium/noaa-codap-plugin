@@ -10,6 +10,10 @@
     height: 16px;
     margin: 9px 12px 0 0;
 
+    .location-title {
+      font-weight: bold;
+    }
+
     .selected-weather-station {
       padding: 2px 2px 2px 8px;
       background-color: rgba(114, 191, 202, 0.25);
