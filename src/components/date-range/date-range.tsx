@@ -75,6 +75,12 @@ export const DateRange = () => {
     }
   };
 
+  const handleOuterModalClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (e.target === e.currentTarget) {
+      setShowWarningModal(false);
+    }
+  };
+
   return (
     <div className="date-range-container">
       <div className="date-range-header">
@@ -118,7 +124,7 @@ export const DateRange = () => {
       </div>
       {
         showWarningModal &&
-          <div className="warning-modal">
+          <div className="warning-modal" onClick={handleOuterModalClick}>
             <div className="warning-container">
               <div className="warning-header">
                 <div className="warning-title">Data Return Warning</div>
