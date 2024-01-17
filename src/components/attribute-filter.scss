@@ -1,0 +1,53 @@
+.attribute-filter-container {
+  display: grid;
+  grid-template-columns: 174px 56px 36px 41px;
+  grid-template-rows: [row1-start] 21px [row1-end] 16px;
+  gap: 2px;
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 174px 56px 36px 41px;
+    color: rgba(0, 0, 0, 0.48);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 0 5px;
+    &.attribute-header {
+      grid-column: 1;
+      grid-row: 1;
+      background-color: rgba(198, 198, 198, 0.3);
+    }
+    &.abbr-header {
+      grid-column: 2;
+      grid-row: 1;
+      background-color: rgba(198, 198, 198, 0.3);
+    }
+    &.units-header {
+      grid-column: 3;
+      grid-row: 1;
+      background-color: rgba(126, 126, 126, 0.3);
+    }
+    &.filter-header {
+      grid-column: 4;
+      grid-row: 1;
+      background-color: rgba(198, 198, 198, 0.3);
+    }
+  }
+  .table-body {
+    font-size: 10px;
+    font-weight: 500;
+    color: #000;
+    display: grid;
+    .filter-attribute {
+      grid-column: 1;
+    }
+    .filter-abbr {
+      grid-column: 2;
+    }
+    .filter-units {
+      grid-column: 3;
+    }
+    .filter-filter {
+      grid-column: 4;
+      color: #177991;    }
+  }
+}

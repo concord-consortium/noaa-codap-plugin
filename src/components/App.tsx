@@ -5,6 +5,7 @@ import {
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range";
 import { AttributesSelector } from "./attribute-selector";
+import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useStateContext } from "../hooks/use-state";
@@ -52,6 +53,7 @@ export const App = () => {
       <DateRange />
       <div className="divider" />
       <AttributesSelector />
+      {state.attributes.length > 0 && <AttributeFilter />}
       <div className="divider" />
       <div className="footer">
         <button className="clear-data-button">Clear Data</button>

@@ -68,7 +68,6 @@ export const AttributesSelector = () => {
           );
         })}
       </div>
-      <div className="attribute-filters">attribute filters</div>
     </div>
   );
 };
