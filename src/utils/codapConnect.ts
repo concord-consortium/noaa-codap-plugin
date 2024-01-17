@@ -1,6 +1,5 @@
-import { codapInterface, createDataContext, createItems, createNewCollection } from "@concord-consortium/codap-plugin-api";
-import { kStationsCollectionName, kStationsDatasetName, kWeatherStationCollectionAttrs } from "./getWeatherStations";
-import { IWeatherStation } from "../types";
+import { IResult, codapInterface, createDataContext, createItems, createNewCollection } from "@concord-consortium/codap-plugin-api";
+import { IWeatherStation, kStationsCollectionName, kStationsDatasetName, kWeatherStationCollectionAttrs } from "../types";
 
 export const createStationsDataset = async(stations: IWeatherStation[]) => {
   let result = await createDataContext(kStationsDatasetName);
@@ -50,4 +49,4 @@ export const selectStations = async(stationNames: any) => {
       resource: `dataContext[${kStationsDatasetName}].selectionList`,
       values: selectionList
   });
-}
+};

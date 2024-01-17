@@ -53,8 +53,8 @@ export type IFilter = IEqualsFilter | DoesNotEqualFilter | IGreaterThanFilter | 
 
 export interface IPlace {
   name: string;
-  lat: number;
-  long: number;
+  latitude: number;
+  longitude: number;
 }
 
 export interface IWeatherStation {
@@ -63,18 +63,34 @@ export interface IWeatherStation {
   latitude: number;
   longitude: number;
   name: string;
-  elevation:number;
+  elevation: number;
   ICAO: string; // "KMWN"
   mindate: string; // "1973-01-01"
   maxdate: string; // "1973-01-01" || "present",
   isdID: string; // "72613014755,72613099999",
   ghcndID: string; // "USW00014755"
-  ranges: Record<string, string | number>[]
+  ranges: IWeatherStationRange[];
+}
+
+interface IWeatherStationRange {
+  mindate: string | number;
+  maxdate: string | number;
+  latitude: number;
+  longitude: number;
+  name: string;
+  elevation?: string | number;
+  ids: IWeatherStationID[];
+}
+
+interface IWeatherStationID {
+  type: string;
+  id: string;
 }
 
 export interface IState {
   location?: IPlace;
-  weatherStation?: string;
+  weatherStation?: IWeatherStation;
+  weatherStationDistance?: number;
   frequency: IFrequency;
   startDate?: string;
   endDate?: string;
@@ -92,3 +108,60 @@ export const DefaultState: IState = {
   filters: [],
   counterToTestStateChanges: 0,
 };
+
+export const kStationsDatasetName = "US-Weather-Stations";
+export const kStationsCollectionName = "US Weather Stations";
+
+export const kWeatherStationCollectionAttrs = [
+  { name: "name" },
+  {
+      name: "ICAO",
+      description: "International Civil Aviation Org. Airport Code"
+  },
+  {
+      name: "mindate",
+      type: "date",
+      precision: "day",
+      description: "Earliest reporting date"
+  },
+  {
+      name: "maxdate",
+      type: "date",
+      precision: "day",
+      description: `Latest reporting date, or "present" if is an active station`
+  },
+  {
+      name: "latitude",
+      unit: "º"
+  },
+  {
+      name: "longitude",
+      unit: "º"
+  },
+  {
+      name: "elevation",
+      unit: "ft",
+      precision: "0",
+      type: "number"
+  },
+  { name: "isdID"},
+  {
+      name: "ghcndID",
+      description: "Global Historical Climatology Network ID"
+  },
+  {
+      name: "isActive",
+      formula: `(number(maxdate="present"
+                  ? date()
+                  : date(split(maxdate,'-',1), split(maxdate, ""-", 2), split(maxdate, "-", 3))) - wxMinDate)>0 and wxMaxDate-number(date(split(mindate,"-",1), split(mindate, "-", 2), split(mindate, "-", 3)))>0`,
+      description: "whether the station was active in the Weather Plugin's requested date range",
+      _categoryMap: {
+          __order: [
+              "false",
+              "true"
+          ],
+          false: "#a9a9a9",
+          true: "#2a4bd7"
+      },
+  }
+];
