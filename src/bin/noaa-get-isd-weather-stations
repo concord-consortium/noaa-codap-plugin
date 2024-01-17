@@ -1,7 +1,7 @@
 #!/bin/bash
 # Retrieves the current isd-history list of
 # weather stations and formats it as a JSON object.
-# Requires curl, csvjson, and jq (csvjson obtainable from node, jq from homebrew)
+# Requires curl, csvtojson, and jq (csvtojson obtainable from node, jq from homebrew)
 #PROGNAME=`basename $0`
 DIRNAME=`dirname $0`
 
@@ -15,7 +15,7 @@ URL=$ISD_HISTORY_URL
 #DAYBEFORE=$(date -v-2d "+%Y%m%d")
 
 curl $URL |
-  csvjson |
+  csvtojson |
 #  jq --arg today "$TODAY" --arg yest "$YESTERDAY" --arg dbef $DAYBEFORE '[
   jq '[
   .[] |
