@@ -92,8 +92,8 @@ export interface IState {
   weatherStation?: IWeatherStation;
   weatherStationDistance?: number;
   frequency: IFrequency;
-  startDate?: string;
-  endDate?: string;
+  startDate?: Date;
+  endDate?: Date;
   units: IUnits;
   attributes: string[];
   filters: IFilter[];

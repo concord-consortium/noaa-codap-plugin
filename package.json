@@ -133,6 +133,7 @@
     "webpack-dev-server": "^4.15.0"
   },
   "dependencies": {
+    "@mui/icons-material": "^5.15.4",
     "classnames": "^2.5.1",
     "dayjs": "^1.11.10",
     "react": "^18.2.0",
