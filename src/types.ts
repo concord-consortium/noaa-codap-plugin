@@ -77,3 +77,82 @@ export const DefaultState: IState = {
   filters: [],
   counterToTestStateChanges: 0,
 };
+
+interface IDataTypeUnits {
+  ["standard"]: string;
+  ["metric"]: string;
+}
+export interface IDataType {
+  name: string;
+  units: IDataTypeUnits;
+  description: string;
+}
+
+export interface Attribute {
+  name: string;
+  formula?: string;
+  description?: string;
+  type?: string;
+  cid?: string;
+  precision?: string;
+  unit?: string;
+  editable?: boolean;
+  renameable?: boolean;
+  deleteable?: boolean;
+  hidden?: boolean;
+}
+
+export interface Collection {
+  name: string;
+  title: string;
+  id?: number;
+  parent?: string | number;
+  description?: string;
+  labels?: {
+    singleCase?: string;
+    pluralCase?: string;
+    singleCaseWithArticle?: string;
+    setOfCases?: string;
+    setOfCasesWithArticle?: string;
+  };
+  attrs: Attribute[];
+}
+
+export interface DataContextCreation {
+  title: string;
+  collections?: Collection[];
+}
+
+export interface DataContext extends DataContextCreation {
+  name: string;
+  collections: Collection[];
+}
+
+export interface CodapItemValues {
+  [attr: string]: any;
+}
+
+export interface CodapItem {
+  id: number|string;
+  values: CodapItemValues;
+}
+
+export type Action = "create" | "get" | "update" | "delete";
+
+export type ILatLong = [number, number];
+
+export interface IMapComponent {
+  type: 'map',
+  name: string,
+  title?: string,
+  dimensions: {
+    width: number,
+    height: number
+  },
+  position: string,
+  cannotClose: boolean,
+  dataContext: string,
+  legendAttributeName?: string,
+  center: ILatLong,
+  zoom: number
+}
