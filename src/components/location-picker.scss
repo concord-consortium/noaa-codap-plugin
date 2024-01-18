@@ -1,3 +1,5 @@
+@import "./vars.scss";
+
 .location-picker-container {
   height: 71px;
   width: 336px;
@@ -16,8 +18,8 @@
 
     .selected-weather-station {
       padding: 2px 2px 2px 8px;
-      background-color: rgba(114, 191, 202, 0.25);
-      color: #177991;
+      background-color: $teal-light-25;
+      color: $teal-dark;
       font-size: 10px;
       font-weight: 500;
       .station-distance {
@@ -48,13 +50,13 @@
         width: 312px;
         height: 30px;
         border-radius: 3px;
-        border: solid 1px rgba(23, 121, 145, 0.75);
+        border: solid 1px $teal-dark-75;
         background-color: #fff;
         &.short {
           width: 275px;
         }
         &.editing {
-          background-color: rgba(114, 191, 202, 0.25);
+          background-color: $teal-light-25;
         }
 
         svg {
@@ -70,11 +72,11 @@
           background-color: transparent;
           &::placeholder {
             font-style: italic;
-            color: #c6c6c6;
+            color: $placeholder-gray;
           }
         }
         .selected-loc-intro {
-          color: #c6c6c6;
+          color: $placeholder-gray;
         }
       }
 
