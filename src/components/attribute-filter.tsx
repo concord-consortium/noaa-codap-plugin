@@ -6,7 +6,7 @@ import EditIcon from "../assets/images/icon-edit.svg";
 import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
-  const {state, setState} = useStateContext();
+  const {state} = useStateContext();
   const frequency = state.frequency;
   const units = state.units;
   const attributes = state.attributes;
