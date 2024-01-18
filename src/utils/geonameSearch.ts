@@ -1,3 +1,4 @@
+import { IPlace } from "../types";
 
 const kGeonamesService = "https://secure.geonames.org/search";
 const kGeolocService = "https://secure.geonames.org/findNearbyPlaceNameJSON";
@@ -5,11 +6,6 @@ const kGeolocService = "https://secure.geonames.org/findNearbyPlaceNameJSON";
 const kDefaultMaxRows = 4;
 const kGeonamesUser = "codap";
 
-export interface IPlace {
-  name: string;
-  lat: number;
-  long: number;
-}
 
 async function geoNameSearch(searchString: string, maxRows?: number): Promise<IPlace[] | undefined> {
   const userClause = `username=${kGeonamesUser}`;
@@ -29,7 +25,6 @@ async function geoNameSearch(searchString: string, maxRows?: number): Promise<IP
   if (response.ok) {
     let data = await response.json();
     if (data.totalResultsCount > 0) {
-      console.log(JSON.stringify(data));
       return data.geonames.map(function (place: any) {
         return {
           name: `${place.name}, ${place.adminCode1}`,
@@ -56,8 +51,8 @@ export const autoComplete = async(inputEl: HTMLInputElement) => {
 export const geoLocSearch = async (lat: number, long: number) => {
   const userClause = `username=${kGeonamesUser}`;
   const locClause = `lat=${lat}&lng=${long}`;
-  const filterClause = `cities=cities15000`; // filter cities with population less than 15000.
-  const url = `${kGeolocService}?${[locClause, userClause, filterClause].join("&")}`;
+  //const filterClause = `cities=cities15000`; // filter cities with population less than 15000. Temporarily commented out to try
+  const url = `${kGeolocService}?${[locClause, userClause].join("&")}`;
   try {
     const response = await fetch(url);
     if (response.ok) {

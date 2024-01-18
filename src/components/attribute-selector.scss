@@ -1,22 +1,95 @@
 .attribute-selection-container {
+  margin-top: 12px;
+
+  .attribute-selection-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    .attribute-title {
+      font-style: bold;
+    }
+    .units-selection {
+      display: flex;
+      align-items: center;
+      position: relative;
+      right: 11px;
+
+      .units-label {
+        font-family: "Montserrat", sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+        color: #959595;
+        margin-right: 6px;
+      }
+      .units-toggle {
+        display: flex;
+        align-items: center;
+        width: 71px;
+        height: 16px;
+        border: none;
+        background-color: rgba(114, 191, 202, 0.25);
+        color: #177991;
+        font-size: 10px;
+        font-weight: 500;
+        padding: 0 0 0 12px;
+        .toggle-icon {
+          margin-left: 6px;
+          position: absolute;
+          right: 2px;
+        }
+      }
+    }
+  }
+
   .attribute-selection{
     display: flex;
     flex-wrap: wrap;
+    margin: 8px 0 11px 0;
+
     .attribute-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       height: 32px;
-      margin: 0 5px 0 0;
-      padding: 7.9px 11px 9.1px;
+      margin: 0 5px 5px 0;
+      padding: 0 11px;
       border-radius: 16px;
       border: solid 1px #a2a2a2;
       background-color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      color: #a2a2a2;
 
+      &:hover {
+        border: solid 1px rgba(0, 144, 164, 0.25);
+        background-color: rgba(0, 144, 164, 0.32);
+        color: #177991;
+      }
       &.selected {
         border: solid 1px rgba(114, 191, 202, 0.25);
         background-color: rgba(114, 191, 202, 0.25);
+        color:#177991;
       }
       &.disabled {
         border: solid 1px #a2a2a2;
         background-color: rgba(198, 198, 198, 0.25);
+      }
+      &.all {
+        border: solid 1px #a2a2a2;
+        background-color: rgba(198, 198, 198, 0.25);
+        color: #a2a2a2;
+
+        &:hover {
+          border: solid 1px rgba(19, 79, 88, 0.25);
+          background-color: rgba(24, 111, 133, 0.75);
+          color: #fff;
+        }
+        &.selected {
+          border: solid 1px rgba(19, 79, 88, 0.25);
+          background-color: rgba(23, 121, 145, 0.58);
+          color: #fff;
+        }
       }
     }
   }

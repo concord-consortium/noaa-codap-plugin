@@ -3,6 +3,7 @@ import classnames from "classnames";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import { useStateContext } from "../hooks/use-state";
 import { IPlace } from "../types";
+import { findNearestActiveStation } from "../utils/getWeatherStations";
 import OpenMapIcon from "../assets/images/icon-map.svg";
 import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
@@ -14,7 +15,6 @@ export const LocationPicker = () => {
   const {state, setState} = useStateContext();
   const [showMapButton, setShowMapButton] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedStation, setSelectedStation] = useState("");
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
   const [showSelectionList, setShowSelectionList] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -23,6 +23,11 @@ export const LocationPicker = () => {
   const locationInputEl = useRef<HTMLInputElement>(null);
   const locationSelectionListEl = useRef<HTMLUListElement>(null);
   const selectedLocation = state.location;
+  const unit = state.units;
+  const unitDistanceText = unit === "standard" ? "mi" : "km";
+  const stationDistance = state.weatherStationDistance && unit === "standard"
+                            ? Math.round((state.weatherStationDistance * 0.6 * 10) / 10)
+                            :state.weatherStationDistance &&  Math.round(state.weatherStationDistance * 10) / 10;
 
   const handleOpenMap = () => {
     //send request to CODAP to open map with available weather stations
@@ -40,6 +45,21 @@ export const LocationPicker = () => {
       locationInputEl.current?.focus();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+      if (selectedLocation) {
+        findNearestActiveStation(selectedLocation.latitude, selectedLocation.longitude, 80926000, "present")
+          .then(({station, distance}) => {
+            if (station) {
+              setState((draft) => {
+                draft.weatherStation = station;
+                draft.weatherStationDistance = distance;
+              });
+            }
+          });
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[selectedLocation]);
 
   const getLocationList = () => {
     if (locationInputEl.current) {
@@ -139,7 +159,7 @@ export const LocationPicker = () => {
       const long = position.coords.longitude;
       geoLocSearch(lat, long).then((currPosName) => {
         setState(draft => {
-          draft.location = {name: currPosName, lat, long};
+          draft.location = {name: currPosName, latitude: lat, longitude: long};
         });
         setShowMapButton(true);
         setIsEditing(false);
@@ -153,18 +173,23 @@ export const LocationPicker = () => {
   };
 
   const handleLocationInputClick = () => {
-    setSelectedStation("station");
     setIsEditing(true);
   };
 
   return (
     <div className="location-picker-container">
       <div className="location-header">
-        <span>Location</span>
+        <span className="location-title">Location</span>
         { selectedLocation && !isEditing &&
           <div className="selected-weather-station">
-            <span>{selectedStation}</span>
-            <EditIcon />
+            { state.weatherStation &&
+              <>
+                {state.weatherStationDistance &&
+                  <span className="station-distance">({stationDistance} {unitDistanceText}) </span>}
+                <span className="station-name">{state.weatherStation?.name}</span>
+                {/* <EditIcon />  hide this for now until implemented*/}
+              </>
+            }
           </div>
         }
       </div>
