@@ -22,14 +22,22 @@ export const AttributesSelector = () => {
     });
   };
 
-  const handleSelectAllAttrs = () => {
-    setAllSelected(true);
-    setState(draft => {
-      draft.attributes = state.frequency === "daily" ? kHourlyAttributes : kMonthlyDailyAttributes;
-    });
+  const toggleSelectAllAttrs = () => {
+    if (allSelected) {
+      setAllSelected(false);
+      setState(draft => {
+        draft.attributes = [];
+      });
+    } else {
+      setAllSelected(true);
+      setState(draft => {
+        draft.attributes = state.frequency === "daily" ? kHourlyAttributes : kMonthlyDailyAttributes;
+      });
+    }
+
   };
 
-  const handleAttributeSelect = (e: React.MouseEvent<HTMLDivElement>) => {
+  const toggleAttributeSelect = (e: React.MouseEvent<HTMLDivElement>) => {
     const attrSelected = e.currentTarget.textContent;
     if (allSelected) {
       setAllSelected(false);
@@ -38,7 +46,11 @@ export const AttributesSelector = () => {
       if (allSelected) {
         draft.attributes = [];
       }
-      attrSelected && draft.attributes.push(attrSelected);
+      if (attrSelected && draft.attributes.includes(attrSelected)) {
+        draft.attributes.splice(draft.attributes.indexOf(attrSelected));
+      } else {
+        attrSelected && draft.attributes.push(attrSelected);
+      }
     });
   };
 
@@ -55,14 +67,14 @@ export const AttributesSelector = () => {
         </div>
       </div>
       <div className="attribute-selection">
-        <div className={`attribute-button all ${allSelected ? "selected" : ""}`} onClick={handleSelectAllAttrs}>
+        <div className={`attribute-button all ${allSelected ? "selected" : ""}`} onClick={toggleSelectAllAttrs}>
           All
         </div>
         { attributes.map(attr => {
           const attrSelected = state.attributes.includes(attr) && !allSelected;
           return (
             <div key={attr} className={`attribute-button ${attrSelected ? "selected" : ""}`}
-              onClick={handleAttributeSelect}>
+              onClick={toggleAttributeSelect}>
               {attr}
             </div>
           );
