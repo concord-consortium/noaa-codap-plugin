@@ -5,8 +5,13 @@ import { DateRange } from "./date-range/date-range";
 import { AttributesSelector } from "./attribute-selector";
 import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
-import InfoIcon from "../assets/images/icon-info.svg";
 import { useStateContext } from "../hooks/use-state";
+import { DataReturnWarning } from "./data-return-warning";
+import { adjustStationDataset } from "../utils/getWeatherStations";
+import { createStationsDataset } from "../utils/codapConnect";
+
+import weatherStations from "../assets/data/weather-stations.json";
+import InfoIcon from "../assets/images/icon-info.svg";
 
 import "./App.scss";
 
@@ -19,10 +24,13 @@ const kInitialDimensions = {
 
 export const App = () => {
   const {state, setState} = useStateContext();
-  const { showModal } = state;
+  const {showModal} = state;
+  //TODO: allow station selection from CODAP and show selected station in CODAP from plugin
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+    adjustStationDataset(weatherStations); //change max data to "present"
+    createStationsDataset(weatherStations); //send weather station data to CODAP
   }, []);
 
   const handleOpenInfo = () => {
