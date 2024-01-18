@@ -1,0 +1,30 @@
+@import "../vars.scss";
+
+.table-calendar {
+  font-family: "Montserrat", sans-serif;
+  font-size: 10px;
+  border-collapse: collapse;
+  th {
+    font-weight: 600;
+  }
+  td, th {
+    text-align: center;
+    vertical-align: center;
+    width: 20px;
+    height: 20px;
+  }
+  td {
+    border: 1px solid $teal-light-25;
+  }
+  .day-picker {
+    cursor: pointer;
+    &.selected {
+      background-color: $teal-dark;
+      color: #fff;
+      font-weight: 800;
+    }
+    &.in-range {
+      background-color: #a2d4db;
+    }
+  }
+}
