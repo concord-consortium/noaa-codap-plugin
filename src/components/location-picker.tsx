@@ -164,7 +164,7 @@ export const LocationPicker = () => {
         { selectedLocation && !isEditing &&
           <div className="selected-weather-station">
             <span>{selectedStation}</span>
-            <EditIcon />
+            <EditIcon className="location-edit-icon"/>
           </div>
         }
       </div>
