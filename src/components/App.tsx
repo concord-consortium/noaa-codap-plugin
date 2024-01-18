@@ -6,7 +6,6 @@ import { AttributesSelector } from "./attribute-selector";
 import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
-import { DataReturnWarning } from "./data-return-warning";
 import { adjustStationDataset } from "../utils/getWeatherStations";
 import { createStationsDataset } from "../utils/codapConnect";
 
@@ -58,7 +57,6 @@ export const App = () => {
         <button className="get-data-button">Get Data</button>
       </div>
       {showModal === "info" && <InfoModal />}
-      {showModal === "data-return-warning" && <DataReturnWarning />}
     </div>
   );
 };
