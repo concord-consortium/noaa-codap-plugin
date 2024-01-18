@@ -1,7 +1,7 @@
 import React from "react";
 import { useStateContext } from "../hooks/use-state";
 
-import ExitIcon from "../assets/icon-exit.svg";
+import ExitIcon from "../assets/images/icon-exit.svg";
 
 import "./data-return-warning.scss";
 
