@@ -27,12 +27,12 @@ export const addNotificationHandler = (action: string, resource: string, handler
  * @param stationNames {[string]}
  * @return {Promise<void>}
  */
-export const selectStations = async(stationNames: any) => {
+export const selectStations = async(stationNames: string[]) => {
   if (!stationNames) {
       return;
   }
 
-  const req = stationNames.map((stationName: any) => {
+  const req = stationNames.map((stationName: string) => {
      return {
          action: "get",
          resource: `dataContext[${kStationsDatasetName}].collection[${kStationsCollectionName}].caseSearch[name==${stationName}]`

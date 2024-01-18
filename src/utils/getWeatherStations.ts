@@ -57,7 +57,6 @@ function degreesToRadians(degrees: number): number {
 
 export function calculateDistance(point1Lat: number, point1Long: number, point2Lat: number, point2Long: number): number {
   const earthRadiusKm = 6371; // Earth radius in kilometers
-  // console.log(point1Lat, point1Long, point2Lat, point2Long);
 
   const lat1Rad = degreesToRadians(point1Lat);
   const lon1Rad = degreesToRadians(point1Long);

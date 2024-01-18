@@ -51,7 +51,7 @@ export const autoComplete = async(inputEl: HTMLInputElement) => {
 export const geoLocSearch = async (lat: number, long: number) => {
   const userClause = `username=${kGeonamesUser}`;
   const locClause = `lat=${lat}&lng=${long}`;
-  //const filterClause = `cities=cities15000`; // filter cities with population less than 15000.
+  //const filterClause = `cities=cities15000`; // filter cities with population less than 15000. Temporarily commented out to try
   const url = `${kGeolocService}?${[locClause, userClause].join("&")}`;
   try {
     const response = await fetch(url);

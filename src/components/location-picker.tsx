@@ -173,7 +173,6 @@ export const LocationPicker = () => {
   };
 
   const handleLocationInputClick = () => {
-    // setSelectedStation("station");
     setIsEditing(true);
   };
 
