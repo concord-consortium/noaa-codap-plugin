@@ -26,27 +26,31 @@ export const AttributeFilter = () => {
   return (
     <div className="attribute-filter-container">
       <table>
-        <tr>
-          <th scope="col" className="table-header attribute-header">Attributes</th>
-          <th scope="col" className="table-header abbr-header">abbr</th>
-          <th scope="col" className="table-header units-header">units</th>
-          <th scope="col" className="table-header filter-header">filter</th>
-        </tr>
-        {selectedAttrMap.map((attr: AttrType, idx: number) => {
-          return (
-            <tr key={`${attr}-filter`} className="table-body">
-              <td className="filter-attribute">{attr.name}</td>
-              <td className="filter-abbr">{attr.abbr}</td>
-              <td className="filter-units">{attr.unit[units]}</td>
-              <td className="filter-filter">
-                <div onClick={()=>handleFilterClick(idx)}>
-                  all
-                  <EditIcon className="edit-icon" />
-                </div>
-              </td>
-            </tr>
-          );
-        })}
+        <thead>
+          <tr>
+            <th scope="col" className="table-header attribute-header">Attributes</th>
+            <th scope="col" className="table-header abbr-header">abbr</th>
+            <th scope="col" className="table-header units-header">units</th>
+            <th scope="col" className="table-header filter-header">filter</th>
+          </tr>
+        </thead>
+        <tbody>
+          {selectedAttrMap.map((attr: AttrType, idx: number) => {
+            return (
+              <tr key={`${attr}-${idx}-filter`} className="table-body">
+                <td className="filter-attribute">{attr.name}</td>
+                <td className="filter-abbr">{attr.abbr}</td>
+                <td className="filter-units">{attr.unit[units]}</td>
+                <td className="filter-filter">
+                  <div onClick={()=>handleFilterClick(idx)}>
+                    all
+                    <EditIcon className="edit-icon" />
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
       </table>
     </div>
   );
