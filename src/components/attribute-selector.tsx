@@ -11,8 +11,8 @@ export const AttributesSelector = () => {
   const [allSelected, setAllSelected] = useState(false);
   const hourlyAttributeNames = hourlyAttrMap.map(attr => { return attr.name; });
   const dailyMonthlyAttributeNames = dailyMonthlyAttrMap.map(attr => { return attr.name; });
-
-  const attributes = state.frequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
+  const attributes = state.frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
+  const attributeNames = state.frequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
 
   const handleUnitsClicked = () => {
     setState(draft => {
@@ -29,25 +29,32 @@ export const AttributesSelector = () => {
     } else {
       setAllSelected(true);
       setState(draft => {
-        draft.attributes = state.frequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
+        draft.attributes = state.frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
       });
     }
-
   };
 
   const toggleAttributeSelect = (e: React.MouseEvent<HTMLDivElement>) => {
-    const attrSelected = e.currentTarget.textContent;
-    if (allSelected) {
-      setAllSelected(false);
-    }
+    const selectedAttrName = e.currentTarget.textContent;
+    const selectedAttr = attributes.find(a => a.name === selectedAttrName);
     setState(draft => {
+      const draftAttrNames = draft.attributes.map(attr => {return attr.name;});
       if (allSelected) {
+        setAllSelected(false);
         draft.attributes = [];
+        selectedAttr && draft.attributes.push(selectedAttr);
       }
-      if (attrSelected && draft.attributes.includes(attrSelected)) {
-        draft.attributes.splice(draft.attributes.indexOf(attrSelected));
-      } else {
-        attrSelected && draft.attributes.push(attrSelected);
+      if (selectedAttrName) {
+        const attrIndex = draftAttrNames.indexOf(selectedAttrName);
+        if (selectedAttr) {
+          if (draftAttrNames.includes(selectedAttrName)) {
+            if (attrIndex !== null) {
+              draft.attributes.splice(attrIndex, 1);
+            }
+          } else {
+            draft.attributes.push(selectedAttr);
+          }
+        }
       }
     });
   };
@@ -68,8 +75,8 @@ export const AttributesSelector = () => {
         <div className={`attribute-button all ${allSelected ? "selected" : ""}`} onClick={toggleSelectAllAttrs}>
           All
         </div>
-        { attributes.map(attr => {
-          const attrSelected = state.attributes.includes(attr) && !allSelected;
+        { attributeNames.map(attr => {
+          const attrSelected = state.attributes.find(a => a.name === attr) && !allSelected;
           return (
             <div key={`${attr}-button`} className={`attribute-button ${attrSelected ? "selected" : ""}`}
               onClick={toggleAttributeSelect}>

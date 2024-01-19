@@ -80,7 +80,7 @@ export interface IAboveMeanFilter extends IBaseFilter {
   operator: "aboveMean",
 }
 export interface IBelowMeanFilter extends IBaseFilter {
-  operator: "aboveMean",
+  operator: "belowMean",
 }
 export type IFilter = IEqualsFilter | DoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
 
@@ -128,7 +128,7 @@ export interface IState {
   startDate?: Date;
   endDate?: Date;
   units: IUnits;
-  attributes: string[];
+  attributes: AttrType[];
   filters: IFilter[];
   showModal?: "info" | "data-return-warning";
 }
