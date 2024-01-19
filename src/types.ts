@@ -19,22 +19,25 @@ export const unitMap = {
 };
 
 export const dailyMonthlyAttrMap: AttrType[] = [
-  {name: "Maximum temperature", abbr: "tMax", unit: unitMap.temperature},
-  {name: "Minimum temperature", abbr: "tMin", unit: unitMap.temperature},
   {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
   {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
+  {name: "Max temperature", abbr: "tMax", unit: unitMap.temperature},
+  {name: "Min temperature", abbr: "tMin", unit: unitMap.temperature},
   {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
   {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
 ];
 
 export const hourlyAttrMap = [
   {name: "Dew point", abbr: "Dew", unit: unitMap.temperature},
-  {name: "Barometric pressure at sea level", abbr: "Pressure", unit: unitMap.pressure},
-  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
-  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
   {name: "Wind speed", abbr: "WSpeed", unit: unitMap.speed},
-  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation}
+  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
+  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation},
+  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
+  {name: "Barometric pressure at sea level", abbr: "Pressure", unit: unitMap.pressure}
 ];
+
+export type TOperators = "equals" | "doesNotEqual" | "greaterThan" | "greaterThanOrEqualTo" | "lessThan"
+                            | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean";
 
 export interface IBaseFilter {
   attribute: string;
@@ -65,7 +68,7 @@ export interface ILessThanOrEqualToFilter extends IBaseFilter {
 }
 export interface IBetweenFilter extends IBaseFilter {
   operator: "between",
-  lowerValue: number
+  lowerValue: number,
   upperValue: number
 }
 export interface ITopFilter extends IBaseFilter {
