@@ -1,21 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
-import { AttrType, TOperators, dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
+import { AttrType, IBetweenFilter, IBottomFilter, ISingleValueFilter, ITopFilter, TOperators, dailyMonthlyAttrMap, hourlyAttrMap, operatorSymbolMap, operatorTextMap } from "../types";
 import EditIcon from "../assets/images/icon-edit.svg";
 
 import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
   const {state} = useStateContext();
-  const frequency = state.frequency;
-  const units = state.units;
-  const attributes = state.attributes;
+  const {frequency, units, attributes, filters} = state;
   const attrMap = frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const selectedAttrMap: AttrType[] = [];
   const [hasFilter, setHasFilter] = useState(false);
   const [filteringIndex, setFilteringIndex] = useState<number | undefined>(undefined);
-  const [filterModalPosition, setFilterModalPosition] = useState({ top: 0, right: 0 });
+  const [filterModalPosition, setFilterModalPosition] = useState({ top: 0 });
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [attributeToFilter, setAttributeToFilter] = useState<AttrType | undefined>(undefined);
   attributes.forEach(attr => {
@@ -26,17 +24,16 @@ export const AttributeFilter = () => {
   });
 
   useEffect(()=>{
-    if (state.filters.length > 0) {
+    if (filters.length > 0) {
       setHasFilter(true);
     }
-  },[state.filters.length]);
+  },[filters.length]);
 
   const handleFilterClick = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const top = rect.bottom + window.scrollY;
-    const right = rect.right + window.scrollX - 19; // Move it further right bec. browser was setting right to auto
 
-    setFilterModalPosition({top, right});
+    setFilterModalPosition({top});
     setShowFilterModal(true);
     setAttributeToFilter(attributes[index]);
     setFilteringIndex(index);
@@ -62,10 +59,12 @@ export const AttributeFilter = () => {
               filterValue = attributeToFilter === attr && showFilterModal
                 ? "--"
                 : filterAboveOrBelowMean
-                    ? attrFilter.operator
+                    ? `${operatorTextMap[attrFilter.operator]}`
                     : attrFilter.operator === "between"
                         ? `${attrFilter.lowerValue} - ${attrFilter.upperValue} ${attr.unit[units]}`
-                        : `${attrFilter.value} ${attr.unit[units]}`;
+                        : attrFilter.operator === "top" || attrFilter.operator === "bottom"
+                          ? `${operatorTextMap[attrFilter.operator]} ${attrFilter.value}`
+                          :`${operatorSymbolMap[attrFilter.operator]} ${attrFilter.value} ${attr.unit[units]}`;
             } else {
               filterValue = attributeToFilter === attr && showFilterModal ? "--" : filterValue = "all";
             }
@@ -96,7 +95,7 @@ export const AttributeFilter = () => {
 
 interface IFilterModalProps {
   attr: AttrType;
-  position: {top: number, right: number};
+  position: {top: number};
   setShowFilterModal: (show: boolean) => void
 }
 
@@ -118,9 +117,6 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   const filterValueTopBottomInputElRef = useRef<HTMLInputElement>(null);
   const filterLowerValueInputElRef = useRef<HTMLInputElement>(null);
   const filterUpperValueInputElRef = useRef<HTMLInputElement>(null);
-  const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal", greaterThan: "greater than", greaterThanOrEqualTo: "great than or equal to",
-                            lessThan: "less than", lessThanOrEqualTo: "less than or equal to", between: "between", top: "top", bottom: "bottom",
-                            aboveMean: "above mean", belowMean: "below mean"};
 
   const handleReset = () => {
     setOperator(currentAttrFilter?.operator || "equals");
@@ -128,13 +124,21 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   };
 
   const handleSubmitFilter = () => {
+    console.log("in submit currentEl", filterValueInputElRef.current?.value);
     switch (operator) {
       case "between":
         if (filterLowerValueInputElRef.current && filterUpperValueInputElRef.current) {
           const lowerInputValue = parseFloat(filterLowerValueInputElRef.current.value);
           const upperInputValue = parseFloat(filterUpperValueInputElRef.current.value);
           setState(draft => {
-            draft.filters.push({attribute: attr.name, operator, lowerValue: lowerInputValue, upperValue: upperInputValue});
+            const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+            if (existingFilter) {
+              (existingFilter as IBetweenFilter).operator = operator;
+              (existingFilter as IBetweenFilter).lowerValue = lowerInputValue;
+              (existingFilter as IBetweenFilter).upperValue = upperInputValue;
+            } else {
+              draft.filters.push({attribute: attr.name, operator, lowerValue: lowerInputValue, upperValue: upperInputValue});
+            }
           });
         }
         break;
@@ -143,21 +147,38 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
         if (filterValueTopBottomInputElRef.current) {
           const inputValue = parseFloat(filterValueTopBottomInputElRef.current.value);
           setState(draft => {
-            draft.filters.push({attribute: attr.name, operator, value: inputValue});
+            const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+            if (existingFilter) {
+              (existingFilter as ITopFilter | IBottomFilter).operator = operator;
+              (existingFilter as ITopFilter | IBottomFilter).value = inputValue;
+            } else {
+              draft.filters.push({attribute: attr.name, operator, value: inputValue});
+            }
           });
         }
         break;
       case "aboveMean":
       case "belowMean":
         setState(draft => {
-          draft.filters.push({attribute: attr.name, operator});
+          const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+          if (existingFilter) {
+            existingFilter.operator = operator;
+          } else {
+            draft.filters.push({attribute: attr.name, operator});
+          }
         });
         break;
       default:
         if (filterValueInputElRef.current) {
           const inputValue = parseFloat(filterValueInputElRef.current.value);
           setState(draft => {
-            draft.filters.push({attribute: attr.name, operator, value: inputValue});
+            const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+            if (existingFilter) {
+              (existingFilter as ISingleValueFilter).operator = operator;
+              (existingFilter as ISingleValueFilter).value = inputValue;
+            } else {
+              draft.filters.push({attribute: attr.name, operator, value: inputValue});
+            }
           });
         }
     }
@@ -165,12 +186,12 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   };
 
   const renderFilterInputs = () => {
-    console.log("operator", operator);
+    console.log("currentFilterValue", currentFilterValue);
+    const [lowerVal, upperVal] = Array.isArray(currentFilterValue) ? currentFilterValue : [0, 0];
+    // key attribute forces inputs to rerender when operator changes
     if (operator === "between") {
-      const lowerVal = currentFilterValue  as [number, number][0];
-      const upperVal = currentFilterValue  as [number, number][1];
       return (
-        <div className="between-inputs-wrapper">
+        <div className="between-inputs-wrapper" key="between">
           <input ref={filterLowerValueInputElRef} className="filter-value between-low-value"
             defaultValue={`${lowerVal} ${currentAttr?.unit[units]}`}>
           </input>
@@ -180,13 +201,12 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
           </input>
         </div>
       );
-    } else if (operator === "top" || operator === "bottom") {
-      console.log("in operator = top");
-      return <input ref={filterValueTopBottomInputElRef} className="filter-value" defaultValue={`${currentFilterValue}`} />;
     } else if (operator === "aboveMean" || operator === "belowMean") {
       return null;
+    } else if (operator === "top" || operator === "bottom") {
+      return <input ref={filterValueTopBottomInputElRef} key={operator} className="filter-value" defaultValue={`${currentFilterValue || "100"}`}></input>;
     } else {
-      return <input ref={filterValueInputElRef} className="filter-value" defaultValue={`${currentFilterValue} ${currentAttr?.unit[units]}`}></input>;
+      return <input ref={filterValueInputElRef} key={operator} className="filter-value" defaultValue={`${currentFilterValue} ${currentAttr?.unit[units]}`}></input>;
     }
   };
 
@@ -194,8 +214,8 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
     setShowFilterSelectModal(true);
   };
 
-  const handleSelectFilterOperator = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setOperator(e.currentTarget.value as TOperators);
+  const handleSelectFilterOperator = (newOperator: TOperators) => {
+    setOperator(newOperator);
     setShowFilterSelectModal(false);
   };
   const wideModal = !["equals", "top", "bottom"].includes(operator);
@@ -217,7 +237,7 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
       </div>
       {showFilterSelectionModal &&
         <div className="filter-operator-selection-container">
-          <select className="operator-selection" size={11} onChange={handleSelectFilterOperator}>
+          <select className="operator-selection" size={11} onChange={(e)=>handleSelectFilterOperator(e.currentTarget.value as TOperators)}>
             <option value="equals">{operatorTextMap.equals} ...</option>
             <option value="doesNotEqual">{operatorTextMap.doesNotEqual} ...</option>
             <option value="greaterThan">{operatorTextMap.greaterThan} ...</option>

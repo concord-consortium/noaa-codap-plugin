@@ -24,7 +24,7 @@ $filter-green: #2dbe5e;
       width: 56px;
     }
     &.units-header {
-      width: 36px;
+      min-width: 36px;
       background-color: rgba(126, 126, 126, 0.3);
     }
     &.filter-header {
@@ -92,10 +92,12 @@ table tr:nth-child(odd) {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   background-color: #f6f6f6;
   position: fixed;
+  left: 161px;
   box-sizing: border-box;
 
   &.wide {
-    width: 256px;
+    width: 217px;
+    left: 114px;
   }
 
   .filter-wrapper {
@@ -155,6 +157,7 @@ table tr:nth-child(odd) {
       align-items: center;
       text-align: right;
       margin-left: 5px;
+      box-sizing: border-box;
 
       &.between-upper-value {
         margin-left: 0;
@@ -216,6 +219,12 @@ table tr:nth-child(odd) {
         font-weight: 500;
         color: #000;
         padding: 2px 0;
+        &:hover {
+          background-color: $teal-medium;
+        }
+        &:checked {
+          background-color: $teal-light-25;
+        }
       }
     }
   }
