@@ -7,9 +7,7 @@ import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
   const {state} = useStateContext();
-  const frequency = state.frequency;
-  const units = state.units;
-  const attributes = state.attributes;
+  const {frequency, units, attributes} = state;
   const attrMap = frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const selectedAttrMap: AttrType[] = [];
   attributes.forEach(attr => {
