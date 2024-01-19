@@ -25,7 +25,7 @@ export const Calendars = ({selectedCalendar, handleSelectCalendar, closeCalendar
       </div>
       <div className="calendar-footer">
         <div className="station-information">
-          <div className="station-name">{weatherStation || "WEATHER STATION"}</div>
+          <div className="station-name">{weatherStation?.name || "WEATHER STATION"}</div>
           <div className="station-dates">
             <span>MM/DD/YYYY</span> - <span>MM/DD/YYYY</span>
           </div>

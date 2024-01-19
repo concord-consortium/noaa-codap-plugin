@@ -1,0 +1,59 @@
+@import "./vars.scss";
+
+.attribute-filter-container {
+
+  .table-header {
+    color: rgba(0, 0, 0, 0.48);
+    font-size: 10px;
+    font-weight: 500;
+    height: 21px;
+    background-color: rgba(198, 198, 198, 0.3);
+    text-align: left;
+    padding-left: 5px;
+    box-sizing: border-box;
+
+    &.attribute-header {
+      width: 174px;
+    }
+    &.abbr-header {
+      width: 56px;
+    }
+    &.units-header {
+      width: 36px;
+      background-color: rgba(126, 126, 126, 0.3);
+    }
+    &.filter-header {
+      width: 41px;
+    }
+  }
+  tr.table-body {
+    height: 16px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #000;
+    text-align: left;
+    padding-left: 5px;
+
+    td.filter-units {
+      text-align: center;
+    }
+
+    td.filter-filter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: $teal-light-25;
+      color: #177991;
+
+      .edit-icon {
+        margin-left: 7px;
+        height: 10px;
+        width: 10px;
+      }
+    }
+  }
+}
+
+table tr:nth-child(odd) {
+  background-color: rgba(216, 216, 216, 0.3);
+}

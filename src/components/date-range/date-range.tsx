@@ -5,7 +5,7 @@ import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
 import { constants } from "../../constants";
 import WarningIcon from "../../assets/icon-warning.svg";
-import ExitIcon from "../../assets/icon-exit.svg";
+import ExitIcon from "../../assets/images/icon-exit.svg";
 
 import "./date-range.scss";
 

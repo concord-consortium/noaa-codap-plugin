@@ -24,6 +24,7 @@
     background-color: $teal-light-25;
   }
   &.placeholder {
+    color: $placeholder-gray;
     font-style: italic;
   }
 }
