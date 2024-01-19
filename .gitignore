@@ -13,3 +13,6 @@
 # Logs
 npm-debug.log*
 npm-error.log*
+
+# Build output
+dist/
