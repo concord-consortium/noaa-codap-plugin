@@ -99,6 +99,8 @@ export interface IState {
   filters: IFilter[];
   showModal?: "info" | "data-return-warning";
   counterToTestStateChanges: number;
+  stationTimezoneOffset?: number;
+  stationTimezoneName?: string;
 }
 
 export const DefaultState: IState = {
@@ -173,7 +175,7 @@ export type Action = "create" | "get" | "update" | "delete";
 export type ILatLong = [number, number];
 
 export interface IMapComponent {
-  type: 'map',
+  type: "map",
   name: string,
   title?: string,
   dimensions: {
@@ -187,59 +189,13 @@ export interface IMapComponent {
   center: ILatLong,
   zoom: number
 }
-export const kStationsDatasetName = "US-Weather-Stations";
-export const kStationsCollectionName = "US Weather Stations";
 
-export const kWeatherStationCollectionAttrs = [
-  { name: "name" },
-  {
-      name: "ICAO",
-      description: "International Civil Aviation Org. Airport Code"
-  },
-  {
-      name: "mindate",
-      type: "date",
-      precision: "day",
-      description: "Earliest reporting date"
-  },
-  {
-      name: "maxdate",
-      type: "date",
-      precision: "day",
-      description: `Latest reporting date, or "present" if is an active station`
-  },
-  {
-      name: "latitude",
-      unit: "º"
-  },
-  {
-      name: "longitude",
-      unit: "º"
-  },
-  {
-      name: "elevation",
-      unit: "ft",
-      precision: "0",
-      type: "number"
-  },
-  { name: "isdID"},
-  {
-      name: "ghcndID",
-      description: "Global Historical Climatology Network ID"
-  },
-  {
-      name: "isActive",
-      formula: `(number(maxdate="present"
-                  ? date()
-                  : date(split(maxdate,'-',1), split(maxdate, ""-", 2), split(maxdate, "-", 3))) - wxMinDate)>0 and wxMaxDate-number(date(split(mindate,"-",1), split(mindate, "-", 2), split(mindate, "-", 3)))>0`,
-      description: "whether the station was active in the Weather Plugin's requested date range",
-      _categoryMap: {
-          __order: [
-              "false",
-              "true"
-          ],
-          false: "#a9a9a9",
-          true: "#2a4bd7"
-      },
-  }
-];
+export type Unit = "m" | "mm" | "in" | "m/s" | "mph" | "°C" | "°F" | "º" | "yd" | "hPa";
+
+export interface UnitMap {
+  [key: string]: {metric: Unit, standard: Unit};
+}
+
+export interface ConverterMap {
+  [key: string]: null | ((fromUnit: Unit, toUnit: Unit, value: number) => number);
+}

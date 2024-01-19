@@ -3,11 +3,11 @@ import { IFrequency } from "../../types";
 import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
-import { constants } from "../../constants";
 import WarningIcon from "../../assets/icon-warning.svg";
-import ExitIcon from "../../assets/icon-exit.svg";
+import ExitIcon from "../../assets/images/icon-exit.svg";
 
 import "./date-range.scss";
+import { defaultDates } from "../../constants";
 
 export const DateRange = () => {
   const { state, setState } = useStateContext();
@@ -54,8 +54,8 @@ export const DateRange = () => {
   };
 
   function configureDates() {
-    handleSetStartDate(constants.defaultDates[frequency].start);
-    handleSetEndDate(constants.defaultDates[frequency].end);
+    handleSetStartDate(defaultDates[frequency].start);
+    handleSetEndDate(defaultDates[frequency].end);
   }
 
   const handleOpenCalendar = (calendar: string) => {

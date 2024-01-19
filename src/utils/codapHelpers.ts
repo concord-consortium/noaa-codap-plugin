@@ -1,34 +1,36 @@
 
-import {IResult, codapInterface, getDataContext, createItems, IDimensions, getCaseBySearch, getAllItems, getCaseByFormulaSearch} from "@concord-consortium/codap-plugin-api";
-import { Collection, DataContext, IDataType, IUnits, Attribute, ILatLong, IMapComponent } from "../types";
-import { constants } from "../constants";
-
-const { DSName, DSCollection1, DSCollection2, StationDSName, StationDSTitle } = constants;
+import { IResult, codapInterface, getDataContext, createItems,
+  IDimensions, getCaseBySearch, getAllItems, getCaseByFormulaSearch,
+  createDataContext, createNewCollection} from "@concord-consortium/codap-plugin-api";
+import { Collection, DataContext, IDataType, IWeatherStation,
+  IUnits, Attribute, ILatLong, IMapComponent } from "../types";
+import { DSName, DSCollection1, DSCollection2, StationDSName, StationDSTitle,
+  kStationsCollectionName, kStationsDatasetName, kWeatherStationCollectionAttrs } from "../constants";
 
 const selectComponent = async (id: string) => {
   return await codapInterface.sendRequest({
-      action: 'notify',
+      action: "notify",
       resource: `component[${id}]`,
-      values: {request: 'select'
+      values: {request: "select"
       }
   }) as IResult;
-}
+};
 
 const createAttribute = (datasetName: string, collectionName: string, dataType: IDataType, unitSystem: IUnits) => {
    return codapInterface.sendRequest({
-       action: 'create',
-       resource: 'dataContext[' + datasetName + '].collection[' + collectionName + '].attribute',
+       action: "create",
+       resource: "dataContext[" + datasetName + "].collection[" + collectionName + "].attribute",
        values: {
            name: dataType.name,
            unit: dataType.units[unitSystem],
            description: dataType.description
        }
-   })
+   });
 };
 
 const updateAttributeUnit = (datasetDef: DataContext, attrName: string, unit: string) => {
-   let collection = datasetDef.collections.find(function (collection) {
-       return collection.attrs.find(function (attr) {
+   let collection = datasetDef.collections.find(function (coll) {
+       return coll.attrs.find(function (attr) {
            return attr.name === attrName;
        });
    });
@@ -36,10 +38,10 @@ const updateAttributeUnit = (datasetDef: DataContext, attrName: string, unit: st
    if (collection) {
     let resource = `dataContext[${datasetDef.name}].collection[${collection.name}].attribute[${attrName}]`;
     return codapInterface.sendRequest({
-        action: 'update',
-        resource: resource,
+        action: "update",
+        resource,
         values: {
-            unit: unit
+            unit
         }
     });
    }
@@ -47,22 +49,22 @@ const updateAttributeUnit = (datasetDef: DataContext, attrName: string, unit: st
 
 async function updateWeatherDataset(dataTypes: IDataType[], unitSystem: IUnits) {
    const getDatasetMsg = {
-       action: 'get',
+       action: "get",
        resource: `dataContext[${DSName}]`
    };
    let result = await codapInterface.sendRequest(getDatasetMsg) as IResult;
    if (!result || !result.success) {
         result = await codapInterface.sendRequest({
-           action: 'create',
-           resource: 'dataContext',
-           values: getNoaaDataContextSetupObject(DSName, DSCollection1, DSCollection2)
+           action: "create",
+           resource: "dataContext",
+           values: getNoaaDataContextSetupObject()
        }) as IResult;
        if (result.success) {
            result = await codapInterface.sendRequest(getDatasetMsg) as IResult;
        }
    }
    if (!result.success) {
-       throw new Error('Could not find or create NOAA-Weather dataset');
+       throw new Error("Could not find or create NOAA-Weather dataset");
    }
 
    const dataSetDef = result.values;
@@ -71,7 +73,7 @@ async function updateWeatherDataset(dataTypes: IDataType[], unitSystem: IUnits) 
    dataSetDef.collections.forEach(function (collection: Collection) {
        collection.attrs.forEach(function (attr) {
            attrDefs.push(attr);
-       })
+       });
    });
 
    const lastCollection = dataSetDef.collections[dataSetDef.collections.length - 1];
@@ -87,12 +89,12 @@ async function updateWeatherDataset(dataTypes: IDataType[], unitSystem: IUnits) 
            if (attrDef.unit !== unit) {
                return updateAttributeUnit(dataSetDef, attrName, unit);
            } else {
-               return Promise.resolve('Unknown attribute.')
+               return Promise.resolve("Unknown attribute.");
            }
        }
    });
    return Promise.all(promises);
-};
+}
 
 const hasDataset = async (name: string) => {
    const result = await getDataContext(name);
@@ -103,22 +105,22 @@ const createMap = async (name: string, dimensions: IDimensions, center: ILatLong
    let map;
 
    let componentListResult = await codapInterface.sendRequest({
-       action: 'get',
-       resource: 'componentList'
+       action: "get",
+       resource: "componentList"
    }) as IResult;
 
    if (componentListResult && componentListResult.success) {
-       map = componentListResult.values.find(function (component: Record<string, string>) { return component.type==='map';})
+       map = componentListResult.values.find(function (component: Record<string, string>) { return component.type==="map";});
    }
 
    if (!map) {
        let result = await codapInterface.sendRequest({
-           action: 'create', resource: 'component', values: {
-               type: 'map',
-               name: name,
-               dimensions: dimensions,
+           action: "create", resource: "component", values: {
+               type: "map",
+               name,
+               dimensions,
                dataContextName: name,
-               legendAttributeName: 'isActive'
+               legendAttributeName: "isActive"
            }
        }) as IResult;
        if (result.success) {
@@ -126,34 +128,33 @@ const createMap = async (name: string, dimensions: IDimensions, center: ILatLong
        }
    }
    if (map && center && (zoom != null)) {
-       return centerAndZoomMap(map.id, center, zoom)
+       return centerAndZoomMap(map.id, center, zoom);
    } else {
        return selectComponent(map.id);
    }
 };
 
 const centerAndZoomMap = (mapName: string, center: ILatLong, zoom: number) => {
-   // noinspection JSIgnoredPromiseFromCall
-   return new Promise ((resolve) => {
+   return new Promise<void>((resolve) => {
        setTimeout(function () {
            codapInterface.sendRequest({
-               action: 'update',
+               action: "update",
                resource: `component[${mapName}]`,
                values: {
-                   center: center,
+                   center,
                    zoom: 4
                }
            });
            setTimeout(function () {
                codapInterface.sendRequest({
-                   action: 'update',
+                   action: "update",
                    resource: `component[${mapName}]`,
                    values: {
-                       zoom: zoom
+                       zoom
                    }
                });
 
-           }, 500)
+           }, 500);
        }, 2000);
        resolve();
    });
@@ -161,8 +162,8 @@ const centerAndZoomMap = (mapName: string, center: ILatLong, zoom: number) => {
 
 const hasMap = async () => {
    const componentsResult = await codapInterface.sendRequest({
-       action: 'get',
-       resource: 'componentList'
+       action: "get",
+       resource: "componentList"
    }) as IResult;
    return componentsResult
        && componentsResult.success
@@ -171,97 +172,29 @@ const hasMap = async () => {
        });
 };
 
-const createStationsDataset = async (datasetName: string, collectionName: string, stations: any) => {
-   let result = await codapInterface.sendRequest({
-       action: 'create',
-       resource: 'dataContext',
-       values: {
-           name: datasetName,
-           label: datasetName,
-           collections: [{
-               name: collectionName,
-               attrs: [
-                   { name: 'name' },
-                   {
-                       name: 'ICAO',
-                       description: 'International Civil Aviation Org. Airport Code'
-                   },
-                   {
-                       name: 'mindate',
-                       type: 'date',
-                       precision: 'day',
-                       description: 'Earliest reporting date'
-                   },
-                   {
-                       name: 'maxdate',
-                       type: 'date',
-                       precision: 'day',
-                       description: 'Latest reporting date, or "present" if is an active station'
-                   },
-                   {
-                       name: 'latitude',
-                       unit: 'º'
-                   },
-                   {
-                       name: 'longitude',
-                       unit: 'º'
-                   },
-                   {
-                       name: 'elevation',
-                       unit: 'ft',
-                       precision: 0,
-                       type: 'number'
-                   },
-                   { name: 'isdID'},
-                   {
-                       name: 'ghcndID',
-                       description: 'Global Historical Climatology Network ID'
-                   },
-                   {
-                       name: 'isActive',
-                       formula: "(number(maxdate='present'? " +
-                           "date(): date(split(maxdate,'-',1), split(maxdate, " +
-                           "'-', 2), split(maxdate, '-', 3))) - wxMinDate)>0 " +
-                           "and wxMaxDate-number(date(split(mindate,'-',1), " +
-                           "split(mindate, '-', 2), split(mindate, '-', 3)))>0",
-                       description: "whether the station was active in the Weather Plugin's requested date range",
-                       _categoryMap: {
-                           __order: [
-                               "false",
-                               "true"
-                           ],
-                           false: "#a9a9a9",
-                           true: "#2a4bd7"
-                       },
-                   }
-               ]
-           }]
-       }
-   }) as IResult;
-
-   if (!result.success) {
-       console.log(`Dataset, "${datasetName}", creation failed`);
-       return;
-   }
-
-   result = await codapInterface.sendRequest({
-       action: 'create',
-       resource: `dataContext[${datasetName}].item`,
-       values: stations
-   }) as IResult;
-
-   return result;
-};
-
-const addNotificationHandler = (action: "get" | "notify", resource: string, handler: ((result: any) => void)) => {
-    codapInterface.on(action, resource, handler);
-};
-
-const arrayify = (vals?: any) => {
-  if (vals && !Array.isArray(vals)) {
-    vals = [vals];
+const createStationsDataset = async (stations: IWeatherStation[]) => {
+  let result = await createDataContext(kStationsDatasetName);
+  if (!result.success) {
+      console.log(`Dataset, "${kStationsDatasetName}", creation failed`);
+      return;
   }
-  return vals;
+
+  result = await createNewCollection(kStationsDatasetName, kStationsCollectionName, kWeatherStationCollectionAttrs);
+  if (!result.success) {
+    console.log(`Collection, "${kStationsCollectionName}", creation failed`);
+    return;
+  }
+
+  result = await createItems(kStationsDatasetName, stations);
+  return result;
+};
+
+const addNotificationHandler = (action: string, resource: string, handler: (req: any)=>Promise<void>) => {
+  codapInterface.on(action, resource, handler);
+};
+
+const arrayify = (value: any) => {
+  return Array.isArray(value) ? value : [value];
 };
 
 const createNOAAItem = async (dsName: string, iValues: any, dataTypes: IDataType[], unitSystem: IUnits) => {
@@ -288,27 +221,28 @@ const findStationByID = async (stationID: string) => {
    }
 };
 
-const selectStations = async (stationNames: string[]) => {
-   if (!stationNames) {
-       return;
-   }
-   const req = stationNames.map(function (stationName) {
-      return {
-          action: 'get',
-          resource: `dataContext[${StationDSName}].collection[${StationDSTitle}].caseSearch[name==${stationName}]`
-      }
-   });
-   const reply = await codapInterface.sendRequest(req) as IResult[];
-   const selectionList = reply.filter(function (r) {
-           return r && r.success;
-       }).map(function (r) {
-           return r.values[0].id;
-       });
-   await codapInterface.sendRequest({
-       action: 'create',
-       resource: `dataContext[${StationDSName}].selectionList`,
-       values: selectionList
-   });
+const selectStations = async(stationNames: string[]) => {
+  if (!stationNames) {
+      return;
+  }
+
+  const req = stationNames.map((stationName: string) => {
+     return {
+         action: "get",
+         resource: `dataContext[${kStationsDatasetName}].collection[${kStationsCollectionName}].caseSearch[name==${stationName}]`
+     };
+  });
+  const reply = (await codapInterface.sendRequest(req)) as unknown as any[];
+  const selectionList = reply.filter((r: any) => {
+          return r && r.success;
+      }).map((r: any) => {
+          return r.values[0].id;
+      });
+  await codapInterface.sendRequest({
+      action: "create",
+      resource: `dataContext[${kStationsDatasetName}].selectionList`,
+      values: selectionList
+  });
 };
 
 const getNoaaDataContextSetupObject = () => {
@@ -322,13 +256,13 @@ const getNoaaDataContextSetupObject = () => {
                singleCase: "station", pluralCase: "stations",
            },
            attrs: [
-               {name: "where", type: 'categorical', description: "weather station"},
-               {name: "latitude", type: 'numeric', unit: 'º', description: "Latitude of weather station"},
-               {name: "longitude", type: 'numeric', unit: 'º', description: "Longitude of weather station"},
-               {name: "UTC offset", type: 'numeric', unit: 'hours', description: "Station standard time offset from UTC"},
-               {name: "timezone", type: 'categorical', description: "Timezone of weather station"},
-               {name: "elevation", type: 'numeric', description: "Elevation of weather station", unit: "ft", precision: 0},
-               {name: "report type", type: 'categorical', description: 'Daily summary or monthly summary'}
+               {name: "where", type: "categorical", description: "weather station"},
+               {name: "latitude", type: "numeric", unit: "º", description: "Latitude of weather station"},
+               {name: "longitude", type: "numeric", unit: "º", description: "Longitude of weather station"},
+               {name: "UTC offset", type: "numeric", unit: "hours", description: "Station standard time offset from UTC"},
+               {name: "timezone", type: "categorical", description: "Timezone of weather station"},
+               {name: "elevation", type: "numeric", description: "Elevation of weather station", unit: "ft", precision: 0},
+               {name: "report type", type: "categorical", description: "Daily summary or monthly summary"}
            ]
        },
        {
@@ -341,23 +275,23 @@ const getNoaaDataContextSetupObject = () => {
            },
            attrs: [
                {
-                   name: 'when',
-                   type: 'date',
+                   name: "when",
+                   type: "date",
                    description: "When the observation occurred in weather station's standard time",
                    formula: 'if(`report type`="hourly",date(utc + (`UTC offset`*3600)), utc)'
                },
                {
-                   name: 'utc',
-                   type: 'date',
+                   name: "utc",
+                   type: "date",
                    hidden: true,
                    description: "When the observation occurred in UTC"
                },
            ]
        }],
        metadata: {
-           source: 'https://www.ncei.noaa.gov/access/services/data/v1',
-           'import date': new Date().toLocaleString(),
-           description: 'Historical weather data fetched from NOAA. Note that ' +
+           source: "https://www.ncei.noaa.gov/access/services/data/v1",
+           "import date": new Date().toLocaleString(),
+           description: "Historical weather data fetched from NOAA. Note that " +
                'the attribute "utc" has been hidden.'
        }
    };
@@ -369,7 +303,7 @@ const clearData = async (datasetName: string) =>{
        let dc = result.values;
        let lastCollection = dc.collections[dc.collections.length-1];
        return await codapInterface.sendRequest({
-           action: 'delete',
+           action: "delete",
            resource: `dataContext[${datasetName}].collection[${lastCollection.name}].allCases`
        });
    } else {
@@ -380,11 +314,11 @@ const clearData = async (datasetName: string) =>{
 const deleteAttributes = async (datasetName: string, collectionName: string, attributeNames: string[]) => {
    let attrDeletePromises = attributeNames.map(function (attrName) {
        return codapInterface.sendRequest({
-           action: 'delete',
+           action: "delete",
            resource: `dataContext[${datasetName}].collection[${collectionName}].attribute[${attrName}]`
-       })
+       });
    });
-   return await Promise.allSettled(attrDeletePromises).then(() => {return {success: true};});
+   return await (Promise as any).allSettled(attrDeletePromises).then(() => {return {success: true};});
 };
 
 const getAllItemValues = async (datasetName: string) => {
@@ -397,8 +331,8 @@ const getAllItemValues = async (datasetName: string) => {
    result = await getAllItems(datasetName);
 
    if (result && result.success) {
-       return result.values.map(function (item: any) {return item.values});
-   };
+       return result.values.map(function (item: any) {return item.values;});
+   }
 };
 
 const queryCases = async (dataset: string, collection: string, query: string) => {
@@ -406,32 +340,29 @@ const queryCases = async (dataset: string, collection: string, query: string) =>
 };
 
 const guaranteeGlobal = async (name: string, value: any) => {
-   return codapInterface.sendRequest({
-       action: 'get',
-       resource: `global[${name}]`
-   }).then(result => {
-        if (result.success) {
-            return codapInterface.sendRequest({
-                action: 'update',
-                resource: `global[${name}]`,
-                values: {
-                    value: value
-                }
-            })
-        } else {
-            return codapInterface.sendRequest({
-                action: 'create',
-                resource: 'global',
-                values: {
-                    name: name,
-                    value: value
-                }
-            })
-        }
-
-      },
-      msg => Promise.reject(msg)
-  );
+  return (codapInterface.sendRequest({
+      action: "get",
+      resource: `global[${name}]`
+  }) as Promise<IResult>).then(result => {
+    if (result.success) {
+        return codapInterface.sendRequest({
+            action: "update",
+            resource: `global[${name}]`,
+            values: {
+                value
+            }
+        });
+    } else {
+        return codapInterface.sendRequest({
+            action: "create",
+            resource: "global",
+            values: {
+                name,
+                value
+            }
+        });
+    }
+  }, (msg) => Promise.reject(msg));
 };
 
 export {
