@@ -3,18 +3,16 @@ import { useStateContext } from "../hooks/use-state";
 import ToggleIcon from "../assets/images/icon-toggle.svg";
 
 import "./attribute-selector.scss";
-
-const kHourlyAttributes = ["Dew Point", "Barometric Pressure at sea level", "Air Temperature", "Visibility",
-                            "Wind Direction", "Wind Speed", "Precipitation in last hour"];
-const kMonthlyDailyAttributes = ["Average temperature", "Precipitation", "Max temperature", "Min temperature",
-                                  "Snowfall", "Average wind speed"];
+import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
 
 export const AttributesSelector = () => {
   const {state, setState} = useStateContext();
   const {units} = state;
   const [allSelected, setAllSelected] = useState(false);
+  const hourlyAttributeNames = hourlyAttrMap.map(attr => { return attr.name; });
+  const dailyMonthlyAttributeNames = dailyMonthlyAttrMap.map(attr => { return attr.name; });
 
-  const attributes = state.frequency === "hourly" ? kHourlyAttributes : kMonthlyDailyAttributes;
+  const attributes = state.frequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
 
   const handleUnitsClicked = () => {
     setState(draft => {
@@ -31,7 +29,7 @@ export const AttributesSelector = () => {
     } else {
       setAllSelected(true);
       setState(draft => {
-        draft.attributes = state.frequency === "daily" ? kHourlyAttributes : kMonthlyDailyAttributes;
+        draft.attributes = state.frequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
       });
     }
 
@@ -73,14 +71,13 @@ export const AttributesSelector = () => {
         { attributes.map(attr => {
           const attrSelected = state.attributes.includes(attr) && !allSelected;
           return (
-            <div key={attr} className={`attribute-button ${attrSelected ? "selected" : ""}`}
+            <div key={`${attr}-button`} className={`attribute-button ${attrSelected ? "selected" : ""}`}
               onClick={toggleAttributeSelect}>
               {attr}
             </div>
           );
         })}
       </div>
-      <div className="attribute-filters">attribute filters</div>
     </div>
   );
 };

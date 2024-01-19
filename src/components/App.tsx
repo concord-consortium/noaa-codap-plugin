@@ -3,8 +3,8 @@ import { initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
 import { AttributesSelector } from "./attribute-selector";
+import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
-import { StateCounterDemoToBeRemoved } from "./state-counter-demo";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset } from "../utils/getWeatherStations";
 import { createStationsDataset } from "../utils/codapHelpers";
@@ -130,6 +130,7 @@ export const App = () => {
       <DateRange />
       <div className="divider" />
       <AttributesSelector />
+      {state.attributes.length > 0 && <AttributeFilter />}
       <div className="divider" />
       <div className="footer">
         {statusMessage && <div>{statusMessage}</div>}
@@ -137,7 +138,6 @@ export const App = () => {
         <button className="get-data-button" disabled={isFetching}>Get Data</button>
       </div>
       {showModal === "info" && <InfoModal />}
-      <StateCounterDemoToBeRemoved />
     </div>
   );
 };
