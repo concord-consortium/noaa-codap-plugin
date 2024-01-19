@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
 import { AttrType, dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
@@ -13,6 +13,8 @@ export const AttributeFilter = () => {
   const attributes = state.attributes;
   const attrMap = frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const selectedAttrMap: AttrType[] = [];
+  const [hasFilter, setHasFilter] = useState(false);
+  const [filteringIndex, setFilteringIndex] = useState<number | undefined>(undefined);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [attributeToFilter, setAttributeToFilter] = useState<AttrType | undefined>(undefined);
   attributes.forEach(attr => {
@@ -22,9 +24,16 @@ export const AttributeFilter = () => {
     }
   });
 
+  useEffect(()=>{
+    if (state.filters.length > 0) {
+      setHasFilter(true);
+    }
+  },[state.filters.length]);
+
   const handleFilterClick = (index: number) => {
     setShowFilterModal(true);
     setAttributeToFilter(attributes[index]);
+    setFilteringIndex(index);
   };
 
   return (
@@ -33,23 +42,38 @@ export const AttributeFilter = () => {
         <table>
           <thead>
             <tr>
-              <th scope="col" className="table-header attribute-header">Attributes</th>
+              <th scope="col" className={classnames("table-header attribute-header", {"narrow": hasFilter})}>Attributes</th>
               <th scope="col" className="table-header abbr-header">abbr</th>
               <th scope="col" className="table-header units-header">units</th>
-              <th scope="col" className="table-header filter-header">filter</th>
+              <th scope="col" className={classnames("table-header filter-header", {"wide": hasFilter})}>filter</th>
             </tr>
           </thead>
           <tbody>
             {selectedAttrMap.map((attr: AttrType, idx: number) => {
+              let filterValue;
               const attrFilter = state.filters.find(f => f.attribute === attr.name);
+              if (attrFilter) {
+                const filterAboveOrBelowMean = (attrFilter.operator === "aboveMean" || attrFilter?.operator === "belowMean");
+                filterValue = showFilterModal
+                  ? "--"
+                  : filterAboveOrBelowMean
+                      ? attrFilter.operator
+                      : attrFilter.operator === "between"
+                          ? `${attrFilter.lowerValue} - ${attrFilter.upperValue} ${attr.unit[units]}`
+                          : `${attrFilter.value} ${attr.unit[units]}`;
+              } else {
+                filterValue = "all";
+              }
+
               return (
                 <tr key={`${attr}-${idx}-filter`} className="table-body">
                   <td className="filter-attribute">{attr.name}</td>
                   <td className="filter-abbr">{attr.abbr}</td>
                   <td className="filter-units">{attr.unit[units]}</td>
-                  <td className={classnames("filter-filter", {"filtering": showFilterModal})}>
+                  <td className={classnames("filter-filter", {"filtering": idx === filteringIndex && showFilterModal,
+                                              "has-filter": !showFilterModal && attrFilter})}>
                     <div onClick={()=>handleFilterClick(idx)}>
-                      {showFilterModal ? "--" : attrFilter?.operator || "all"}
+                      {filterValue}
                       <EditIcon className="edit-icon" />
                     </div>
                   </td>

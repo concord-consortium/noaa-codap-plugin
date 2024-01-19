@@ -1,4 +1,6 @@
 @import "./vars.scss";
+$filter-background-green: rgba(90, 249, 90, 0.25);
+$filter-green: #2dbe5e;
 
 .attribute-filter-container {
 
@@ -14,6 +16,9 @@
 
     &.attribute-header {
       width: 174px;
+      &.narrow {
+        width: 132px;
+      }
     }
     &.abbr-header {
       width: 56px;
@@ -24,6 +29,11 @@
     }
     &.filter-header {
       width: 41px;
+      &.wide {
+        width: 83px;
+        text-align: right;
+        padding-right: 9px;
+      }
     }
   }
   tr.table-body {
@@ -37,20 +47,31 @@
     td.filter-units {
       text-align: center;
     }
+    td.filter-abbr {
+      padding-left: 5px;
+    }
 
     td.filter-filter {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
+      text-align: right;
       background-color: $teal-light-25;
       color: #177991;
+      font-size: 10px;
+      box-sizing: border-box;
+
       &.filtering {
-        background-color: rgba(90, 249, 90, 0.25);
-        color: #2dbe5e;
+        background-color: $filter-background-green;
+        color: $filter-green;
+      }
+      &.has-filter {
+        background-color: $filter-background-green;
+        color: $filter-green;
       }
 
       .edit-icon {
-        margin-left: 7px;
+        margin: 0 3px 0 7px;
         height: 10px;
         width: 10px;
       }
