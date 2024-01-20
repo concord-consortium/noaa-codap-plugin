@@ -17,7 +17,7 @@ $filter-green: #2dbe5e;
     &.attribute-header {
       width: 174px;
       &.narrow {
-        width: 132px;
+        width: 130px;
       }
     }
     &.abbr-header {
@@ -30,13 +30,13 @@ $filter-green: #2dbe5e;
     &.filter-header {
       width: 41px;
       &.wide {
-        width: 83px;
+        width: 85px;
         text-align: right;
         padding-right: 9px;
       }
     }
   }
-  tr.table-body {
+  tr.table-row {
     height: 16px;
     font-size: 10px;
     font-weight: 500;
@@ -69,12 +69,19 @@ $filter-green: #2dbe5e;
         background-color: $filter-background-green;
         color: $filter-green;
       }
+      .filter-value-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
 
-      .edit-icon {
-        margin: 0 3px 0 7px;
-        height: 10px;
-        width: 10px;
+        .edit-icon {
+          margin: 0 3px 0 7px;
+          height: 10px;
+          width: 10px;
+        }
       }
+
+
     }
   }
 }

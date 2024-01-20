@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
 import { AttrType, IBetweenFilter, IBottomFilter, ISingleValueFilter, ITopFilter, TOperators, dailyMonthlyAttrMap, hourlyAttrMap, operatorSymbolMap, operatorTextMap } from "../types";
@@ -10,24 +10,33 @@ export const AttributeFilter = () => {
   const {state} = useStateContext();
   const {frequency, units, attributes, filters} = state;
   const attrMap = frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
-  const selectedAttrMap: AttrType[] = [];
   const [hasFilter, setHasFilter] = useState(false);
   const [filteringIndex, setFilteringIndex] = useState<number | undefined>(undefined);
   const [filterModalPosition, setFilterModalPosition] = useState({ top: 0 });
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [attributeToFilter, setAttributeToFilter] = useState<AttrType | undefined>(undefined);
-  attributes.forEach(attr => {
-    const selectedAttr = attrMap.find(a => a.name === attr.name);
-    if (selectedAttr) {
-      selectedAttrMap.push(selectedAttr);
-    }
-  });
+  const selectedAttrMap = useMemo(() => {
+    const result: AttrType[] = [];
+    attributes.forEach(attr => {
+      const selectedAttr = attrMap.find(a => a.name === attr.name);
+      if (selectedAttr) {
+        result.push(selectedAttr);
+      }
+    });
+    return result;
+  }, [attributes, attrMap]);
 
   useEffect(()=>{
-    if (filters.length > 0) {
+    const hasFilters = selectedAttrMap.some(selectedAttr => {
+      const filter = filters.find(f => f.attribute === selectedAttr.name);
+      return filter !== undefined;
+    });
+
+    if (hasFilters) {
+
       setHasFilter(true);
     }
-  },[filters.length]);
+  },[filters, filters.length, selectedAttrMap]);
 
   const handleFilterClick = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -39,58 +48,62 @@ export const AttributeFilter = () => {
     setFilteringIndex(index);
   };
 
-  return (
-    <div className="attribute-filter-container">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col" className={classnames("table-header attribute-header", {"narrow": hasFilter})}>Attributes</th>
-            <th scope="col" className="table-header abbr-header">abbr</th>
-            <th scope="col" className="table-header units-header">units</th>
-            <th scope="col" className={classnames("table-header filter-header", {"wide": hasFilter})}>filter</th>
-          </tr>
-        </thead>
-        <tbody>
-          {selectedAttrMap.map((attr: AttrType, idx: number) => {
-            let filterValue;
-            const attrFilter = state.filters.find(f => f.attribute === attr.name);
-            if (attrFilter) {
-              const filterAboveOrBelowMean = (attrFilter.operator === "aboveMean" || attrFilter?.operator === "belowMean");
-              filterValue = attributeToFilter === attr && showFilterModal
-                ? "--"
-                : filterAboveOrBelowMean
-                    ? `${operatorTextMap[attrFilter.operator]}`
-                    : attrFilter.operator === "between"
-                        ? `${attrFilter.lowerValue} - ${attrFilter.upperValue} ${attr.unit[units]}`
-                        : attrFilter.operator === "top" || attrFilter.operator === "bottom"
-                          ? `${operatorTextMap[attrFilter.operator]} ${attrFilter.value}`
-                          :`${operatorSymbolMap[attrFilter.operator]} ${attrFilter.value} ${attr.unit[units]}`;
-            } else {
-              filterValue = attributeToFilter === attr && showFilterModal ? "--" : filterValue = "all";
-            }
+  if (selectedAttrMap && selectedAttrMap.length > 0) {
+    return (
+      <div className="attribute-filter-container">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col" className={classnames("table-header attribute-header", {"narrow": hasFilter})}>Attributes</th>
+              <th scope="col" className="table-header abbr-header">abbr</th>
+              <th scope="col" className="table-header units-header">units</th>
+              <th scope="col" className={classnames("table-header filter-header", {"wide": hasFilter})}>filter</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selectedAttrMap.map((attr: AttrType, idx: number) => {
+              let filterValue;
+              const attrFilter = state.filters.find(f => f.attribute === attr.name);
+              if (attrFilter) {
+                const filterAboveOrBelowMean = (attrFilter.operator === "aboveMean" || attrFilter?.operator === "belowMean");
+                filterValue = attributeToFilter === attr && showFilterModal
+                  ? "--"
+                  : filterAboveOrBelowMean
+                      ? `${operatorTextMap[attrFilter.operator]}`
+                      : attrFilter.operator === "between"
+                          ? `${attrFilter.lowerValue} - ${attrFilter.upperValue} ${attr.unit[units]}`
+                          : attrFilter.operator === "top" || attrFilter.operator === "bottom"
+                            ? `${operatorTextMap[attrFilter.operator]} ${attrFilter.value}`
+                            :`${operatorSymbolMap[attrFilter.operator]} ${attrFilter.value} ${attr.unit[units]}`;
+              } else {
+                filterValue = attributeToFilter === attr && showFilterModal ? "--" : filterValue = "all";
+              }
 
-            return (
-              <tr key={`${attr}-${idx}-filter`} className="table-body">
-                <td className="filter-attribute">{attr.name}</td>
-                <td className="filter-abbr">{attr.abbr}</td>
-                <td className="filter-units">{attr.unit[units]}</td>
-                <td className={classnames("filter-filter", {"filtering": idx === filteringIndex && showFilterModal,
-                                            "has-filter": !showFilterModal && attrFilter})}
-                    onClick={(e)=>handleFilterClick(e,idx)}>
-                  <div>
-                    {filterValue}
-                    <EditIcon className="edit-icon" />
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      {(attributeToFilter && showFilterModal) &&
-            <FilterModal attr={attributeToFilter} setShowFilterModal={setShowFilterModal} position={filterModalPosition}/>}
-    </div>
-  );
+              return (
+                <tr key={`${attr}-${idx}-filter`} className="table-row">
+                  <td className="filter-attribute">{attr.name}</td>
+                  <td className="filter-abbr">{attr.abbr}</td>
+                  <td className="filter-units">{attr.unit[units]}</td>
+                  <td className={classnames("filter-filter", {"filtering": idx === filteringIndex && showFilterModal,
+                                              "has-filter": !showFilterModal && attrFilter})}
+                      onClick={(e)=>handleFilterClick(e,idx)}>
+                    <div className="filter-value-container">
+                      <span>{filterValue}</span>
+                      <EditIcon className="edit-icon" />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {(attributeToFilter && showFilterModal) &&
+              <FilterModal attr={attributeToFilter} setShowFilterModal={setShowFilterModal} position={filterModalPosition}/>}
+      </div>
+    );
+  } else {
+    return null;
+  }
 };
 
 interface IFilterModalProps {
@@ -186,7 +199,6 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   };
 
   const renderFilterInputs = () => {
-    console.log("currentFilterValue", currentFilterValue);
     const [lowerVal, upperVal] = Array.isArray(currentFilterValue) ? currentFilterValue : [0, 0];
     // key attribute forces inputs to rerender when operator changes
     if (operator === "between") {
