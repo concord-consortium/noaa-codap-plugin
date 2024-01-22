@@ -8,8 +8,8 @@ import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
   const {state} = useStateContext();
-  const {frequency, units, attributes, filters} = state;
-  const attrMap = frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
+  const {selectedFrequency, units, frequencies} = state;
+  const attrMap = selectedFrequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const [hasFilter, setHasFilter] = useState(false);
   const [filteringIndex, setFilteringIndex] = useState<number | undefined>(undefined);
   const [filterModalPosition, setFilterModalPosition] = useState({ top: 0 });
@@ -17,18 +17,18 @@ export const AttributeFilter = () => {
   const [attributeToFilter, setAttributeToFilter] = useState<AttrType | undefined>(undefined);
   const selectedAttrMap = useMemo(() => {
     const result: AttrType[] = [];
-    attributes.forEach(attr => {
+    frequencies[selectedFrequency].attrs.forEach(attr => {
       const selectedAttr = attrMap.find(a => a.name === attr.name);
       if (selectedAttr) {
         result.push(selectedAttr);
       }
     });
     return result;
-  }, [attributes, attrMap]);
+  }, [attrMap, frequencies, selectedFrequency]);
 
   useEffect(()=>{
     const hasFilters = selectedAttrMap.some(selectedAttr => {
-      const filter = filters.find(f => f.attribute === selectedAttr.name);
+      const filter = frequencies[selectedFrequency].filters.find(f => f.attribute === selectedAttr.name);
       return filter !== undefined;
     });
 
@@ -36,7 +36,7 @@ export const AttributeFilter = () => {
 
       setHasFilter(true);
     }
-  },[filters, filters.length, selectedAttrMap]);
+  },[frequencies, selectedAttrMap, selectedFrequency]);
 
   const handleFilterClick = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -44,7 +44,7 @@ export const AttributeFilter = () => {
 
     setFilterModalPosition({top});
     setShowFilterModal(true);
-    setAttributeToFilter(attributes[index]);
+    setAttributeToFilter(frequencies[selectedFrequency].attrs[index]);
     setFilteringIndex(index);
   };
 
@@ -63,7 +63,7 @@ export const AttributeFilter = () => {
           <tbody>
             {selectedAttrMap.map((attr: AttrType, idx: number) => {
               let filterValue;
-              const attrFilter = state.filters.find(f => f.attribute === attr.name);
+              const attrFilter = frequencies[selectedFrequency].filters.find(f => f.attribute === attr.name);
               if (attrFilter) {
                 const filterAboveOrBelowMean = (attrFilter.operator === "aboveMean" || attrFilter?.operator === "belowMean");
                 filterValue = attributeToFilter === attr && showFilterModal
@@ -114,9 +114,9 @@ interface IFilterModalProps {
 
 const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) => {
   const {state, setState} = useStateContext();
-  const {attributes, units} = state;
-  const currentAttr = attributes.find(a => a.name === attr.name);
-  const currentAttrFilter = state.filters.find(f => f.attribute === attr.name);
+  const {frequencies, units, selectedFrequency} = state;
+  const currentAttr = frequencies[selectedFrequency].attrs.find(a => a.name === attr.name);
+  const currentAttrFilter = frequencies[selectedFrequency].filters.find(f => f.attribute === attr.name);
   const noValueFilter = currentAttrFilter?.operator === "aboveMean" || currentAttrFilter?.operator === "belowMean";
   const currentFilterValue: number | [number, number] | undefined  =
           (currentAttrFilter && !noValueFilter)
@@ -144,13 +144,13 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
           const lowerInputValue = parseFloat(filterLowerValueInputElRef.current.value);
           const upperInputValue = parseFloat(filterUpperValueInputElRef.current.value);
           setState(draft => {
-            const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+            const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
             if (existingFilter) {
               (existingFilter as IBetweenFilter).operator = operator;
               (existingFilter as IBetweenFilter).lowerValue = lowerInputValue;
               (existingFilter as IBetweenFilter).upperValue = upperInputValue;
             } else {
-              draft.filters.push({attribute: attr.name, operator, lowerValue: lowerInputValue, upperValue: upperInputValue});
+              draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator, lowerValue: lowerInputValue, upperValue: upperInputValue});
             }
           });
         }
@@ -160,12 +160,12 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
         if (filterValueTopBottomInputElRef.current) {
           const inputValue = parseFloat(filterValueTopBottomInputElRef.current.value);
           setState(draft => {
-            const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+            const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
             if (existingFilter) {
               (existingFilter as ITopFilter | IBottomFilter).operator = operator;
               (existingFilter as ITopFilter | IBottomFilter).value = inputValue;
             } else {
-              draft.filters.push({attribute: attr.name, operator, value: inputValue});
+              draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator, value: inputValue});
             }
           });
         }
@@ -173,11 +173,11 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
       case "aboveMean":
       case "belowMean":
         setState(draft => {
-          const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+          const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
           if (existingFilter) {
             existingFilter.operator = operator;
           } else {
-            draft.filters.push({attribute: attr.name, operator});
+            draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator});
           }
         });
         break;
@@ -185,12 +185,12 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
         if (filterValueInputElRef.current) {
           const inputValue = parseFloat(filterValueInputElRef.current.value);
           setState(draft => {
-            const existingFilter = draft.filters.find(f=>f.attribute === attr.name);
+            const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
             if (existingFilter) {
               (existingFilter as ISingleValueFilter).operator = operator;
               (existingFilter as ISingleValueFilter).value = inputValue;
             } else {
-              draft.filters.push({attribute: attr.name, operator, value: inputValue});
+              draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator, value: inputValue});
             }
           });
         }

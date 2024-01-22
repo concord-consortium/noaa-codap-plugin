@@ -7,12 +7,13 @@ import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
 
 export const AttributesSelector = () => {
   const {state, setState} = useStateContext();
-  const {units, attributes} = state;
+  const {units, frequencies, selectedFrequency} = state;
   const [allSelected, setAllSelected] = useState(false);
   const hourlyAttributeNames = hourlyAttrMap.map(attr => { return attr.name; });
   const dailyMonthlyAttributeNames = dailyMonthlyAttrMap.map(attr => { return attr.name; });
-  const attributeList = state.frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
-  const attributeNamesList = state.frequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
+  const attributeList = selectedFrequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
+  const attributeNamesList = selectedFrequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
+  const selectsForFrequency = frequencies[selectedFrequency];
 
   const handleUnitsClicked = () => {
     setState(draft => {
@@ -21,15 +22,18 @@ export const AttributesSelector = () => {
   };
 
   const toggleSelectAllAttrs = () => {
+    const filters = selectsForFrequency.filters;
     if (allSelected) {
       setAllSelected(false);
       setState(draft => {
-        draft.attributes = [];
+        draft.frequencies[selectedFrequency] = {attrs: [], filters};
       });
     } else {
       setAllSelected(true);
       setState(draft => {
-        draft.attributes = state.frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
+        draft.frequencies[selectedFrequency] =
+          state.selectedFrequency === "hourly" ? {attrs: hourlyAttrMap, filters}
+                                                : {attrs: dailyMonthlyAttrMap, filters};
       });
     }
   };
@@ -37,22 +41,23 @@ export const AttributesSelector = () => {
   const toggleAttributeSelect = (e: React.MouseEvent<HTMLDivElement>) => {
     const selectedAttrName = e.currentTarget.textContent;
     const selectedAttr = attributeList.find(a => a.name === selectedAttrName);
+    const filters = selectsForFrequency.filters;
     setState(draft => {
-      const draftAttrNames = draft.attributes.map(attr => {return attr.name;});
+      const draftAttrNames = draft.frequencies[selectedFrequency].attrs.map(a => {return a.name;});
       if (allSelected) {
         setAllSelected(false);
-        draft.attributes = [];
-        selectedAttr && draft.attributes.push(selectedAttr);
+        draft.frequencies[selectedFrequency] = {attrs: [], filters};
+        selectedAttr && draft.frequencies[selectedFrequency].attrs.push(selectedAttr);
       }
       if (selectedAttrName) {
         const attrIndex = draftAttrNames.indexOf(selectedAttrName);
         if (selectedAttr) {
           if (draftAttrNames.includes(selectedAttrName)) {
             if (attrIndex !== null) {
-              draft.attributes.splice(attrIndex, 1);
+              draft.frequencies[selectedFrequency].attrs.splice(attrIndex, 1);
             }
           } else {
-            draft.attributes.push(selectedAttr);
+            draft.frequencies[selectedFrequency].attrs.push(selectedAttr);
           }
         }
       }
@@ -76,7 +81,7 @@ export const AttributesSelector = () => {
           All
         </div>
         { attributeNamesList.map(attr => {
-          const attrSelected = attributes.find(a => a.name === attr) && !allSelected;
+          const attrSelected = frequencies[selectedFrequency].attrs.find(a => a.name === attr) && !allSelected;
           return (
             <div key={`${attr}-button`} className={`attribute-button ${attrSelected ? "selected" : ""}`}
               onClick={toggleAttributeSelect}>

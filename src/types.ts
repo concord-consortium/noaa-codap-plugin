@@ -132,20 +132,23 @@ export interface IState {
   location?: IPlace;
   weatherStation?: IWeatherStation;
   weatherStationDistance?: number;
-  frequency: IFrequency;
+  selectedFrequency: IFrequency;
+  frequencies: {
+    [key in IFrequency]: {attrs: AttrType[], filters: IFilter[]};
+  };
   startDate?: Date;
   endDate?: Date;
   units: IUnits;
-  attributes: AttrType[];
-  filters: IFilter[];
+  // filters: IFilter[];
   showModal?: "info" | "data-return-warning";
 }
 
 export const DefaultState: IState = {
-  frequency: "daily",
+  selectedFrequency: "daily",
+  frequencies: {hourly: {attrs: [], filters: []},
+                daily: {attrs: [], filters: []},
+                monthly: {attrs: [], filters: []}},
   units: "standard",
-  attributes: [],
-  filters: [],
 };
 
 export const kStationsDatasetName = "US-Weather-Stations";
