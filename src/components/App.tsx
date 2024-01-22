@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
@@ -10,8 +10,10 @@ import { adjustStationDataset } from "../utils/getWeatherStations";
 import { createStationsDataset } from "../utils/codapHelpers";
 import weatherStations from "../assets/data/weather-stations.json";
 import InfoIcon from "../assets/images/icon-info.svg";
-import { useNOAAApi } from "../hooks/use-noaa-api";
 import { useCODAPApi } from "../hooks/use-codap-api";
+import { dataTypeStore } from "../utils/noaaDataTypes";
+import { composeURL, formatData } from "../utils/noaaApiHelper";
+import { IDataType } from "../types";
 
 import "./App.scss";
 
@@ -24,11 +26,10 @@ const kInitialDimensions = {
 
 export const App = () => {
   const { state, setState } = useStateContext();
-  const { composeURL, formatData } = useNOAAApi();
   const { createNOAAItems } = useCODAPApi();
-  const [statusMessage, setStatusMessage] = React.useState("");
-  const [isFetching, setIsFetching] = React.useState(false);
-  const { showModal } = state;
+  const [statusMessage, setStatusMessage] = useState("");
+  const [isFetching, setIsFetching] = useState(false);
+  const { showModal, attributes } = state;
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
@@ -43,15 +44,16 @@ export const App = () => {
   };
 
   const getSelectedDataTypes = () => {
-    return [];
+    return attributes.map((attr) => {
+      return dataTypeStore.findByName(attr);
+    }) as IDataType[];
   };
 
-  const fetchSuccessHandler = (data: any) => {
-    console.log("data") // to-do: inspect data and make an interface
+  const fetchSuccessHandler = async (data: any) => {
     if (data) {
       const dataRecords = formatData(data);
-      setStatusMessage('Sending weather records to CODAP');
-      createNOAAItems(dataRecords, getSelectedDataTypes()).then(
+      setStatusMessage("Sending weather records to CODAP");
+      await createNOAAItems(dataRecords, getSelectedDataTypes()).then(
         function (result: any) {
           setIsFetching(false);
           setStatusMessage(`Retrieved ${dataRecords.length} cases`);
@@ -64,57 +66,65 @@ export const App = () => {
       );
     } else {
       setIsFetching(false);
-      setStatusMessage('No data retrieved');
+      setStatusMessage("No data retrieved");
     }
   };
 
   const fetchErrorHandler = (message: string, resultText: string) => {
-    if (resultText && resultText.length && (resultText[0] === '<')) {
+    if (resultText && resultText.length && (resultText[0] === "<")) {
       try {
-        let xmlDoc = new DOMParser().parseFromString(resultText, 'text/xml');
-        message = xmlDoc.getElementsByTagName('userMessage')[0].innerHTML;
-        message += '(' + xmlDoc.getElementsByTagName(
-            'developerMessage')[0].innerHTML + ')';
-      } catch (e) {
+        let xmlDoc = new DOMParser().parseFromString(resultText, "text/xml");
+        message = xmlDoc.getElementsByTagName("userMessage")[0].innerHTML;
+        message += "(" + xmlDoc.getElementsByTagName(
+            "developerMessage")[0].innerHTML + ")";
+      } catch (e: any) {
+        console.log("Error parsing XML: " + e);
       }
     }
-    console.warn('fetchErrorHandler: ' + resultText);
+    console.warn("fetchErrorHandler: " + resultText);
     console.warn("fetchErrorHandler error: " + message);
     setIsFetching(false);
     setStatusMessage(message);
   };
 
-
-  const handleGetData = () => {
-    const { location, startDate, endDate, weatherStation, attributes } = state;
-    if (location && attributes && startDate && endDate && weatherStation) {
-    const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
-    if (isEndDateAfterStartDate) {
-      setStatusMessage("Fetching weather records from NOAA");
-      const tURL = composeURL();
-      try {
-        const tRequest = new Request(tURL);
-        const tResult = await fetch(tRequest, {mode: 'cors'});
-        setIsFetching(true);
-        if (tResult.ok) {
-          const theJSON = await tResult.json();
-          fetchSuccessHandler(theJSON);
-        } else {
-          let result = await tResult.text();
-          fetchErrorHandler(tResult.statusText, result);
+  const handleGetData = async () => {
+    const { location, startDate, endDate, frequency, weatherStation, stationTimezoneOffset } = state;
+    if (location && attributes && startDate && endDate && weatherStation && frequency) {
+      const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
+      if (isEndDateAfterStartDate) {
+        setStatusMessage("Fetching weather records from NOAA");
+        const tURL = composeURL({
+          startDate,
+          endDate,
+          frequency,
+          weatherStation,
+          attributes,
+          stationTimezoneOffset
+        });
+        try {
+          const tRequest = new Request(tURL);
+          const tResult = await fetch(tRequest, {mode: "cors"});
+          setIsFetching(true);
+          if (tResult.ok) {
+            const theJSON = await tResult.json();
+            await fetchSuccessHandler(theJSON);
+          } else {
+            let result = await tResult.text();
+            fetchErrorHandler(tResult.statusText, result);
+          }
+        } catch (msg: any) {
+          // If fetch throws an error, this is likely a network error with no
+          // additional information in the message. The error, on Chrome, is of the
+          // form "TypeError: Failed to fetch", but varies with browser. We
+          // substitute a more informative message.
+          let error = (msg && msg.toString().startsWith("TypeError:"))
+              ? "Network error: The NOAA Server is likely temporarily down"
+              : "Network error";
+          fetchErrorHandler(error, msg);
         }
-      } catch (msg: string) {
-        // If fetch throws an error, this is likely a network error with no
-        // additional information in the message. The error, on Chrome, is of the
-        // form "TypeError: Failed to fetch", but varies with browser. We
-        // substitute a more informative message.
-        let error = (msg && msg.toString().startsWith('TypeError:'))
-            ? 'Network error: The NOAA Server is likely temporarily down'
-            : 'Network error'
-        fetchErrorHandler(error, msg);
+      } else {
+        setStatusMessage("End date must be on or after start date");
       }
-    } else {
-      setStatusMessage("End date must be on or after start date");
     }
   };
 
@@ -135,7 +145,7 @@ export const App = () => {
       <div className="footer">
         {statusMessage && <div>{statusMessage}</div>}
         <button className="clear-data-button">Clear Data</button>
-        <button className="get-data-button" disabled={isFetching}>Get Data</button>
+        <button className="get-data-button" disabled={isFetching} onClick={handleGetData}>Get Data</button>
       </div>
       {showModal === "info" && <InfoModal />}
     </div>

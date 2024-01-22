@@ -4,18 +4,14 @@ import {
   kUnitTypePrecip,
   kUnitTypePressure,
   kUnitTypeSpeed,
-  kUnitTypeTemp }
+  kUnitTypeTemp,
+  unitMap}
 from "../constants";
-import { ConverterMap, Unit, UnitMap } from "../types";
+import { Unit } from "../types";
 
-const unitMap: UnitMap = {
-    angle: { metric: "º", standard: "º" },
-    distance: { metric: "m", standard: "yd" },
-    precipitation: { metric: "mm", standard: "in" },
-    pressure: { metric: "hPa", standard: "hPa" },
-    speed: { metric: "m/s", standard: "mph" },
-    temperature: { metric: "°C", standard: "°F" },
-};
+interface ConverterMap {
+  [key: string]: null | ((fromUnit: Unit, toUnit: Unit, value: number) => number);
+}
 
 const converterMap: ConverterMap = {
     angle: null,
@@ -130,6 +126,7 @@ class NoaaType {
 }
 
 const dataTypes = [
+  // {sourceName, name, unitType, description, datasetList, decoderMap}
   new NoaaType("TMAX", "tMax", kUnitTypeTemp, "Maximum temperature",
       ["daily-summaries", "global-summary-of-the-month"]),
   new NoaaType("TMIN", "tMin", kUnitTypeTemp, "Minimum temperature",
@@ -144,20 +141,20 @@ const dataTypes = [
       ["daily-summaries", "global-summary-of-the-month"], {
       "GHCND" (v: number) {return v/10;}, "GSOM" (v) {return v/10;}
   }),
-  new NoaaType("DEW", "Dew", kUnitTypeTemp, "Dew Point",
+  new NoaaType("DEW", "dew", kUnitTypeTemp, "Dew Point",
       ["global-hourly"], {"global-hourly": extractHourlyTemp}),
-  new NoaaType("SLP", "Pressure", kUnitTypePressure,
+  new NoaaType("SLP", "pressure", kUnitTypePressure,
       "Barometric Pressure at sea level", ["global-hourly"],
       {"global-hourly": extractHourlyPressure}),
-  new NoaaType("TMP", "Temp", kUnitTypeTemp, "Air Temperature",
+  new NoaaType("TMP", "temp", kUnitTypeTemp, "Air Temperature",
       ["global-hourly"], {"global-hourly": extractHourlyTemp}),
-  new NoaaType("VIS", "Vis", kUnitTypeDistance, "Visibility",
+  new NoaaType("VIS", "vis", kUnitTypeDistance, "Visibility",
       ["global-hourly"], {"global-hourly": extractHourlyVisibility}),
   new NoaaType("WND", "WDir", kUnitTypeAngle, "Wind Direction",
       ["global-hourly"], {"global-hourly": extractHourlyWindDirection}),
-  new NoaaType("WND", "WSpeed", kUnitTypeSpeed, "Wind Speed",
+  new NoaaType("WND", "wSpeed", kUnitTypeSpeed, "Wind Speed",
       ["global-hourly"], {"global-hourly": extractHourlyWindspeed}),
-  new NoaaType("AA1", "Precip", kUnitTypePrecip, "Precipitation in last hour",
+  new NoaaType("AA1", "precip", kUnitTypePrecip, "Precipitation in last hour",
       ["global-hourly"], {"global-hourly": extractHourlyPrecipitation}),
 ];
 
@@ -173,7 +170,7 @@ function findAllBySourceName(targetName: string) {
 
 function findByName(targetName: string) {
   return dataTypes.find(function (dataType) {
-      return targetName === dataType.name;
+      return targetName === dataType.description;
   });
 }
 

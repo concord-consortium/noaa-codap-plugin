@@ -1,6 +1,7 @@
 import React from "react";
 import { useStateContext } from "../hooks/use-state";
-import { AttrType, dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
+import { dailyMonthlyAttrMap, hourlyAttrMap } from "../constants";
+import { AttrType } from "../types";
 import EditIcon from "../assets/images/icon-edit.svg";
 
 import "./attribute-filter.scss";

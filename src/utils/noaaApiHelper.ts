@@ -1,79 +1,119 @@
-// */
-// import {dataTypeStore} from "./noaaDataTypes.js";
+import dayjs from "dayjs";
+import { IFrequency, IRecord, IUnits, IWeatherStation } from "../types";
+import { frequencyToReportTypeMap, nceiBaseURL } from "../constants";
+import { dataTypeStore } from "./noaaDataTypes";
 
-// const noaaNCEIConnect = {
+export const convertUnits = (fromUnitSystem: IUnits, toUnitSystem: IUnits, data: any) => {
+  if (fromUnitSystem === toUnitSystem) {
+    return;
+  }
+  data.forEach(function (item: any) {
+    Object.keys(item).forEach(function (prop) {
+      let dataType = dataTypeStore.findByName(prop);
+      if (dataType && dataType.convertUnits) {
+        item[prop] = dataType.convertUnits(dataType.units[fromUnitSystem], dataType.units[toUnitSystem], item[prop]);
+      }
+    });
+  });
+};
 
-//     state: null,
+interface IFormatData {
+  data: IRecord[];
+  stationTimezoneOffset?: number;
+  stationTimezoneName?: string;
+  units: IUnits;
+  frequency: IFrequency;
+  weatherStation: IWeatherStation;
+}
 
-//     constants: null,
+export const formatData = (props: IFormatData) => {
+  const {data, stationTimezoneOffset, stationTimezoneName, units, frequency, weatherStation} = props;
+  const database = frequencyToReportTypeMap[frequency];
+  let dataRecords: any[] = [];
+  data.forEach((r: any) => {
+    const aValue = convertNOAARecordToValue(r, weatherStation, database);
+    aValue.latitude = weatherStation.latitude;
+    aValue.longitude = weatherStation.longitude;
+    aValue["UTC offset"] = stationTimezoneOffset || "";
+    aValue.timezone = stationTimezoneName || "";
+    aValue.elevation = weatherStation.elevation;
+    aValue["report type"] = frequency;
+    dataRecords.push(aValue);
+  });
+  convertUnits("metric", units, dataRecords);
+  return dataRecords;
+};
 
-//     beforeFetchHandler: null,
-//     fetchSuccessHandler: null,
-//     fetchErrorHandler: null,
+export const decodeData = (iField: string, iValue: any, database: string) => {
+  let dataType = dataTypeStore.findByName(iField);
+  let decoder = dataType && dataType.decode && dataType.decode[database];
+  return decoder ? decoder(iValue) : iValue;
+};
 
-//     initialize (state, constants, handlers) {
-//         this.state = state;
-//         this.constants = constants;
-//         this.beforeFetchHandler = handlers.beforeFetchHandler;
-//         this.fetchSuccessHandler = handlers.fetchSuccessHandler;
-//         this.fetchErrorHandler = handlers.fetchErrorHandler;
-//     },
+export const convertNOAARecordToValue = (iRecord: IRecord, weatherStation: IWeatherStation, database: string) => {
+  let out: IRecord = {}; // to-do: add interface / type
+  Object.keys(iRecord).forEach(function (key: any) {
+    let value = iRecord[key];
+    let dataTypeName;
+    switch (key) {
+      case "DATE":
+        out.utc = value as Date;
+        break;
+      case "STATION":
+        out.station = weatherStation;
+        out.where = weatherStation?.name || "";
+        break;
+      default:
+        dataTypeStore.findAllBySourceName(key).forEach(function (dataType) {
+          dataTypeName = dataType.name;
+          out[dataTypeName] = decodeData(dataTypeName, value, database);
+        });
+    }
+  });
+  return out;
+};
 
-//     composeURL() {
-//         const format = "YYYY-MM-DDThh:mm:ss";
+export const getSelectedStations = (database: string, weatherStation: IWeatherStation) => {
+  let id = database === "global-hourly" ? "isdID": "ghcndID" as keyof IWeatherStation;
+  return [weatherStation[id]];
+};
 
-//         // noinspection JSPotentiallyInvalidConstructorUsage
-//         let startDate = this.state.startDate;
-//         let endDate = this.state.endDate;
-//         // adjust for local station time
-//         if (this.state.database === "global-hourly") {
-//             let offset = this.state.stationTimezoneOffset;
-//             startDate = dayjs(startDate).subtract(offset, "hour");
-//             endDate = dayjs(endDate).subtract(offset, "hour").add(1, "day");
-//         }
-//         const startDateString = dayjs(startDate).format(
-//             format);
-//         // noinspection JSPotentiallyInvalidConstructorUsage
-//         const endDateString = dayjs(endDate).format(
-//             format);
-//         if (new Date(startDateString) <= new Date(endDateString)) {
-//             // const typeNames = this.getSelectedDataTypes().map(function (dataType) {
-//             //     return dataType.name;
-//             // })
-//             const tDatasetIDClause = `dataset=${this.state.database}`;
-//             const tStationIDClause = `stations=${this.getSelectedStations().join()}`;
-//             const dataTypes = this.state.selectedDataTypes.filter(
-//                 function (dt) {
-//                     return dt !== "all-datatypes";
-//                 }).map(function (name) {
-//                     return dataTypeStore.findByName(name).sourceName;
-//                 });
-//             const tDataTypeIDClause = `dataTypes=${dataTypes.join()}`;
-//             const tStartDateClause = `startDate=${startDateString}`;
-//             const tEndDateClause = `endDate=${endDateString}`;
-//             const tUnitClause = `units=metric`;
-//             const tFormatClause = "format=json";
+interface IComposeURL {
+  startDate: Date;
+  endDate: Date;
+  frequency: IFrequency;
+  attributes: string[];
+  weatherStation: IWeatherStation;
+  stationTimezoneOffset?: number;
+}
 
-//             let tURL = [this.constants.nceiBaseURL, [tDatasetIDClause, tStationIDClause, tStartDateClause, tEndDateClause, tFormatClause, tDataTypeIDClause, tUnitClause].join(
-//                 "&")].join("?");
-//             console.log(`Fetching: ${tURL}`);
-//             return tURL;
-//         }
-//     },
+export const composeURL = (props: IComposeURL) => {
+  const { startDate, endDate, frequency, attributes, weatherStation, stationTimezoneOffset } = props;
+  const database = frequencyToReportTypeMap[frequency];
+  const format = "YYYY-MM-DDThh:mm:ss";
+  let sDate = dayjs(startDate);
+  let eDate = dayjs(endDate);
+  // adjust for local station time
+  if (database === "global-hourly" && stationTimezoneOffset) {
+      sDate = dayjs(startDate).subtract(stationTimezoneOffset, "hour");
+      eDate = dayjs(endDate).subtract(stationTimezoneOffset, "hour").add(1, "day");
+  }
+  const startDateString = dayjs(sDate).format(format);
+  const endDateString = dayjs(eDate).format(format);
+  const tDatasetIDClause = `dataset=${database}`;
+  const tStationIDClause = `stations=${getSelectedStations(database, weatherStation).join()}`;
+  const dataTypes = attributes.map(function (attrName) {
+      return dataTypeStore.findByName(attrName)?.sourceName;
+  }); // to-do: update for when attributes are objects
+  console.log("dataTypes", dataTypes);
+  const tDataTypeIDClause = `dataTypes=${dataTypes.join()}`;
+  const tStartDateClause = `startDate=${startDateString}`;
+  const tEndDateClause = `endDate=${endDateString}`;
+  const tUnitClause = `units=metric`;
+  const tFormatClause = "format=json";
 
-//     getSelectedStations () {
-//         let id = this.state.database === "global-hourly"? "isdID": "ghcndID";
-//         return [this.state.selectedStation && this.state.selectedStation[id]];
-//     },
-
-//     getSelectedDataTypes () {
-//         return this.state.selectedDataTypes.filter(function (dt) {
-//             return !!dataTypeStore.findByName(dt);
-//         }).map(function (typeName) {
-//             return dataTypeStore.findByName(typeName);
-//         });
-//     },
-
-// };
-
-// export {noaaNCEIConnect};
+  let tURL = [nceiBaseURL, [tDatasetIDClause, tStationIDClause, tStartDateClause, tEndDateClause, tFormatClause, tDataTypeIDClause, tUnitClause].join(
+      "&")].join("?");
+  console.log(`Fetching: ${tURL}`);
+  return tURL;
+};

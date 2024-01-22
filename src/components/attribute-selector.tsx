@@ -3,7 +3,7 @@ import { useStateContext } from "../hooks/use-state";
 import ToggleIcon from "../assets/images/icon-toggle.svg";
 
 import "./attribute-selector.scss";
-import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
+import { dailyMonthlyAttrMap, hourlyAttrMap } from "../constants";
 
 export const AttributesSelector = () => {
   const {state, setState} = useStateContext();

@@ -1,5 +1,4 @@
-import React from "react";
-import { Attribute, Collection, DataContext, IDataType, IUnits } from "../types";
+import { Attribute, Collection, DataContext, IDataType } from "../types";
 import { IResult, codapInterface, createItems, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { DSCollection1, DSCollection2, DSName } from "../constants";
 import { useStateContext } from "./use-state";
