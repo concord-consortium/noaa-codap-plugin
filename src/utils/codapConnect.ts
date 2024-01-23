@@ -1,4 +1,4 @@
-import { IResult, codapInterface, createDataContext, createItems, createNewCollection } from "@concord-consortium/codap-plugin-api";
+import { codapInterface, createDataContext, createItems, createNewCollection } from "@concord-consortium/codap-plugin-api";
 import { IWeatherStation, kStationsCollectionName, kStationsDatasetName, kWeatherStationCollectionAttrs } from "../types";
 
 export const createStationsDataset = async(stations: IWeatherStation[]) => {
