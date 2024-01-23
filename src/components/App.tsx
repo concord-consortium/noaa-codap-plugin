@@ -50,7 +50,7 @@ export const App = () => {
       <DateRange />
       <div className="divider" />
       <AttributesSelector />
-      {state.attributes.length > 0 && <AttributeFilter />}
+      {state.frequencies[state.selectedFrequency].attrs.length > 0 && <AttributeFilter />}
       <div className="divider" />
       <div className="footer">
         <button className="clear-data-button">Clear Data</button>
