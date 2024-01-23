@@ -7,7 +7,7 @@ import EditIcon from "../assets/images/icon-edit.svg";
 import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
-  const {state} = useStateContext();
+  const {state, setState} = useStateContext();
   const {selectedFrequency, units, frequencies} = state;
   const attrMap = selectedFrequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const [hasFilter, setHasFilter] = useState(false);
@@ -49,10 +49,10 @@ export const AttributeFilter = () => {
   };
 
     const handleUnitsToggle = () => {
-    setState(draft => {
-      draft.units = draft.units === "standard" ? "metric" : "standard";
-    });
-  };
+      setState(draft => {
+        draft.units = draft.units === "standard" ? "metric" : "standard";
+      });
+    };
 
   if (selectedAttrMap && selectedAttrMap.length > 0) {
     return (
