@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
-import ToggleIcon from "../assets/images/icon-toggle.svg";
+import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
 
 import "./attribute-selector.scss";
-import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
 
 export const AttributesSelector = () => {
   const {state, setState} = useStateContext();
@@ -58,10 +58,8 @@ export const AttributesSelector = () => {
         <span className="attributes-title">Attributes</span>
         <div className="units-selection">
           <label className="units-label">Units</label>
-          <button className="units-toggle" onClick={handleUnitsClicked}>
-            {units}
-            <ToggleIcon className="toggle-icon"/>
-          </button>
+          <button className={classnames("units-switch left", {"selected-unit": units === "standard"})} onClick={handleUnitsClicked}>Standard</button>
+          <button className={classnames("units-switch right",{"selected-unit": units === "metric"} )} onClick={handleUnitsClicked}>Metric</button>
         </div>
       </div>
       <div className="attribute-selection">
