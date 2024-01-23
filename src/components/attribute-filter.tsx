@@ -6,7 +6,7 @@ import EditIcon from "../assets/images/icon-edit.svg";
 import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
-  const {state} = useStateContext();
+  const {state, setState} = useStateContext();
   const {frequency, units, attributes} = state;
   const attrMap = frequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const selectedAttrMap: AttrType[] = [];
@@ -21,6 +21,13 @@ export const AttributeFilter = () => {
     console.log("in handleFilterClick index", index);
   };
 
+  const handleUnitsToggle = () => {
+    setState(draft => {
+      draft.units = draft.units === "standard" ? "metric" : "standard";
+    });
+  };
+
+
   return (
     <div className="attribute-filter-container">
       <table>
@@ -28,7 +35,7 @@ export const AttributeFilter = () => {
           <tr>
             <th scope="col" className="table-header attribute-header">Attributes</th>
             <th scope="col" className="table-header abbr-header">abbr</th>
-            <th scope="col" className="table-header units-header">units</th>
+            <th scope="col" className="table-header units-header" onClick={handleUnitsToggle}>units</th>
             <th scope="col" className="table-header filter-header">filter</th>
           </tr>
         </thead>
