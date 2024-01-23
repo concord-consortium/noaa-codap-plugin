@@ -11,7 +11,7 @@ import "./date-range.scss";
 
 export const DateRange = () => {
   const { state, setState } = useStateContext();
-  const { frequency, startDate, endDate } = state;
+  const { frequency, startDate, endDate, didUserSelectDate } = state;
   const [selectedCalendar, setSelectedCalendar] = useState<string>(); // "start" | "end"
   const [showCalendars, setShowCalendars] = useState(false);
   const [showWarningIcon, setShowWarningIcon] = useState(false);
@@ -39,6 +39,12 @@ export const DateRange = () => {
     setState(draft => {
       draft.frequency = freq;
     });
+
+    // if user has not clicked on a calendar date, set to the default date range
+    if (!didUserSelectDate && startDate && endDate) {
+      handleSetStartDate(constants.defaultDates[freq].start);
+      handleSetEndDate(constants.defaultDates[freq].end);
+    }
   };
 
   const handleSetStartDate = (date: Date) => {

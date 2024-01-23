@@ -29,7 +29,7 @@ export const constants = {
     },
     "monthly": {
       start: today.subtract(10, "year").toDate(),
-      end: today.toDate()
+      end: today.subtract(1, "day").toDate()
     }
   },
   defaultCoords: {

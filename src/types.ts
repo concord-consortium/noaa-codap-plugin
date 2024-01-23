@@ -131,6 +131,7 @@ export interface IState {
   attributes: string[];
   filters: IFilter[];
   showModal?: "info" | "data-return-warning";
+  didUserSelectDate: boolean;
 }
 
 export const DefaultState: IState = {
@@ -138,6 +139,7 @@ export const DefaultState: IState = {
   units: "standard",
   attributes: [],
   filters: [],
+  didUserSelectDate: false,
 };
 
 export const kStationsDatasetName = "US-Weather-Stations";
