@@ -1,5 +1,3 @@
-import { dailyMonthlyAttrMap } from "./constants";
-
 export type IFrequency = "hourly" | "daily" | "monthly";
 export type IUnits = "standard" | "metric";
 
@@ -117,6 +115,35 @@ export interface IState {
   stationTimezoneOffset?: number;
   stationTimezoneName?: string;
 }
+
+export const unitMap: UnitMap = {
+  angle: { metric: "º", standard: "º" },
+  distance: { metric: "m", standard: "yd" },
+  precipitation: { metric: "mm", standard: "in" },
+  pressure: { metric: "hPa", standard: "hPa" },
+  speed: { metric: "m/s", standard: "mph" },
+  temperature: { metric: "°C", standard: "°F" },
+};
+
+
+export const dailyMonthlyAttrMap: AttrType[] = [
+  {name: "Maximum temperature", abbr: "tMax", unit: unitMap.temperature},
+  {name: "Minimum temperature", abbr: "tMin", unit: unitMap.temperature},
+  {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
+  {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
+  {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
+  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
+];
+
+export const hourlyAttrMap: AttrType[] = [
+  {name: "Dew Point", abbr: "Dew", unit: unitMap.temperature},
+  {name: "Barometric Pressure at sea level", abbr: "Pressure", unit: unitMap.pressure},
+  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
+  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
+  {name: "Wind speed", abbr: "WSpeed", unit: unitMap.speed},
+  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation}
+];
+
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",

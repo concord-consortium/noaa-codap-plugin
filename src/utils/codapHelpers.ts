@@ -366,19 +366,21 @@ const guaranteeGlobal = async (name: string, value: any) => {
 };
 
 export {
-   addNotificationHandler,
-   centerAndZoomMap,
-   clearData,
-   createAttribute,
-   createMap,
-   createNOAAItem,
-   createStationsDataset,
-   deleteAttributes,
-   getAllItems,
-   guaranteeGlobal,
-   hasDataset,
-   hasMap,
-   queryCases,
-   selectStations,
-   updateWeatherDataset
+  addNotificationHandler,
+  centerAndZoomMap,
+  clearData,
+  createAttribute,
+  createMap,
+  createNOAAItem,
+  createStationsDataset,
+  deleteAttributes,
+  getAllItems,
+  guaranteeGlobal,
+  hasDataset,
+  hasMap,
+  queryCases,
+  selectStations,
+  updateWeatherDataset,
+  findStationByID,
+  getAllItemValues
 };

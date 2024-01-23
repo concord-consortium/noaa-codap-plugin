@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useStateContext } from "../hooks/use-state";
-import { dailyMonthlyAttrMap, hourlyAttrMap } from "../constants";
+import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
 import ToggleIcon from "../assets/images/icon-toggle.svg";
 
 import "./attribute-selector.scss";

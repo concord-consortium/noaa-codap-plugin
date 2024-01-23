@@ -29,7 +29,7 @@ export const App = () => {
   const { createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
-  const { showModal, attributes } = state;
+  const { showModal } = state;
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
@@ -44,15 +44,25 @@ export const App = () => {
   };
 
   const getSelectedDataTypes = () => {
+    const { selectedFrequency } = state;
+    const attributes = state.frequencies[selectedFrequency].attrs.map(attr => attr.name);
     return attributes.map((attr) => {
       return dataTypeStore.findByName(attr);
     }) as IDataType[];
   };
 
   const fetchSuccessHandler = async (data: any) => {
-    const {stationTimezoneOffset, weatherStation, frequency, startDate, endDate, units} = state;
+    const {stationTimezoneOffset, weatherStation, selectedFrequency, startDate, endDate, units} = state;
     if (data && weatherStation) {
-      const formatDataProps = {data, stationTimezoneOffset, weatherStation, frequency, startDate, endDate, units};
+      const formatDataProps = {
+        data,
+        stationTimezoneOffset,
+        weatherStation,
+        frequency: selectedFrequency,
+        startDate,
+        endDate,
+        units
+      };
       const dataRecords = formatData(formatDataProps);
       setStatusMessage("Sending weather records to CODAP");
       await createNOAAItems(dataRecords, getSelectedDataTypes()).then(
@@ -90,15 +100,16 @@ export const App = () => {
   };
 
   const handleGetData = async () => {
-    const { location, startDate, endDate, frequency, weatherStation, stationTimezoneOffset } = state;
-    if (location && attributes && startDate && endDate && weatherStation && frequency) {
+    const { location, startDate, endDate, selectedFrequency, weatherStation, stationTimezoneOffset } = state;
+    const attributes = state.frequencies[selectedFrequency].attrs.map(attr => attr.name);
+    if (location && attributes && startDate && endDate && weatherStation && selectedFrequency) {
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
         setStatusMessage("Fetching weather records from NOAA");
         const tURL = composeURL({
           startDate,
           endDate,
-          frequency,
+          frequency: selectedFrequency,
           weatherStation,
           attributes,
           stationTimezoneOffset

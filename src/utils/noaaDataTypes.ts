@@ -5,9 +5,8 @@ import {
   kUnitTypePressure,
   kUnitTypeSpeed,
   kUnitTypeTemp,
-  unitMap}
-from "../constants";
-import { Unit } from "../types";
+} from "../constants";
+import { Unit, unitMap } from "../types";
 
 interface ConverterMap {
   [key: string]: null | ((fromUnit: Unit, toUnit: Unit, value: number) => number);
