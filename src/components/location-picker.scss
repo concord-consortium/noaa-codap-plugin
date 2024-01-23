@@ -16,18 +16,57 @@
       font-weight: bold;
     }
 
-    .selected-weather-station {
-      padding: 2px 2px 2px 8px;
-      background-color: $teal-light-25;
-      color: $teal-dark;
-      font-size: 10px;
-      font-weight: 500;
-      .station-distance {
-        font-style: italic;
+    .weather-station-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      top: 0;
+      right: 0;
+      .selected-weather-station {
+        padding: 2px 2px 2px 8px;
+        background-color: $teal-light-25;
+        color: $teal-dark;
+        font-size: 10px;
+        font-weight: 500;
+        .station-distance {
+          font-style: italic;
+        }
+        svg {
+          height: 12px;
+          width: 12px;
+        }
       }
-      .location-edit-icon {
-        height: 12px;
-        width: 12px;
+      .station-selection-list {
+        width: 311px;
+        height: 86px;
+        margin: 25px 14px 42px 12px;
+        padding: 4px 18px 1px 13px;
+        box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.5);
+        background-color: #fff;
+        visibility: hidden;
+        &.show {
+          visibility: visible;
+          z-index: 5;
+        }
+
+        .station-selection {
+          font-family: "Montserrat", sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+
+          .station-name {
+            text-overflow: ellipsis;
+            color: #000;
+          }
+          .station-distance {
+            color: $teal-dark-75;
+          }
+          &.selected-station {
+            background-color: $teal-medium;
+          }
+        }
+
       }
     }
   }

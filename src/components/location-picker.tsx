@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import { useStateContext } from "../hooks/use-state";
-import { IPlace } from "../types";
-import { findNearestActiveStation } from "../utils/getWeatherStations";
+import { IPlace, IStation } from "../types";
+import { findNearestActiveStations } from "../utils/getWeatherStations";
 import OpenMapIcon from "../assets/images/icon-map.svg";
 import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
@@ -17,17 +17,22 @@ export const LocationPicker = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
   const [showSelectionList, setShowSelectionList] = useState(false);
+  const [stationPossibilities, setStationPossibilities] = useState<IStation[]>([]);
+  const [showStationSelectionList, setShowStationSelectionList] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [arrowedIndex, setArrowedIndex] = useState<number>(-1);
   const locationDivRef = useRef<HTMLDivElement>(null);
   const locationInputEl = useRef<HTMLInputElement>(null);
   const locationSelectionListEl = useRef<HTMLUListElement>(null);
+  const stationSelectionListEl = useRef<HTMLUListElement>(null);
   const selectedLocation = state.location;
   const unit = state.units;
   const unitDistanceText = unit === "standard" ? "mi" : "km";
-  const stationDistance = state.weatherStationDistance && unit === "standard"
-                            ? Math.round((state.weatherStationDistance * 0.6 * 10) / 10)
-                            :state.weatherStationDistance &&  Math.round(state.weatherStationDistance * 10) / 10;
+  const selectedStation = state.weatherStation;
+  const selectedStationDistance = state.weatherStationDistance;
+  const stationDistance = selectedStationDistance && unit === "standard"
+                            ? Math.round((selectedStationDistance * 0.6 * 10) / 10)
+                            :selectedStationDistance &&  Math.round(selectedStationDistance * 10) / 10;
 
   const handleOpenMap = () => {
     //send request to CODAP to open map with available weather stations
@@ -48,15 +53,24 @@ export const LocationPicker = () => {
 
   useEffect(() => {
       if (selectedLocation) {
-        findNearestActiveStation(selectedLocation.latitude, selectedLocation.longitude, 80926000, "present")
-          .then(({station, distance}) => {
-            if (station) {
+        findNearestActiveStations(selectedLocation.latitude, selectedLocation.longitude, 80926000, "present")
+          .then((stationList: IStation[]) => {
+            if (stationList) {
+              setStationPossibilities(stationList);
+              (isEditing && stationList.length > 0) && setShowSelectionList(true);
               setState((draft) => {
-                draft.weatherStation = station;
-                draft.weatherStationDistance = distance;
+                draft.weatherStation = stationList[0].station;
+                draft.weatherStationDistance = stationList[0].distance;
               });
             }
-          });
+        });
+            // if (station) {
+            //   setState((draft) => {
+            //     draft.weatherStation = station;
+            //     draft.weatherStationDistance = distance;
+            //   });
+            // }
+          // });
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[selectedLocation]);
@@ -181,15 +195,31 @@ export const LocationPicker = () => {
       <div className="location-header">
         <span className="location-title">Location</span>
         { selectedLocation && !isEditing &&
-          <div className="selected-weather-station">
-            { state.weatherStation &&
-              <>
-                {state.weatherStationDistance &&
-                  <span className="station-distance">({stationDistance} {unitDistanceText}) </span>}
-                <span className="station-name">{state.weatherStation?.name}</span>
-                {/* <EditIcon />  hide this for now until implemented*/}
-              </>
-            }
+          <div className="weather-station-wrapper">
+            <div className="selected-weather-station" onClick={()=>setShowStationSelectionList(true)}>
+              { state.weatherStation &&
+                <>
+                  <span className="station-distance">({stationDistance} {unitDistanceText}) </span>
+                  <span className="station-name">{selectedStation?.name}</span>
+                  <EditIcon />
+                </>
+              }
+            </div>
+            <div className={classnames("station-selection-list", {"show": showStationSelectionList})}>
+            <ul ref={stationSelectionListEl}>
+              {stationPossibilities.map((station: IStation, idx: number) => {
+                if (station) {
+                  return (
+                    <li key={`${station}-${idx}`} value={station.station.name}
+                            className={classnames("station-selection", {"selected-station": station.station.name === state.weatherStation?.name})}>
+                      <span className="station-distance">{station.distance} from {state.location?.name}</span>
+                      <span className="station-name"> {station.station.name}</span>
+                    </li>
+                  );
+                }
+              })}
+            </ul>
+            </div>
           </div>
         }
       </div>

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { IWeatherStation } from "../types";
+import { IStation, IWeatherStation } from "../types";
 import weatherStations from "../assets/data/weather-stations.json";
 
 /**
@@ -34,21 +34,31 @@ export const adjustStationDataset = (dataset: IWeatherStation[]) => {
   }
 };
 
-export const findNearestActiveStation = async(targetLat: number, targetLong: number, fromDate: number | string,
+export const findNearestActiveStations = async(targetLat: number, targetLong: number, fromDate: number | string,
      toDate: number | string) => {
   // TODO: filter out weather stations that are active
-  let nearestStation: IWeatherStation | null = null;
-  let minDistance = Number.MAX_VALUE;
+  // let nearestStation: IWeatherStation | null = null;
+  // let minDistance = Number.MAX_VALUE;
+  let nearestStations: IStation[] = [];
 
   for (const station of weatherStations) {
     const distance = calculateDistance(targetLat, targetLong, station.latitude, station.longitude);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestStation = station;
+    const newStation = {station, distance};
+
+    // Insert the new station into the sorted array at the correct position
+    const index = nearestStations.findIndex(s => s.distance > distance);
+    if (index === -1) {
+      nearestStations.push(newStation);
+    } else {
+      nearestStations.splice(index, 0, newStation);
     }
+    // if (distance < minDistance) {
+    //   minDistance = distance;
+    //   nearestStation = station;
+    // }
   }
 
-  return {station: nearestStation, distance: minDistance};
+  return nearestStations.slice(0, 5);
 };
 
 function degreesToRadians(degrees: number): number {

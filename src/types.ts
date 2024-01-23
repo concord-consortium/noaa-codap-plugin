@@ -89,7 +89,7 @@ export interface IPlace {
   latitude: number;
   longitude: number;
 }
-
+export interface IStation {station: IWeatherStation, distance: number}
 export interface IWeatherStation {
   country: string; // "US"
   state: string; // 2 char state name
