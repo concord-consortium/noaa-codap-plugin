@@ -58,8 +58,8 @@ export const AttributesSelector = () => {
         <span className="attributes-title">Attributes</span>
         <div className="units-selection">
           <label className="units-label">Units</label>
-          <button className={classnames("units-switch left", {"selected-unit": units === "standard"})} onClick={handleUnitsClicked}>Standard</button>
-          <button className={classnames("units-switch right",{"selected-unit": units === "metric"} )} onClick={handleUnitsClicked}>Metric</button>
+          <button className={classnames("units-switch left", {"selected-unit": units === "standard"})} onClick={handleUnitsClicked}>standard</button>
+          <button className={classnames("units-switch right",{"selected-unit": units === "metric"} )} onClick={handleUnitsClicked}>metric</button>
         </div>
       </div>
       <div className="attribute-selection">

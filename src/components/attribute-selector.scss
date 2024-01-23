@@ -27,17 +27,17 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        border: solid 1.5px #a2a2a2;
         box-sizing: border-box;
         cursor: pointer;
         height: 16px;
         width: 61px;
         border: solid 1px #a2a2a2;
         background-color: #fff;
+        font-family: "Montserrat", sans-serif;
         font-size: 10px;
         font-weight: 500;
         color: #a2a2a2;
-
+        cursor: pointer;
         &.left {
           border-radius: 15px 0 0 15px;
           margin-right: 2px;

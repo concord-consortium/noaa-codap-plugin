@@ -11,7 +11,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin-right: 14px;
+    margin-right: 4px;
     margin-bottom: 8px;
 
     .title {
@@ -29,10 +29,13 @@
     }
 
     .frequency-selection {
-      font-family: "Montserrat";
-      height: 18px;
-      border: 0px;
-      padding: 3px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      font-family: "Montserrat", sans-serif;
+      height: 16px;
       min-width: 44px;
       border: solid 1px #a2a2a2;
       background-color: white;
