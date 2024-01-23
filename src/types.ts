@@ -1,3 +1,5 @@
+import { dailyMonthlyAttrMap } from "./constants";
+
 export type IFrequency = "hourly" | "daily" | "monthly";
 export type IUnits = "standard" | "metric";
 
@@ -7,6 +9,14 @@ export interface AttrType {
   unit: {metric: string, standard: string}
 }
 
+export type TOperators = "equals" | "doesNotEqual" | "greaterThan" | "greaterThanOrEqualTo" | "lessThan"
+                            | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean";
+
+export const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal", greaterThan: "greater than", greaterThanOrEqualTo: "great than or equal to",
+lessThan: "less than", lessThanOrEqualTo: "less than or equal to", between: "between", top: "top", bottom: "bottom",
+aboveMean: "above mean", belowMean: "below mean"};
+export const operatorSymbolMap = {equals: "=", doesNotEqual: "≠", greaterThan: ">", greaterThanOrEqualTo: ">=", lessThan: "<", lessThanOrEqualTo: "<="};
+
 export interface IBaseFilter {
   attribute: string;
 }
@@ -14,7 +24,7 @@ export interface IEqualsFilter extends IBaseFilter {
   operator: "equals",
   value: number
 }
-export interface DoesNotEqualFilter extends IBaseFilter {
+export interface IDoesNotEqualFilter extends IBaseFilter {
   operator: "doesNotEqual",
   value: number
 }
@@ -36,7 +46,7 @@ export interface ILessThanOrEqualToFilter extends IBaseFilter {
 }
 export interface IBetweenFilter extends IBaseFilter {
   operator: "between",
-  lowerValue: number
+  lowerValue: number,
   upperValue: number
 }
 export interface ITopFilter extends IBaseFilter {
@@ -51,9 +61,10 @@ export interface IAboveMeanFilter extends IBaseFilter {
   operator: "aboveMean",
 }
 export interface IBelowMeanFilter extends IBaseFilter {
-  operator: "aboveMean",
+  operator: "belowMean",
 }
-export type IFilter = IEqualsFilter | DoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
+export type ISingleValueFilter =IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | ITopFilter | IBottomFilter;
+export type IFilter = IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
 
 export interface IPlace {
   name: string;
@@ -95,22 +106,24 @@ export interface IState {
   location?: IPlace;
   weatherStation?: IWeatherStation;
   weatherStationDistance?: number;
-  frequency: IFrequency;
+  selectedFrequency: IFrequency;
+  frequencies: {
+    [key in IFrequency]: {attrs: AttrType[], filters: IFilter[]};
+  };
   startDate?: Date;
   endDate?: Date;
   units: IUnits;
-  attributes: string[];
-  filters: IFilter[];
   showModal?: "info" | "data-return-warning";
   stationTimezoneOffset?: number;
   stationTimezoneName?: string;
 }
 
 export const DefaultState: IState = {
-  frequency: "daily",
+  selectedFrequency: "daily",
+  frequencies: {hourly: {attrs: [], filters: []},
+                daily: {attrs: dailyMonthlyAttrMap, filters: []},
+                monthly: {attrs: [], filters: []}},
   units: "standard",
-  attributes: [],
-  filters: [],
 };
 
 interface IDataTypeUnits {

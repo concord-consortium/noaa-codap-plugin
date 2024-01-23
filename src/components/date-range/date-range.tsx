@@ -5,13 +5,13 @@ import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
 import WarningIcon from "../../assets/icon-warning.svg";
 import ExitIcon from "../../assets/images/icon-exit.svg";
+import { defaultDates } from "../../constants";
 
 import "./date-range.scss";
-import { defaultDates } from "../../constants";
 
 export const DateRange = () => {
   const { state, setState } = useStateContext();
-  const { frequency, startDate, endDate } = state;
+  const { selectedFrequency, startDate, endDate } = state;
   const [selectedCalendar, setSelectedCalendar] = useState<string>(); // "start" | "end"
   const [showCalendars, setShowCalendars] = useState(false);
   const [showWarningIcon, setShowWarningIcon] = useState(false);
@@ -19,11 +19,11 @@ export const DateRange = () => {
   const frequencies = ["hourly", "daily", "monthly"] as IFrequency[];
 
   useEffect(() => {
-    if (endDate && startDate && frequency) {
+    if (endDate && startDate && selectedFrequency) {
       const ONE_DAY = 24 * 3600 * 1000; // one day in milliseconds
       const ONE_HOUR = 3600 * 1000; // one hour in milliseconds
       const timeDifference = endDate.getTime() - startDate.getTime();
-      const frequencyFactor = frequency === "monthly" ? ONE_DAY * 30 : frequency === "hourly" ? ONE_HOUR : ONE_DAY;
+      const frequencyFactor = selectedFrequency === "monthly" ? ONE_DAY * 30 : selectedFrequency === "hourly" ? ONE_HOUR : ONE_DAY;
       const expectedEntries = Math.ceil(timeDifference / frequencyFactor);
       if (expectedEntries > 5000) {
         setShowWarningIcon(true);
@@ -33,11 +33,11 @@ export const DateRange = () => {
     } else {
       setShowWarningIcon(false);
     }
-  }, [frequency, startDate, endDate]);
+  }, [selectedFrequency, startDate, endDate]);
 
   const handleSetFrequency = (freq: IFrequency) => {
     setState(draft => {
-      draft.frequency = freq;
+      draft.selectedFrequency = freq;
     });
   };
 
@@ -54,8 +54,8 @@ export const DateRange = () => {
   };
 
   function configureDates() {
-    handleSetStartDate(defaultDates[frequency].start);
-    handleSetEndDate(defaultDates[frequency].end);
+    handleSetStartDate(defaultDates[selectedFrequency].start);
+    handleSetEndDate(defaultDates[selectedFrequency].end);
   }
 
   const handleOpenCalendar = (calendar: string) => {
@@ -90,7 +90,7 @@ export const DateRange = () => {
             return (
               <button
                 key={freq}
-                className={`frequency-selection ${frequency === freq ? "selected" : ""}`}
+                className={`frequency-selection ${selectedFrequency === freq ? "selected" : ""}`}
                 value={freq}
                 onClick={() => handleSetFrequency(freq)}>
                 {freq}
