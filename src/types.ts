@@ -139,14 +139,13 @@ export interface IState {
   startDate?: Date;
   endDate?: Date;
   units: IUnits;
-  // filters: IFilter[];
   showModal?: "info" | "data-return-warning";
 }
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",
   frequencies: {hourly: {attrs: [], filters: []},
-                daily: {attrs: [], filters: []},
+                daily: {attrs: dailyMonthlyAttrMap, filters: []},
                 monthly: {attrs: [], filters: []}},
   units: "standard",
 };

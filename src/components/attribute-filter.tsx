@@ -125,11 +125,29 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
               : currentAttrFilter.value !== undefined ? currentAttrFilter.value : 0
             : 0;
   const [operator, setOperator] = useState<TOperators>(currentAttrFilter?.operator || "equals");
-  const [showFilterSelectionModal, setShowFilterSelectModal] = useState(false);
+  const [showOperatorSelectionModal, setShowOperatorSelectionModal] = useState(false);
   const filterValueInputElRef = useRef<HTMLInputElement>(null);
   const filterValueTopBottomInputElRef = useRef<HTMLInputElement>(null);
   const filterLowerValueInputElRef = useRef<HTMLInputElement>(null);
   const filterUpperValueInputElRef = useRef<HTMLInputElement>(null);
+  const operatorSelectionModalRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (event.target) {
+      if (operatorSelectionModalRef.current && !operatorSelectionModalRef.current.contains(event.target as Node)) {
+        setShowOperatorSelectionModal(false);
+      }
+    }
+  }
+
+  // Bind the event listener
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    // Unbind the event listener on clean up
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   const handleReset = () => {
     setOperator(currentAttrFilter?.operator || "equals");
@@ -137,7 +155,6 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   };
 
   const handleSubmitFilter = () => {
-    console.log("in submit currentEl", filterValueInputElRef.current?.value);
     switch (operator) {
       case "between":
         if (filterLowerValueInputElRef.current && filterUpperValueInputElRef.current) {
@@ -223,12 +240,12 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   };
 
   const handleChangeFilterOperator = (e: React.MouseEvent<HTMLDivElement>) => {
-    setShowFilterSelectModal(true);
+    setShowOperatorSelectionModal(true);
   };
 
   const handleSelectFilterOperator = (newOperator: TOperators) => {
     setOperator(newOperator);
-    setShowFilterSelectModal(false);
+    setShowOperatorSelectionModal(false);
   };
   const wideModal = !["equals", "top", "bottom"].includes(operator);
   return (
@@ -247,8 +264,8 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
         <button className="filter-button reset" onClick={handleReset}>Reset</button>
         <button className="filter-button done" onClick={handleSubmitFilter}>Done</button>
       </div>
-      {showFilterSelectionModal &&
-        <div className="filter-operator-selection-container">
+      {showOperatorSelectionModal &&
+        <div ref={operatorSelectionModalRef} className="filter-operator-selection-container">
           <select className="operator-selection" size={11} onChange={(e)=>handleSelectFilterOperator(e.currentTarget.value as TOperators)}>
             <option value="equals">{operatorTextMap.equals} ...</option>
             <option value="doesNotEqual">{operatorTextMap.doesNotEqual} ...</option>
