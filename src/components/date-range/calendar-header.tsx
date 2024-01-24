@@ -3,6 +3,7 @@ import { useStateContext } from "../../hooks/use-state";
 import { IState } from "../../types";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import dayjs from "dayjs";
 
 import "./calendar-header.scss";
 
@@ -11,8 +12,8 @@ interface ICalendarHeader {
   handleSelectCalendar: () => void;
 }
 
-export const CalendarHeader = ({calendarType, handleSelectCalendar}: ICalendarHeader) =>
-  {  const { state, setState } = useStateContext();
+export const CalendarHeader = ({calendarType, handleSelectCalendar}: ICalendarHeader) => {
+  const { state, setState } = useStateContext();
   const {startDate, endDate} = state;
 
   if (!startDate || !endDate) {
@@ -30,9 +31,12 @@ export const CalendarHeader = ({calendarType, handleSelectCalendar}: ICalendarHe
 
   const handleSetDate = (date: Date) => {
     const key = calendarType === "start" ? "startDate" : "endDate";
-    setState((draft: IState) => {
-      draft[key] = date;
-    });
+    const isValidDate = calendarType === "start" ? dayjs(date).isBefore(endDate) : dayjs(date).isAfter(startDate);
+    if (isValidDate) {
+      setState((draft: IState) => {
+        draft[key] = date;
+      });
+    }
   };
 
   const handleNext = () => {

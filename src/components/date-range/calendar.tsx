@@ -14,7 +14,7 @@ interface ICalendar {
 
 export const Calendar = ({calendarType, handleSelectCalendar}: ICalendar) => {
   const { state, setState } = useStateContext();
-  const {startDate, endDate} = state;
+  const { startDate, endDate } = state;
 
   if (!startDate || !endDate) {
     return null;
@@ -28,9 +28,13 @@ export const Calendar = ({calendarType, handleSelectCalendar}: ICalendar) => {
 
   const handleSetDate = (date: Date) => {
     const key = calendarType === "start" ? "startDate" : "endDate";
-    setState((draft: IState) => {
-      draft[key] = date;
-    });
+    const isValidDate = calendarType === "start" ? dayjs(date).isBefore(endDate) : dayjs(date).isAfter(startDate);
+    if (isValidDate) {
+      setState((draft: IState) => {
+        draft[key] = date;
+        draft.didUserSelectDate = true;
+      });
+    }
   };
 
   const handleDateClick = (e: React.MouseEvent<HTMLTableCellElement>) => {

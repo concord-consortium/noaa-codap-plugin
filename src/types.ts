@@ -140,6 +140,7 @@ export interface IState {
   endDate?: Date;
   units: IUnits;
   showModal?: "info" | "data-return-warning";
+  didUserSelectDate: boolean;
 }
 
 export const DefaultState: IState = {
@@ -148,6 +149,7 @@ export const DefaultState: IState = {
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
                 monthly: {attrs: [], filters: []}},
   units: "standard",
+  didUserSelectDate: false,
 };
 
 export const kStationsDatasetName = "US-Weather-Stations";
