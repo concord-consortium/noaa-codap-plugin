@@ -22,6 +22,7 @@
   }
   &.selected {
     background-color: $teal-light-25;
+    font-weight: 600;
   }
   &.placeholder {
     color: $placeholder-gray;

@@ -171,6 +171,8 @@ export const LocationPicker = () => {
     const target = e.target;
     if (target.value !== "") {
       getLocationList();
+    } else {
+      setIsEditing(false);
     }
   };
 

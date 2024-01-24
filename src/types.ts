@@ -1,5 +1,3 @@
-// any new types should be created here...
-
 export type IFrequency = "hourly" | "daily" | "monthly";
 export type IUnits = "standard" | "metric";
 
@@ -9,33 +7,6 @@ export interface AttrType {
   unit: {metric: string, standard: string}
 }
 
-export const unitMap = {
-  angle: {metric: "º", standard: "º"},
-  distance: {metric: "m", standard: "yd"},
-  precipitation: {metric: "mm", standard: "in"},
-  pressure: {metric: "hPa", standard: "hPa"},
-  speed: {metric: "m/s", standard: "mph"},
-  temperature: {metric: "°C", standard: "°F"},
-};
-
-export const dailyMonthlyAttrMap: AttrType[] = [
-  {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
-  {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
-  {name: "Max temperature", abbr: "tMax", unit: unitMap.temperature},
-  {name: "Min temperature", abbr: "tMin", unit: unitMap.temperature},
-  {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
-  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
-];
-
-export const hourlyAttrMap = [
-  {name: "Dew point", abbr: "Dew", unit: unitMap.temperature},
-  {name: "Wind speed", abbr: "WSpeed", unit: unitMap.speed},
-  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
-  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation},
-  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
-  {name: "Barometric pressure at sea level", abbr: "Pressure", unit: unitMap.pressure}
-];
-
 export type TOperators = "equals" | "doesNotEqual" | "greaterThan" | "greaterThanOrEqualTo" | "lessThan"
                             | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean";
 
@@ -43,6 +14,7 @@ export const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal"
 lessThan: "less than", lessThanOrEqualTo: "less than or equal to", between: "between", top: "top", bottom: "bottom",
 aboveMean: "above mean", belowMean: "below mean"};
 export const operatorSymbolMap = {equals: "=", doesNotEqual: "≠", greaterThan: ">", greaterThanOrEqualTo: ">=", lessThan: "<", lessThanOrEqualTo: "<="};
+
 export interface IBaseFilter {
   attribute: string;
 }
@@ -140,7 +112,39 @@ export interface IState {
   endDate?: Date;
   units: IUnits;
   showModal?: "info" | "data-return-warning";
+  stationTimezoneOffset?: number;
+  stationTimezoneName?: string;
+  didUserSelectDate: boolean;
 }
+
+export const unitMap: UnitMap = {
+  angle: { metric: "º", standard: "º" },
+  distance: { metric: "m", standard: "yd" },
+  precipitation: { metric: "mm", standard: "in" },
+  pressure: { metric: "hPa", standard: "hPa" },
+  speed: { metric: "m/s", standard: "mph" },
+  temperature: { metric: "°C", standard: "°F" },
+};
+
+
+export const dailyMonthlyAttrMap: AttrType[] = [
+  {name: "Maximum temperature", abbr: "tMax", unit: unitMap.temperature},
+  {name: "Minimum temperature", abbr: "tMin", unit: unitMap.temperature},
+  {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
+  {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
+  {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
+  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
+];
+
+export const hourlyAttrMap: AttrType[] = [
+  {name: "Dew Point", abbr: "Dew", unit: unitMap.temperature},
+  {name: "Barometric Pressure at sea level", abbr: "Pressure", unit: unitMap.pressure},
+  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
+  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
+  {name: "Wind speed", abbr: "WSpeed", unit: unitMap.speed},
+  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation}
+];
+
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",
@@ -148,61 +152,94 @@ export const DefaultState: IState = {
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
                 monthly: {attrs: [], filters: []}},
   units: "standard",
+  didUserSelectDate: false,
 };
 
-export const kStationsDatasetName = "US-Weather-Stations";
-export const kStationsCollectionName = "US Weather Stations";
+interface IDataTypeUnits {
+  ["standard"]: string;
+  ["metric"]: string;
+}
+export interface IDataType {
+  name: string;
+  units: IDataTypeUnits;
+  description: string;
+}
 
-export const kWeatherStationCollectionAttrs = [
-  { name: "name" },
-  {
-      name: "ICAO",
-      description: "International Civil Aviation Org. Airport Code"
+export interface Attribute {
+  name: string;
+  formula?: string;
+  description?: string;
+  type?: string;
+  cid?: string;
+  precision?: string;
+  unit?: string;
+  editable?: boolean;
+  renameable?: boolean;
+  deleteable?: boolean;
+  hidden?: boolean;
+}
+
+export interface Collection {
+  name: string;
+  title: string;
+  id?: number;
+  parent?: string | number;
+  description?: string;
+  labels?: {
+    singleCase?: string;
+    pluralCase?: string;
+    singleCaseWithArticle?: string;
+    setOfCases?: string;
+    setOfCasesWithArticle?: string;
+  };
+  attrs: Attribute[];
+}
+
+export interface DataContextCreation {
+  title: string;
+  collections?: Collection[];
+}
+
+export interface DataContext extends DataContextCreation {
+  name: string;
+  collections: Collection[];
+}
+
+export interface CodapItemValues {
+  [attr: string]: any;
+}
+
+export interface CodapItem {
+  id: number|string;
+  values: CodapItemValues;
+}
+
+export type Action = "create" | "get" | "update" | "delete";
+
+export type ILatLong = [number, number];
+
+export interface IMapComponent {
+  type: "map",
+  name: string,
+  title?: string,
+  dimensions: {
+    width: number,
+    height: number
   },
-  {
-      name: "mindate",
-      type: "date",
-      precision: "day",
-      description: "Earliest reporting date"
-  },
-  {
-      name: "maxdate",
-      type: "date",
-      precision: "day",
-      description: `Latest reporting date, or "present" if is an active station`
-  },
-  {
-      name: "latitude",
-      unit: "º"
-  },
-  {
-      name: "longitude",
-      unit: "º"
-  },
-  {
-      name: "elevation",
-      unit: "ft",
-      precision: "0",
-      type: "number"
-  },
-  { name: "isdID"},
-  {
-      name: "ghcndID",
-      description: "Global Historical Climatology Network ID"
-  },
-  {
-      name: "isActive",
-      formula: `(number(maxdate="present"
-                  ? date()
-                  : date(split(maxdate,'-',1), split(maxdate, ""-", 2), split(maxdate, "-", 3))) - wxMinDate)>0 and wxMaxDate-number(date(split(mindate,"-",1), split(mindate, "-", 2), split(mindate, "-", 3)))>0`,
-      description: "whether the station was active in the Weather Plugin's requested date range",
-      _categoryMap: {
-          __order: [
-              "false",
-              "true"
-          ],
-          false: "#a9a9a9",
-          true: "#2a4bd7"
-      },
-  }
-];
+  position: string,
+  cannotClose: boolean,
+  dataContext: string,
+  legendAttributeName?: string,
+  center: ILatLong,
+  zoom: number
+}
+
+export type Unit = "m" | "mm" | "in" | "m/s" | "mph" | "°C" | "°F" | "º" | "yd" | "hPa";
+
+export interface UnitMap {
+  [key: string]: {metric: Unit, standard: Unit};
+}
+
+export interface IRecord {
+  [key: string]: number | string | Date | IWeatherStation | IFrequency;
+}
