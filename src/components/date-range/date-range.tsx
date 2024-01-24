@@ -11,7 +11,7 @@ import "./date-range.scss";
 
 export const DateRange = () => {
   const { state, setState } = useStateContext();
-  const { selectedFrequency, startDate, endDate } = state;
+  const { selectedFrequency, startDate, endDate, didUserSelectDate } = state;
   const [selectedCalendar, setSelectedCalendar] = useState<string>(); // "start" | "end"
   const [showCalendars, setShowCalendars] = useState(false);
   const [showWarningIcon, setShowWarningIcon] = useState(false);
@@ -39,6 +39,12 @@ export const DateRange = () => {
     setState(draft => {
       draft.selectedFrequency = freq;
     });
+
+    // if user has not clicked on a calendar date, set to the default date range
+    if (!didUserSelectDate && startDate && endDate) {
+      handleSetStartDate(constants.defaultDates[freq].start);
+      handleSetEndDate(constants.defaultDates[freq].end);
+    }
   };
 
   const handleSetStartDate = (date: Date) => {
@@ -90,7 +96,7 @@ export const DateRange = () => {
             return (
               <button
                 key={freq}
-                className={`frequency-selection ${selectedFrequency === freq ? "selected" : ""}`}
+                className={`frequency-selection ${freq} ${selectedFrequency === freq ? "selected" : ""}`}
                 value={freq}
                 onClick={() => handleSetFrequency(freq)}>
                 {freq}
@@ -131,7 +137,7 @@ export const DateRange = () => {
                 <div className="warning-exit" onClick={() => setShowWarningModal(false)}><ExitIcon/></div>
               </div>
               <div className="warning-body">
-                Your current range is likely to return too many results, which
+                Your current date range is likely to return too many results, which
                 may affect application performance.
               </div>
               <div className="warning-footer">

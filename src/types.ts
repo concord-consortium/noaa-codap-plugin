@@ -114,6 +114,7 @@ export interface IState {
   showModal?: "info" | "data-return-warning";
   stationTimezoneOffset?: number;
   stationTimezoneName?: string;
+  didUserSelectDate: boolean;
 }
 
 export const unitMap: UnitMap = {
@@ -151,6 +152,7 @@ export const DefaultState: IState = {
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
                 monthly: {attrs: [], filters: []}},
   units: "standard",
+  didUserSelectDate: false,
 };
 
 interface IDataTypeUnits {

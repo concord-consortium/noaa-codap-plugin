@@ -17,6 +17,7 @@
     height: 224px;
     background-color: white;
     border-radius: 8px;
+    z-index: 10;
     .calendar-column {
       width: 171px;
       height: 224px;
@@ -37,6 +38,7 @@
     padding: 6px;
     align-items: center;
     background-color: white;
+    border-radius: 0px 0px 8px 8px;
     .station-information {
       display: flex;
       flex-direction: column;

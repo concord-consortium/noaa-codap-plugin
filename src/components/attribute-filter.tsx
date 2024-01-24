@@ -18,7 +18,7 @@ import EditIcon from "../assets/images/icon-edit.svg";
 import "./attribute-filter.scss";
 
 export const AttributeFilter = () => {
-  const {state} = useStateContext();
+  const {state, setState} = useStateContext();
   const {selectedFrequency, units, frequencies} = state;
   const attrMap = selectedFrequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const [hasFilter, setHasFilter] = useState(false);
@@ -59,6 +59,12 @@ export const AttributeFilter = () => {
     setFilteringIndex(index);
   };
 
+    const handleUnitsToggle = () => {
+      setState(draft => {
+        draft.units = draft.units === "standard" ? "metric" : "standard";
+      });
+    };
+
   if (selectedAttrMap && selectedAttrMap.length > 0) {
     return (
       <div className="attribute-filter-container">
@@ -67,7 +73,7 @@ export const AttributeFilter = () => {
             <tr>
               <th scope="col" className={classnames("table-header attribute-header", {"narrow": hasFilter})}>Attributes</th>
               <th scope="col" className="table-header abbr-header">abbr</th>
-              <th scope="col" className="table-header units-header">units</th>
+              <th scope="col" className="table-header units-header"  onClick={handleUnitsToggle}>units</th>
               <th scope="col" className={classnames("table-header filter-header", {"wide": hasFilter})}>filter</th>
             </tr>
           </thead>
@@ -94,7 +100,7 @@ export const AttributeFilter = () => {
                 <tr key={`${attr}-${idx}-filter`} className="table-row">
                   <td className="filter-attribute">{attr.name}</td>
                   <td className="filter-abbr">{attr.abbr}</td>
-                  <td className="filter-units">{attr.unit[units]}</td>
+                  <td className="filter-units" >{attr.unit[units]}</td>
                   <td className={classnames("filter-filter", {"filtering": idx === filteringIndex && showFilterModal,
                                               "has-filter": !showFilterModal && attrFilter})}
                       onClick={(e)=>handleFilterClick(e,idx)}>
