@@ -19,23 +19,30 @@ export const unitMap = {
 };
 
 export const dailyMonthlyAttrMap: AttrType[] = [
-  {name: "Maximum temperature", abbr: "tMax", unit: unitMap.temperature},
-  {name: "Minimum temperature", abbr: "tMin", unit: unitMap.temperature},
   {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
   {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
+  {name: "Max temperature", abbr: "tMax", unit: unitMap.temperature},
+  {name: "Min temperature", abbr: "tMin", unit: unitMap.temperature},
   {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
   {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
 ];
 
 export const hourlyAttrMap = [
   {name: "Dew point", abbr: "Dew", unit: unitMap.temperature},
-  {name: "Barometric pressure at sea level", abbr: "Pressure", unit: unitMap.pressure},
-  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
-  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
   {name: "Wind speed", abbr: "WSpeed", unit: unitMap.speed},
-  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation}
+  {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},
+  {name: "Precipitation in last hour", abbr: "Precip", unit: unitMap.precipitation},
+  {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
+  {name: "Barometric pressure at sea level", abbr: "Pressure", unit: unitMap.pressure}
 ];
 
+export type TOperators = "equals" | "doesNotEqual" | "greaterThan" | "greaterThanOrEqualTo" | "lessThan"
+                            | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean";
+
+export const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal", greaterThan: "greater than", greaterThanOrEqualTo: "great than or equal to",
+lessThan: "less than", lessThanOrEqualTo: "less than or equal to", between: "between", top: "top", bottom: "bottom",
+aboveMean: "above mean", belowMean: "below mean"};
+export const operatorSymbolMap = {equals: "=", doesNotEqual: "≠", greaterThan: ">", greaterThanOrEqualTo: ">=", lessThan: "<", lessThanOrEqualTo: "<="};
 export interface IBaseFilter {
   attribute: string;
 }
@@ -43,7 +50,7 @@ export interface IEqualsFilter extends IBaseFilter {
   operator: "equals",
   value: number
 }
-export interface DoesNotEqualFilter extends IBaseFilter {
+export interface IDoesNotEqualFilter extends IBaseFilter {
   operator: "doesNotEqual",
   value: number
 }
@@ -65,7 +72,7 @@ export interface ILessThanOrEqualToFilter extends IBaseFilter {
 }
 export interface IBetweenFilter extends IBaseFilter {
   operator: "between",
-  lowerValue: number
+  lowerValue: number,
   upperValue: number
 }
 export interface ITopFilter extends IBaseFilter {
@@ -80,9 +87,10 @@ export interface IAboveMeanFilter extends IBaseFilter {
   operator: "aboveMean",
 }
 export interface IBelowMeanFilter extends IBaseFilter {
-  operator: "aboveMean",
+  operator: "belowMean",
 }
-export type IFilter = IEqualsFilter | DoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
+export type ISingleValueFilter =IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | ITopFilter | IBottomFilter;
+export type IFilter = IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
 
 export interface IPlace {
   name: string;
@@ -124,20 +132,22 @@ export interface IState {
   location?: IPlace;
   weatherStation?: IWeatherStation;
   weatherStationDistance?: number;
-  frequency: IFrequency;
+  selectedFrequency: IFrequency;
+  frequencies: {
+    [key in IFrequency]: {attrs: AttrType[], filters: IFilter[]};
+  };
   startDate?: Date;
   endDate?: Date;
   units: IUnits;
-  attributes: string[];
-  filters: IFilter[];
   showModal?: "info" | "data-return-warning";
 }
 
 export const DefaultState: IState = {
-  frequency: "daily",
+  selectedFrequency: "daily",
+  frequencies: {hourly: {attrs: [], filters: []},
+                daily: {attrs: dailyMonthlyAttrMap, filters: []},
+                monthly: {attrs: [], filters: []}},
   units: "standard",
-  attributes: [],
-  filters: [],
 };
 
 export const kStationsDatasetName = "US-Weather-Stations";

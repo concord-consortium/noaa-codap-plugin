@@ -5,7 +5,7 @@ import { useStateContext } from "../hooks/use-state";
 import { IPlace, IStation } from "../types";
 import { findNearestActiveStations } from "../utils/getWeatherStations";
 import OpenMapIcon from "../assets/images/icon-map.svg";
-import EditIcon from "../assets/images/icon-edit.svg";
+// import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
 import CurrentLocationIcon from "../assets/images/icon-current-location.svg";
 
