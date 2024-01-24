@@ -28,8 +28,8 @@ export const App = () => {
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
-    adjustStationDataset(weatherStations); //change max data to "present"
-    createStationsDataset(weatherStations); //send weather station data to CODAP
+    adjustStationDataset(weatherStations as IWeatherStation[]); //change max data to "present"
+    createStationsDataset(weatherStations as IWeatherStation[]); //send weather station data to CODAP
   }, []);
 
   const handleOpenInfo = () => {

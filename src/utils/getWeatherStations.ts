@@ -41,7 +41,7 @@ export const findNearestActiveStations = async(targetLat: number, targetLong: nu
   // let minDistance = Number.MAX_VALUE;
   let nearestStations: IStation[] = [];
 
-  for (const station of weatherStations) {
+  for (const station of weatherStations as IWeatherStation[]) {
     const distance = calculateDistance(targetLat, targetLong, station.latitude, station.longitude);
     const newStation = {station, distance};
 
@@ -85,4 +85,8 @@ export function calculateDistance(point1Lat: number, point1Long: number, point2L
   const distance = earthRadiusKm * c;
 
   return distance; //in km
+}
+
+export function getWeatherStations() {
+  return weatherStations as IWeatherStation[];
 }

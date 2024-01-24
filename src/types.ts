@@ -114,12 +114,12 @@ export interface IWeatherStation {
 }
 
 interface IWeatherStationRange {
-  mindate: string | number;
-  maxdate: string | number;
+  mindate: string;
+  maxdate: string;
   latitude: number;
   longitude: number;
   name: string;
-  elevation?: string | number;
+  elevation: string;
   ids: IWeatherStationID[];
 }
 

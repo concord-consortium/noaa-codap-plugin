@@ -7,8 +7,8 @@
   .location-header {
     display: flex;
     flex-direction: row;
-    align-items: center;
     justify-content: space-between;
+    flex-wrap: nowrap;
     height: 16px;
     margin: 9px 12px 0 0;
 
@@ -19,32 +19,42 @@
     .weather-station-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-end;
       position: relative;
-      top: 0;
-      right: 0;
+      right: 40px;
+      max-width: 311px;
+
       .selected-weather-station {
         padding: 2px 2px 2px 8px;
         background-color: $teal-light-25;
         color: $teal-dark;
         font-size: 10px;
         font-weight: 500;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
         .station-distance {
           font-style: italic;
+          margin-right: 4px;
         }
         svg {
           height: 12px;
           width: 12px;
+          margin-left: 6px;
         }
       }
+
       .station-selection-list {
-        width: 311px;
         height: 86px;
-        margin: 25px 14px 42px 12px;
-        padding: 4px 18px 1px 13px;
+        padding: 8px 13px;
         box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.5);
         background-color: #fff;
+        list-style-type: none;
+        margin-top: 0;
         visibility: hidden;
+        max-width: 311px;
+
         &.show {
           visibility: visible;
           z-index: 5;
@@ -54,13 +64,26 @@
           font-family: "Montserrat", sans-serif;
           font-size: 10px;
           font-weight: 500;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          padding: 2px 0;
+          gap: 4px;
 
           .station-name {
+            overflow: hidden;
+            white-space: nowrap;
             text-overflow: ellipsis;
             color: #000;
+            max-width: 160px;
           }
           .station-distance {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
             color: $teal-dark-75;
+            min-width: 120px;
           }
           &.selected-station {
             background-color: $teal-medium;
