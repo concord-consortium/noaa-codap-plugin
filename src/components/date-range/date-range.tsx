@@ -3,9 +3,9 @@ import { IFrequency } from "../../types";
 import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
-import { constants } from "../../constants";
 import WarningIcon from "../../assets/icon-warning.svg";
 import ExitIcon from "../../assets/images/icon-exit.svg";
+import { defaultDates } from "../../constants";
 
 import "./date-range.scss";
 
@@ -42,8 +42,8 @@ export const DateRange = () => {
 
     // if user has not clicked on a calendar date, set to the default date range
     if (!didUserSelectDate && startDate && endDate) {
-      handleSetStartDate(constants.defaultDates[freq].start);
-      handleSetEndDate(constants.defaultDates[freq].end);
+      handleSetStartDate(defaultDates[freq].start);
+      handleSetEndDate(defaultDates[freq].end);
     }
   };
 
@@ -60,8 +60,8 @@ export const DateRange = () => {
   };
 
   function configureDates() {
-    handleSetStartDate(constants.defaultDates[selectedFrequency].start);
-    handleSetEndDate(constants.defaultDates[selectedFrequency].end);
+    handleSetStartDate(defaultDates[selectedFrequency].start);
+    handleSetEndDate(defaultDates[selectedFrequency].end);
   }
 
   const handleOpenCalendar = (calendar: string) => {

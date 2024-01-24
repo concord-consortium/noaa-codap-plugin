@@ -1,7 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
-import { AttrType, IBetweenFilter, IBottomFilter, ISingleValueFilter, ITopFilter, TOperators, dailyMonthlyAttrMap, hourlyAttrMap, operatorSymbolMap, operatorTextMap } from "../types";
+import {
+  AttrType,
+  IBetweenFilter,
+  IBottomFilter,
+  ISingleValueFilter,
+  ITopFilter,
+  TOperators,
+  operatorSymbolMap,
+  operatorTextMap,
+  dailyMonthlyAttrMap,
+  hourlyAttrMap
+} from "../types";
 import EditIcon from "../assets/images/icon-edit.svg";
 
 import "./attribute-filter.scss";
