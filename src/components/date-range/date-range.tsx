@@ -137,7 +137,7 @@ export const DateRange = () => {
                 <div className="warning-exit" onClick={() => setShowWarningModal(false)}><ExitIcon/></div>
               </div>
               <div className="warning-body">
-                Your current range is likely to return too many results, which
+                Your current date range is likely to return too many results, which
                 may affect application performance.
               </div>
               <div className="warning-footer">
