@@ -104,8 +104,7 @@ export const composeURL = (props: IComposeURL) => {
   const tStationIDClause = `stations=${getSelectedStations(database, weatherStation).join()}`;
   const dataTypes = attributes.map(function (attrName) {
       return dataTypeStore.findByName(attrName)?.sourceName;
-  }); // to-do: update for when attributes are objects
-  console.log("dataTypes", dataTypes);
+  });
   const tDataTypeIDClause = `dataTypes=${dataTypes.join()}`;
   const tStartDateClause = `startDate=${startDateString}`;
   const tEndDateClause = `endDate=${endDateString}`;
@@ -114,6 +113,7 @@ export const composeURL = (props: IComposeURL) => {
 
   let tURL = [nceiBaseURL, [tDatasetIDClause, tStationIDClause, tStartDateClause, tEndDateClause, tFormatClause, tDataTypeIDClause, tUnitClause].join(
       "&")].join("?");
+  // eslint-disable-next-line no-console
   console.log(`Fetching: ${tURL}`);
   return tURL;
 };

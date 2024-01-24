@@ -90,7 +90,7 @@ export const App = () => {
         message += "(" + xmlDoc.getElementsByTagName(
             "developerMessage")[0].innerHTML + ")";
       } catch (e: any) {
-        console.log("Error parsing XML: " + e);
+        console.warn("Error parsing XML: " + e);
       }
     }
     console.warn("fetchErrorHandler: " + resultText);
@@ -116,13 +116,10 @@ export const App = () => {
         });
         try {
           const tRequest = new Request(tURL);
-          console.log("tRequest", tRequest);
           const tResult = await fetch(tRequest, {mode: "cors"});
-          console.log("fetch result: " + JSON.stringify(tResult));
           setIsFetching(true);
           if (tResult.ok) {
             const theJSON = await tResult.json();
-            console.log("theJSON", theJSON);
             await fetchSuccessHandler(theJSON);
           } else {
             let result = await tResult.text();

@@ -145,6 +145,7 @@ export const useCODAPApi = () => {
   const createNOAAItems = async (dataRecords: any, dataTypes: IDataType[]) => {
     await updateWeatherDataset(dataTypes);
     const items = arrayify(dataRecords);
+    // eslint-disable-next-line no-console
     console.log("noaa-cdo ... createNOAAItems with " + dataRecords.length + " case(s)");
     await createItems(DSName, items);
 
