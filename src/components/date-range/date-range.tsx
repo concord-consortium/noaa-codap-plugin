@@ -90,7 +90,7 @@ export const DateRange = () => {
             return (
               <button
                 key={freq}
-                className={`frequency-selection ${selectedFrequency === freq ? "selected" : ""}`}
+                className={`frequency-selection ${freq} ${selectedFrequency === freq ? "selected" : ""}`}
                 value={freq}
                 onClick={() => handleSetFrequency(freq)}>
                 {freq}

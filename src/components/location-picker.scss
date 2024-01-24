@@ -13,7 +13,7 @@
     margin: 9px 12px 0 0;
 
     .location-title {
-      font-weight: bold;
+      font-weight: 600;
     }
 
     .selected-weather-station {
@@ -71,7 +71,9 @@
           box-sizing: border-box;
           background-color: transparent;
           &::placeholder {
+            font-family: "Montserrat", sans-serif;
             font-style: italic;
+            font-weight: 500;
             color: $placeholder-gray;
           }
         }
@@ -119,7 +121,7 @@
 
         .location-selector-option {
           margin-top: 2px;
-          margin-left: -31px;
+          margin-left: -37px;
           width: 100%;
 
           &.geoname-candidate {
