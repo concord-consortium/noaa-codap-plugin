@@ -149,8 +149,6 @@ export const DefaultState: IState = {
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
                 monthly: {attrs: [], filters: []}},
   units: "standard",
-  attributes: [],
-  filters: [],
   didUserSelectDate: false,
 };
 
