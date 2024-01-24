@@ -52,10 +52,6 @@ export const findNearestActiveStations = async(targetLat: number, targetLong: nu
     } else {
       nearestStations.splice(index, 0, newStation);
     }
-    // if (distance < minDistance) {
-    //   minDistance = distance;
-    //   nearestStation = station;
-    // }
   }
 
   return nearestStations.slice(0, 5);
@@ -89,4 +85,8 @@ export function calculateDistance(point1Lat: number, point1Long: number, point2L
 
 export function getWeatherStations() {
   return weatherStations as IWeatherStation[];
+}
+
+export function convertDistanceToStandard(distance: number) {
+  return distance * 0.621371;
 }
