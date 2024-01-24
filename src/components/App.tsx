@@ -26,7 +26,7 @@ const kInitialDimensions = {
 
 export const App = () => {
   const { state, setState } = useStateContext();
-  const { createNOAAItems } = useCODAPApi();
+  const { filterItems, createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const { showModal } = state;
@@ -64,11 +64,13 @@ export const App = () => {
         units
       };
       const dataRecords = formatData(formatDataProps);
+      const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
+      const filteredItems = filterItems(items);
       setStatusMessage("Sending weather records to CODAP");
-      await createNOAAItems(dataRecords, getSelectedDataTypes()).then(
+      await createNOAAItems(filteredItems, getSelectedDataTypes()).then(
         function (result: any) {
           setIsFetching(false);
-          setStatusMessage(`Retrieved ${dataRecords.length} cases`);
+          setStatusMessage(`Retrieved ${filteredItems.length} cases`);
           return result;
         },
         function (msg: string) {

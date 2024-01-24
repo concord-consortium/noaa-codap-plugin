@@ -51,7 +51,7 @@ export const decodeData = (iField: string, iValue: any, database: string) => {
 };
 
 export const convertNOAARecordToValue = (iRecord: IRecord, weatherStation: IWeatherStation, database: string) => {
-  let out: IRecord = {}; // to-do: add interface / type
+  let out: IRecord = {};
   Object.keys(iRecord).forEach(function (key: any) {
     let value = iRecord[key];
     let dataTypeName;

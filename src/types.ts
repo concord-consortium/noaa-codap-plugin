@@ -243,3 +243,7 @@ export interface UnitMap {
 export interface IRecord {
   [key: string]: number | string | Date | IWeatherStation | IFrequency;
 }
+
+export interface IItem {
+  [key: string]: string;
+}
