@@ -42,8 +42,8 @@ export const DateRange = () => {
 
     // if user has not clicked on a calendar date, set to the default date range
     if (!didUserSelectDate && startDate && endDate) {
-      handleSetStartDate(constants.defaultDates[freq].start);
-      handleSetEndDate(constants.defaultDates[freq].end);
+      handleSetStartDate(defaultDates[freq].start);
+      handleSetEndDate(defaultDates[freq].end);
     }
   };
 
