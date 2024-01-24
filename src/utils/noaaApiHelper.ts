@@ -74,7 +74,7 @@ export const convertNOAARecordToValue = (iRecord: IRecord, weatherStation: IWeat
 };
 
 export const getSelectedStations = (database: string, weatherStation: IWeatherStation) => {
-  let id = database === "global-hourly" ? "isdID": "ghcndID" as keyof IWeatherStation;
+  let id = database === "global-hourly" ? "isdID" : "ghcndID" as keyof IWeatherStation;
   return [weatherStation[id]];
 };
 
