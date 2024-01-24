@@ -25,15 +25,33 @@ export const LocationPicker = () => {
   const [distanceWidth, setDistanceWidth] = useState<number>(0);
   const locationDivRef = useRef<HTMLDivElement>(null);
   const locationInputEl = useRef<HTMLInputElement>(null);
-  const locationSelectionListEl = useRef<HTMLUListElement>(null);
-  const stationSelectionListEl = useRef<HTMLUListElement>(null);
+  const locationSelectionListElRef = useRef<HTMLUListElement>(null);
+  const stationSelectionListElRef = useRef<HTMLUListElement>(null);
   const firstStationListedRef = useRef<HTMLSpanElement>(null);
   const unitDistanceText = units === "standard" ? "mi" : "km";
   const stationDistance = weatherStationDistance && units === "standard" ? convertDistanceToStandard(weatherStationDistance) : weatherStationDistance;
 
-  const handleOpenMap = () => {
-    //send request to CODAP to open map with available weather stations
-  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (event.target) {
+        if (stationSelectionListElRef.current && !stationSelectionListElRef.current.contains(event.target as Node)) {
+          setShowStationSelectionList(false);
+        }
+        if (locationSelectionListElRef.current && !locationSelectionListElRef.current.contains(event.target as Node)) {
+          setShowSelectionList(false);
+          setIsEditing(false);
+        }
+      }
+    }
+
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (locationInputEl.current?.value === "") {
@@ -67,7 +85,7 @@ export const LocationPicker = () => {
 
   useEffect(() => {
     if (showStationSelectionList) {
-      const listItems = stationSelectionListEl.current?.children;
+      const listItems = stationSelectionListElRef.current?.children;
       if (listItems && firstStationListedRef.current) {
         const firstStationWidth = firstStationListedRef.current?.getBoundingClientRect().width;
         setDistanceWidth(firstStationWidth ? firstStationWidth : 120);
@@ -112,12 +130,12 @@ export const LocationPicker = () => {
     if (e.key === "ArrowDown" && locationPossibilities.length > 0) {
       setHoveredIndex(0);
       setArrowedIndex(0);
-      locationSelectionListEl.current?.focus();
+      locationSelectionListElRef.current?.focus();
     }
   };
 
   const handleListKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const listItems = locationSelectionListEl.current?.children;
+    const listItems = locationSelectionListElRef.current?.children;
     if (e.key === "Enter") {
       placeNameSelected(locationPossibilities[arrowedIndex-1]);
     } else
@@ -227,6 +245,10 @@ export const LocationPicker = () => {
     setIsEditing(true);
   };
 
+  const handleOpenMap = () => {
+    //send request to CODAP to open map with available weather stations
+  };
+
   return (
     <div className="location-picker-container">
       <div className="location-header">
@@ -242,7 +264,7 @@ export const LocationPicker = () => {
                 </>
               }
             </div>
-            <ul ref={stationSelectionListEl} className={classnames("station-selection-list", {"show": showStationSelectionList})}>
+            <ul ref={stationSelectionListElRef} className={classnames("station-selection-list", {"show": showStationSelectionList})}>
               {stationPossibilities.map((station: IStation, idx: number) => {
                 if (station) {
                   const stationDistanceText = units === "standard" ? convertDistanceToStandard(station.distance) : station.distance;
@@ -278,7 +300,7 @@ export const LocationPicker = () => {
           </div>
           { isEditing &&
             <ul
-              ref={locationSelectionListEl}
+              ref={locationSelectionListElRef}
               className={classnames("location-selection-list", {"show": showSelectionList, "short" : showMapButton})}
               onFocus={() => setHoveredIndex(null)}>
               <li className={classnames("current-location-wrapper", {"geoname-candidate": hoveredIndex === -1})}
