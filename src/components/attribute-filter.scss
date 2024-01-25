@@ -3,7 +3,7 @@ $filter-background-green: rgba(90, 249, 90, 0.25);
 $filter-green: #2dbe5e;
 
 .attribute-filter-container {
-
+  padding-bottom: 16px;
   .table-header {
     color: rgba(0, 0, 0, 0.48);
     font-size: 10px;
@@ -86,7 +86,7 @@ $filter-green: #2dbe5e;
   }
 }
 
-table tr:nth-child(odd) {
+table tr:nth-child(even) {
   background-color: rgba(216, 216, 216, 0.3);
 }
 
