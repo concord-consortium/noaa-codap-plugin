@@ -214,6 +214,7 @@ table tr:nth-child(odd) {
     right: -22px;
     top: -50px;
     box-sizing: border-box;
+    overflow: hidden;
 
     .operator-selection {
       border: none;
@@ -226,6 +227,8 @@ table tr:nth-child(odd) {
         font-weight: 500;
         color: #000;
         padding: 2px 0;
+        height: 12px;
+
         &:hover {
           background-color: $teal-medium;
         }

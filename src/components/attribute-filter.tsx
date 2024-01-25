@@ -88,7 +88,7 @@ export const AttributeFilter = () => {
                   : filterAboveOrBelowMean
                       ? `${operatorTextMap[attrFilter.operator]}`
                       : attrFilter.operator === "between"
-                          ? `${attrFilter.lowerValue} - ${attrFilter.upperValue} ${attr.unit[units]}`
+                          ? `${attrFilter.lowerValue} ${attr.unit[units]} - ${attrFilter.upperValue} ${attr.unit[units]}`
                           : attrFilter.operator === "top" || attrFilter.operator === "bottom"
                             ? `${operatorTextMap[attrFilter.operator]} ${attrFilter.value}`
                             :`${operatorSymbolMap[attrFilter.operator]} ${attrFilter.value} ${attr.unit[units]}`;
@@ -268,13 +268,13 @@ useEffect(() => {
   return (
     <div className={classnames("filter-modal", {"wide": wideModal})} style={position}>
       <div className="filter-wrapper">
-        <div className="filter-operator-wrapper">
-          <div className="filter-operator" onClick={handleChangeFilterOperator}>
+        <div className="filter-operator-wrapper" onClick={handleChangeFilterOperator}>
+          <div className="filter-operator">
             {operatorTextMap[operator] || "equals"}
           </div>
           <EditIcon />
         </div>
-        {!noValueFilter && renderFilterInputs() }
+        {renderFilterInputs()}
         {(operator === "top" || operator === "bottom") && <span>{` results`}</span>}
       </div>
       <div className="filter-modal-footer">
