@@ -133,7 +133,7 @@ export const dailyMonthlyAttrMap: AttrType[] = [
   {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
   {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
   {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
-  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
+  {name: "Average wind speed", abbr: "avgWind", unit: unitMap.speed}
 ];
 
 export const hourlyAttrMap: AttrType[] = [
