@@ -118,6 +118,7 @@ export const AttributeFilter = () => {
         {(attributeToFilter && showFilterModal) &&
               <FilterModal attr={attributeToFilter} setShowFilterModal={setShowFilterModal} position={filterModalPosition}
                             setFilterModalPosition={setFilterModalPosition} targetFilterBottom={targetFilterBottom}
+                            key={attributeToFilter.name}
               />}
       </div>
     );
