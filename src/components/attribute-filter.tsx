@@ -237,7 +237,7 @@ useEffect(() => {
     // key attribute forces inputs to rerender when operator changes
     if (operator === "between") {
       return (
-        <div className="between-inputs-wrapper" key="between">
+        <div className="between-inputs-wrapper" key={`${operator}-${units}`}>
           <input ref={filterLowerValueInputElRef} className="filter-value between-low-value"
             defaultValue={`${lowerVal} ${currentAttr?.unit[units]}`}>
           </input>
@@ -250,9 +250,9 @@ useEffect(() => {
     } else if (operator === "aboveMean" || operator === "belowMean") {
       return null;
     } else if (operator === "top" || operator === "bottom") {
-      return <input ref={filterValueTopBottomInputElRef} key={operator} className="filter-value" defaultValue={`${currentFilterValue || "100"}`}></input>;
+      return <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value" defaultValue={`${currentFilterValue || "100"}`}></input>;
     } else {
-      return <input ref={filterValueInputElRef} key={operator} className="filter-value" defaultValue={`${currentFilterValue} ${currentAttr?.unit[units]}`}></input>;
+      return <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value" defaultValue={`${currentFilterValue} ${currentAttr?.unit[units]}`}></input>;
     }
   };
 
