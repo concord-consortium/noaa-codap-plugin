@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
 import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
@@ -14,6 +14,14 @@ export const AttributesSelector = () => {
   const attributeList = selectedFrequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const attributeNamesList = selectedFrequency === "hourly" ? hourlyAttributeNames : dailyMonthlyAttributeNames;
   const selectedAttrsAndFiltersForFrequency = frequencies[selectedFrequency];
+
+  useEffect(() => {
+    if (frequencies[selectedFrequency].attrs.length === attributeList.length) {
+      setAllSelected(true);
+    } else {
+      setAllSelected(false);
+    }
+  }, [attributeList.length, frequencies, selectedFrequency]);
 
   const handleUnitsClicked = () => {
     setState(draft => {

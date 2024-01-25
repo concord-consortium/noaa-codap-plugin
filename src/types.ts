@@ -148,9 +148,9 @@ export const hourlyAttrMap: AttrType[] = [
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",
-  frequencies: {hourly: {attrs: [], filters: []},
+  frequencies: {hourly: {attrs: hourlyAttrMap, filters: []},
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
-                monthly: {attrs: [], filters: []}},
+                monthly: {attrs: dailyMonthlyAttrMap, filters: []}},
   units: "standard",
   didUserSelectDate: false,
 };
