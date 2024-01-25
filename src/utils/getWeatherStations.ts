@@ -37,10 +37,9 @@ export const adjustStationDataset = (dataset: IWeatherStation[]) => {
 export const findNearestActiveStations = async(targetLat: number, targetLong: number, fromDate: Date,
      toDate: Date) => {
   const adjustedStationDataset = adjustStationDataset(weatherStations as IWeatherStation[]);
-  const fromSecs = fromDate.getTime() / 1000;
-  const toSecs = toDate.getTime() / 1000;
+  const fromMSecs = fromDate.getTime() ;
+  const toMSecs = toDate.getTime();
   const nearestStations: IStation[] = [];
-  console.log(adjustedStationDataset);
 
   const insertStation = (station: IWeatherStation, distance: number) => {
     const newStation = {station, distance};
@@ -58,9 +57,9 @@ export const findNearestActiveStations = async(targetLat: number, targetLong: nu
     if (station.maxdate === "present") {  // If the station is still active (maxdate === "present") then we can use it
       shouldInsert = true;
     } else {  // If the station is not active, we need to check if it has data in the date range
-      const stationMinSecs = new Date(station.mindate).getTime() / 1000;
-      const stationMaxSecs = new Date(station.maxdate).getTime() / 1000;
-      if (stationMinSecs <= toSecs && stationMaxSecs >= fromSecs) {
+      const stationMinMSecs = new Date(station.mindate).getTime();
+      const stationMaxMSecs = new Date(station.maxdate).getTime();
+      if (stationMinMSecs <= toMSecs && stationMaxMSecs >= fromMSecs) {
         shouldInsert = true;
       }
     }
