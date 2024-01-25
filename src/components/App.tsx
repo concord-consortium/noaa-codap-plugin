@@ -52,11 +52,15 @@ export const App = () => {
   };
 
   const fetchSuccessHandler = async (data: any) => {
-    const {stationTimezoneOffset, weatherStation, selectedFrequency, startDate, endDate, units} = state;
-    if (data && weatherStation) {
+    const {startDate, endDate, units, selectedFrequency,
+      weatherStation, timezone} = state;
+    const allDefined = (startDate && endDate && units && selectedFrequency &&
+      weatherStation && timezone);
+
+    if (data && allDefined) {
       const formatDataProps = {
         data,
-        stationTimezoneOffset,
+        timezone,
         weatherStation,
         frequency: selectedFrequency,
         startDate,
@@ -102,9 +106,12 @@ export const App = () => {
   };
 
   const handleGetData = async () => {
-    const { location, startDate, endDate, selectedFrequency, weatherStation, stationTimezoneOffset } = state;
-    const attributes = state.frequencies[selectedFrequency].attrs.map(attr => attr.name);
-    if (location && attributes && startDate && endDate && weatherStation && selectedFrequency) {
+    const { location, startDate, endDate, weatherStation, frequencies,
+      selectedFrequency, timezone } = state;
+    const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
+    const allDefined = (startDate && endDate && location && weatherStation && timezone);
+
+    if (allDefined) {
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
         setStatusMessage("Fetching weather records from NOAA");
@@ -114,7 +121,7 @@ export const App = () => {
           frequency: selectedFrequency,
           weatherStation,
           attributes,
-          stationTimezoneOffset
+          gmtOffset: timezone.gmtOffset
         });
         try {
           const tRequest = new Request(tURL);

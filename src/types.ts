@@ -100,6 +100,11 @@ interface IWeatherStationID {
   id: string;
 }
 
+export interface ITimeZone {
+  gmtOffset: string;
+  name: string;
+}
+
 export interface IState {
   location?: IPlace;
   weatherStation?: IWeatherStation;
@@ -112,8 +117,7 @@ export interface IState {
   endDate?: Date;
   units: IUnits;
   showModal?: "info" | "data-return-warning";
-  stationTimezoneOffset?: number;
-  stationTimezoneName?: string;
+  timezone?: ITimeZone;
   didUserSelectDate: boolean;
 }
 

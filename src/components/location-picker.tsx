@@ -8,11 +8,13 @@ import OpenMapIcon from "../assets/images/icon-map.svg";
 // import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
 import CurrentLocationIcon from "../assets/images/icon-current-location.svg";
+import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 
 import "./location-picker.scss";
 
 export const LocationPicker = () => {
-  const {state, setState} = useStateContext();
+  const { state, setState } = useStateContext();
+  const { location, units, weatherStation, weatherStationDistance } = state;
   const [showMapButton, setShowMapButton] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
@@ -22,12 +24,10 @@ export const LocationPicker = () => {
   const locationDivRef = useRef<HTMLDivElement>(null);
   const locationInputEl = useRef<HTMLInputElement>(null);
   const locationSelectionListEl = useRef<HTMLUListElement>(null);
-  const selectedLocation = state.location;
-  const unit = state.units;
-  const unitDistanceText = unit === "standard" ? "mi" : "km";
-  const stationDistance = state.weatherStationDistance && unit === "standard"
-                            ? Math.round((state.weatherStationDistance * 0.6 * 10) / 10)
-                            :state.weatherStationDistance &&  Math.round(state.weatherStationDistance * 10) / 10;
+  const unitDistanceText = units === "standard" ? "mi" : "km";
+  const stationDistance = weatherStationDistance && units === "standard"
+                            ? Math.round((weatherStationDistance * 0.6 * 10) / 10)
+                            : weatherStationDistance &&  Math.round(weatherStationDistance * 10) / 10;
 
   const handleOpenMap = () => {
     //send request to CODAP to open map with available weather stations
@@ -36,7 +36,6 @@ export const LocationPicker = () => {
   useEffect(() => {
     if (locationInputEl.current?.value === "") {
       setShowSelectionList(false);
-      // setSelectedLocation(undefined);
     }
   }, [locationInputEl.current?.value]);
 
@@ -47,8 +46,8 @@ export const LocationPicker = () => {
   }, [isEditing]);
 
   useEffect(() => {
-      if (selectedLocation) {
-        findNearestActiveStation(selectedLocation.latitude, selectedLocation.longitude, 80926000, "present")
+      if (location) {
+        findNearestActiveStation(location.latitude, location.longitude, 80926000, "present")
           .then(({station, distance}) => {
             if (station) {
               setState((draft) => {
@@ -59,7 +58,39 @@ export const LocationPicker = () => {
           });
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[selectedLocation]);
+  }, [location]);
+
+  useEffect(() => {
+    if (weatherStation) {
+      const fetchTimezone = async (lat: number, long: number) => {
+        let url = `${timezoneServiceURL}?lat=${lat}&lng=${long}&username=${geonamesUser}`;
+        let res = await fetch(url);
+        if (res) {
+          if (res.ok) {
+            const timezoneData = await res.json();
+            const { gmtOffset } = timezoneData as { gmtOffset: keyof typeof kOffsetMap };
+            setState((draft) => {
+              draft.timezone = {
+                gmtOffset,
+                name: kOffsetMap[gmtOffset]
+              };
+            });
+          } else {
+            console.warn(res.statusText);
+          }
+        } else {
+          console.warn(`Failed to fetch timezone data for station ${weatherStation.name}`);
+        }
+      };
+
+      fetchTimezone(weatherStation.latitude, weatherStation.longitude);
+    } else {
+      setState((draft) => {
+        draft.timezone = undefined;
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weatherStation]);
 
   const getLocationList = () => {
     if (locationInputEl.current) {
@@ -182,13 +213,13 @@ export const LocationPicker = () => {
     <div className="location-picker-container">
       <div className="location-header">
         <span className="location-title">Location</span>
-        { selectedLocation && !isEditing &&
+        { location && !isEditing &&
           <div className="selected-weather-station">
-            { state.weatherStation &&
+            { weatherStation &&
               <>
-                {state.weatherStationDistance &&
+                {weatherStationDistance &&
                   <span className="station-distance">({stationDistance} {unitDistanceText}) </span>}
-                <span className="station-name">{state.weatherStation?.name}</span>
+                <span className="station-name">{weatherStation?.name}</span>
                 {/* <EditIcon />  hide this for now until implemented*/}
               </>
             }
@@ -200,10 +231,10 @@ export const LocationPicker = () => {
           <div ref={locationDivRef} className={classnames("location-input-wrapper", {"short" : showMapButton, "editing": isEditing})}
                 onClick={handleLocationInputClick}>
             <LocationIcon />
-            { selectedLocation && !isEditing
+            { location && !isEditing
                 ? <div>
                     <span className="selected-loc-intro">Stations near </span>
-                    <span className="selected-loc-name">{state.location?.name}</span>
+                    <span className="selected-loc-name">{location?.name}</span>
                   </div>
                 : <input ref={locationInputEl} className="location-input" type="text" placeholder={"Enter location or identifier here"}
                     onChange={handleLocationInputChange} onKeyDown={handleInputKeyDown} onBlur={handleLocationInputBlur}/>
