@@ -13,7 +13,7 @@ import "./location-picker.scss";
 
 export const LocationPicker = () => {
   const {state, setState} = useStateContext();
-  const {units, location, weatherStation, weatherStationDistance} = state;
+  const {units, location, weatherStation, weatherStationDistance, startDate, endDate} = state;
   const [showMapButton, setShowMapButton] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
@@ -56,7 +56,6 @@ export const LocationPicker = () => {
   useEffect(() => {
     if (locationInputEl.current?.value === "") {
       setShowSelectionList(false);
-      // setSelectedLocation(undefined);
     }
   }, [locationInputEl.current?.value]);
 
@@ -67,8 +66,10 @@ export const LocationPicker = () => {
   }, [isEditing]);
 
   useEffect(() => {
+    const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
+    const _endDate = endDate ? endDate : new Date(Date.now());
       if (location) {
-        findNearestActiveStations(location.latitude, location.longitude, 80926000, "present")
+        findNearestActiveStations(location.latitude, location.longitude, _startDate, _endDate)
           .then((stationList: IStation[]) => {
             if (stationList) {
               setStationPossibilities(stationList);
@@ -81,7 +82,7 @@ export const LocationPicker = () => {
         });
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[location]);
+  },[endDate, isEditing, location, startDate]);
 
   useEffect(() => {
     if (showStationSelectionList) {
