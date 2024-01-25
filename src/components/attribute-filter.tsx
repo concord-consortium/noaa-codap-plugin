@@ -23,6 +23,7 @@ export const AttributeFilter = () => {
   const attrMap = selectedFrequency === "hourly" ? hourlyAttrMap : dailyMonthlyAttrMap;
   const [hasFilter, setHasFilter] = useState(false);
   const [filteringIndex, setFilteringIndex] = useState<number | undefined>(undefined);
+  const [targetFilterBottom, setTargetFilterBottom] = useState(0);
   const [filterModalPosition, setFilterModalPosition] = useState({ top: 0 });
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [attributeToFilter, setAttributeToFilter] = useState<AttrType | undefined>(undefined);
@@ -44,7 +45,6 @@ export const AttributeFilter = () => {
     });
 
     if (hasFilters) {
-
       setHasFilter(true);
     }
   },[frequencies, selectedAttrMap, selectedFrequency]);
@@ -53,17 +53,18 @@ export const AttributeFilter = () => {
     const rect = e.currentTarget.getBoundingClientRect();
     const top = rect.bottom + window.scrollY;
 
+    setTargetFilterBottom(rect.bottom);
     setFilterModalPosition({top});
     setShowFilterModal(true);
     setAttributeToFilter(frequencies[selectedFrequency].attrs[index]);
     setFilteringIndex(index);
   };
 
-    const handleUnitsToggle = () => {
-      setState(draft => {
-        draft.units = draft.units === "standard" ? "metric" : "standard";
-      });
-    };
+  const handleUnitsToggle = () => {
+    setState(draft => {
+      draft.units = draft.units === "standard" ? "metric" : "standard";
+    });
+  };
 
   if (selectedAttrMap && selectedAttrMap.length > 0) {
     return (
@@ -115,7 +116,9 @@ export const AttributeFilter = () => {
           </tbody>
         </table>
         {(attributeToFilter && showFilterModal) &&
-              <FilterModal attr={attributeToFilter} setShowFilterModal={setShowFilterModal} position={filterModalPosition}/>}
+              <FilterModal attr={attributeToFilter} setShowFilterModal={setShowFilterModal} position={filterModalPosition}
+                            setFilterModalPosition={setFilterModalPosition} targetFilterBottom={targetFilterBottom}
+              />}
       </div>
     );
   } else {
@@ -126,10 +129,12 @@ export const AttributeFilter = () => {
 interface IFilterModalProps {
   attr: AttrType;
   position: {top: number};
+  targetFilterBottom?: number;
   setShowFilterModal: (show: boolean) => void
+  setFilterModalPosition: (position: {top: number}) => void;
 }
 
-const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) => {
+const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, setFilterModalPosition}: IFilterModalProps) => {
   const {state, setState} = useStateContext();
   const {frequencies, units, selectedFrequency} = state;
   const currentAttr = frequencies[selectedFrequency].attrs.find(a => a.name === attr.name);
@@ -148,23 +153,57 @@ const FilterModal = ({attr, position, setShowFilterModal}: IFilterModalProps) =>
   const filterLowerValueInputElRef = useRef<HTMLInputElement>(null);
   const filterUpperValueInputElRef = useRef<HTMLInputElement>(null);
   const operatorSelectionModalRef = useRef<HTMLDivElement>(null);
+  const [operatorSelectionListHeight, setOperatorSelectionListHeight] = useState({height: 190});
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  const dropdownRect = operatorSelectionModalRef.current?.getBoundingClientRect();
+  const dropdownBottom = dropdownRect?.bottom;
 
-useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-    if (event.target) {
-      if (operatorSelectionModalRef.current && !operatorSelectionModalRef.current.contains(event.target as Node)) {
-        setShowOperatorSelectionModal(false);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (event.target) {
+        if (operatorSelectionModalRef.current && !operatorSelectionModalRef.current.contains(event.target as Node)) {
+          setShowOperatorSelectionModal(false);
+        }
       }
     }
-  }
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
 
-  // Bind the event listener
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => {
-    // Unbind the event listener on clean up
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("resize", handleResize);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Move modal to bottom of window if window is too short
+  useEffect(() => {
+    const modalHeight = 89;
+    if (position.top + modalHeight > windowHeight) {
+      setFilterModalPosition({top: windowHeight - modalHeight});
+    } else {
+      setFilterModalPosition({top: targetFilterBottom || 0});
+    }
+  // Adding the other dependencies causes the modal to jump around
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowHeight]);
+
+  // Change filter-operator-selection-container height if window is shorter than dropdown
+  useEffect(() => {
+    if (showOperatorSelectionModal) {
+      console.log("dropdownBottom && dropdownBottom > windowHeight", dropdownBottom, windowHeight, dropdownBottom && dropdownBottom > windowHeight);
+      if (dropdownBottom && dropdownBottom > windowHeight) {
+        const cutOffAmount = dropdownBottom - windowHeight;
+        setOperatorSelectionListHeight({height: 190 - cutOffAmount - 3});
+      } else {
+        setOperatorSelectionListHeight({height: 190});
+      }
+    }
+  },[dropdownBottom, showOperatorSelectionModal, windowHeight]);
 
   const handleReset = () => {
     setOperator(currentAttrFilter?.operator || "equals");
@@ -257,14 +296,19 @@ useEffect(() => {
   };
 
   const handleChangeFilterOperator = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     setShowOperatorSelectionModal(true);
   };
 
-  const handleSelectFilterOperator = (newOperator: TOperators) => {
+  const handleSelectFilterOperator = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newOperator = e.currentTarget.value as TOperators;
+    e.stopPropagation();
     setOperator(newOperator);
     setShowOperatorSelectionModal(false);
   };
+
   const wideModal = !["equals", "top", "bottom"].includes(operator);
+
   return (
     <div className={classnames("filter-modal", {"wide": wideModal})} style={position}>
       <div className="filter-wrapper">
@@ -282,8 +326,8 @@ useEffect(() => {
         <button className="filter-button done" onClick={handleSubmitFilter}>Done</button>
       </div>
       {showOperatorSelectionModal &&
-        <div ref={operatorSelectionModalRef} className="filter-operator-selection-container">
-          <select className="operator-selection" size={11} onChange={(e)=>handleSelectFilterOperator(e.currentTarget.value as TOperators)}>
+        <div ref={operatorSelectionModalRef} className="filter-operator-selection-container" style={operatorSelectionListHeight}>
+          <select className="operator-selection" size={11} onChange={handleSelectFilterOperator}>
             <option value="equals">{operatorTextMap.equals} ...</option>
             <option value="doesNotEqual">{operatorTextMap.doesNotEqual} ...</option>
             <option value="greaterThan">{operatorTextMap.greaterThan} ...</option>
