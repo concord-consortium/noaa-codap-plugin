@@ -54,43 +54,37 @@ export const LocationPicker = () => {
                 draft.weatherStation = station;
                 draft.weatherStationDistance = distance;
               });
+
+              const fetchTimezone = async (lat: number, long: number) => {
+                let url = `${timezoneServiceURL}?lat=${lat}&lng=${long}&username=${geonamesUser}`;
+                let res = await fetch(url);
+                if (res) {
+                  if (res.ok) {
+                    const timezoneData = await res.json();
+                    const { gmtOffset } = timezoneData as { gmtOffset: keyof typeof kOffsetMap };
+                    setState((draft) => {
+                      draft.timezone = {
+                        gmtOffset,
+                        name: kOffsetMap[gmtOffset]
+                      };
+                    });
+                  } else {
+                    console.warn(res.statusText);
+                  }
+                } else {
+                  console.warn(`Failed to fetch timezone data for ${location}`);
+                }
+              };
+              fetchTimezone(location.latitude, location.longitude);
             }
           });
+      } else {
+        setState((draft) => {
+          draft.timezone = undefined;
+        });
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
-
-  useEffect(() => {
-    if (weatherStation) {
-      const fetchTimezone = async (lat: number, long: number) => {
-        let url = `${timezoneServiceURL}?lat=${lat}&lng=${long}&username=${geonamesUser}`;
-        let res = await fetch(url);
-        if (res) {
-          if (res.ok) {
-            const timezoneData = await res.json();
-            const { gmtOffset } = timezoneData as { gmtOffset: keyof typeof kOffsetMap };
-            setState((draft) => {
-              draft.timezone = {
-                gmtOffset,
-                name: kOffsetMap[gmtOffset]
-              };
-            });
-          } else {
-            console.warn(res.statusText);
-          }
-        } else {
-          console.warn(`Failed to fetch timezone data for station ${weatherStation.name}`);
-        }
-      };
-
-      fetchTimezone(weatherStation.latitude, weatherStation.longitude);
-    } else {
-      setState((draft) => {
-        draft.timezone = undefined;
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weatherStation]);
 
   const getLocationList = () => {
     if (locationInputEl.current) {
