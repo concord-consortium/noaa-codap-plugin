@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { IWeatherStation } from "../types";
+import { IStation, IWeatherStation } from "../types";
 import weatherStations from "../assets/data/weather-stations.json";
 
 /**
@@ -10,7 +10,6 @@ import weatherStations from "../assets/data/weather-stations.json";
  */
 export const adjustStationDataset = (dataset: IWeatherStation[]) => {
   const datasetArr = Array.from(dataset);
-
   let maxDate: dayjs.Dayjs | null = null;
 
   if (dataset) {
@@ -32,23 +31,47 @@ export const adjustStationDataset = (dataset: IWeatherStation[]) => {
       });
     }
   }
+  return dataset;
 };
 
-export const findNearestActiveStation = async(targetLat: number, targetLong: number, fromDate: number | string,
-     toDate: number | string) => {
-  // TODO: filter out weather stations that are active
-  let nearestStation: IWeatherStation | null = null;
-  let minDistance = Number.MAX_VALUE;
+export const findNearestActiveStations = async(targetLat: number, targetLong: number, fromDate: Date,
+     toDate: Date) => {
+  const adjustedStationDataset = adjustStationDataset(weatherStations as IWeatherStation[]);
+  const fromMSecs = fromDate.getTime() ;
+  const toMSecs = toDate.getTime();
+  const nearestStations: IStation[] = [];
 
-  for (const station of weatherStations) {
-    const distance = calculateDistance(targetLat, targetLong, station.latitude, station.longitude);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestStation = station;
+  const insertStation = (station: IWeatherStation, distance: number) => {
+    const newStation = {station, distance};
+    // Insert the new station into the sorted array at the correct position
+    const index = nearestStations.findIndex(s => s.distance > distance);
+    if (index === -1) {
+      nearestStations.push(newStation);
+    } else {
+      nearestStations.splice(index, 0, newStation);
+    }
+  };
+
+  for (const station of adjustedStationDataset) {
+    let shouldInsert = false;
+    if (station.maxdate === "present") {  // If the station is still active (maxdate === "present") then we can use it
+      shouldInsert = true;
+    } else {  // If the station is not active, we need to check if it has data in the date range
+      const stationMinMSecs = new Date(station.mindate).getTime();
+      const stationMaxMSecs = new Date(station.maxdate).getTime();
+      if (stationMinMSecs <= toMSecs && stationMaxMSecs >= fromMSecs) {
+        shouldInsert = true;
+      }
+    }
+
+    if (shouldInsert) {
+      const distance = calculateDistance(targetLat, targetLong, station.latitude, station.longitude);
+      const newStation = {station, distance};
+      insertStation(newStation.station, newStation.distance);
     }
   }
 
-  return {station: nearestStation, distance: minDistance};
+  return nearestStations.slice(0, 5);
 };
 
 function degreesToRadians(degrees: number): number {
@@ -75,4 +98,12 @@ export function calculateDistance(point1Lat: number, point1Long: number, point2L
   const distance = earthRadiusKm * c;
 
   return distance; //in km
+}
+
+export function getWeatherStations() {
+  return weatherStations as IWeatherStation[];
+}
+
+export function convertDistanceToStandard(distance: number) {
+  return distance * 0.621371;
 }

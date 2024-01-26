@@ -1,4 +1,4 @@
-import { Attribute, Collection, DataContext, IDataType } from "../types";
+import { Attribute, Collection, DataContext, IDataType, IItem } from "../types";
 import { IResult, codapInterface, createItems, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { DSCollection1, DSCollection2, DSName } from "../constants";
 import { useStateContext } from "./use-state";
@@ -138,17 +138,55 @@ export const useCODAPApi = () => {
     return Promise.all(promises);
   };
 
-  const arrayify = (value: any) => {
-    return Array.isArray(value) ? value : [value];
+  const filterItems = (items: IItem[]) => {
+    const { selectedFrequency, frequencies } = state;
+    const { attrs, filters } = frequencies[selectedFrequency];
+    const filteredItems = items.filter((item: IItem) => {
+      const allFiltersMatch: boolean[] = [];
+      filters.forEach((filter) => {
+        const { attribute, operator } = filter;
+        const attrKey = attrs.find((attr) => attr.name === attribute)?.abbr;
+        if (attrKey) {
+          const itemValue = Number(item[attrKey]);
+          if (operator === "equals") {
+            allFiltersMatch.push(itemValue === filter.value);
+          } else if (operator === "doesNotEqual") {
+            allFiltersMatch.push(itemValue !== filter.value);
+          } else if (operator === "greaterThan") {
+            allFiltersMatch.push(itemValue > filter.value);
+          } else if (operator === "lessThan") {
+            allFiltersMatch.push(itemValue < filter.value);
+          } else if (operator === "greaterThanOrEqualTo") {
+            allFiltersMatch.push(itemValue >= filter.value);
+          } else if (operator === "lessThanOrEqualTo") {
+            allFiltersMatch.push(itemValue <= filter.value);
+          } else if (operator === "between") {
+            const { lowerValue, upperValue } = filter;
+            allFiltersMatch.push(itemValue > lowerValue && itemValue < upperValue);
+          } else if (operator === "top" || operator === "bottom") {
+            const sortedItems = items.sort((a, b) => {
+              return Number(b[attrKey]) - Number(a[attrKey]);
+            });
+            const end = operator === "top" ? filter.value : sortedItems.length;
+            const itemsToCheck = sortedItems.slice(end - filter.value, end);
+            allFiltersMatch.push(itemsToCheck.includes(item));
+          } else if (operator === "aboveMean" || operator === "belowMean") {
+            const mean = items.reduce((acc, i) => acc + Number(i[attrKey]), 0) / items.length;
+            const expression = operator === "aboveMean" ? itemValue > mean : itemValue < mean;
+            allFiltersMatch.push(expression);
+          }
+        }
+      });
+      return allFiltersMatch.every((match) => match === true);
+    });
+    return filteredItems;
   };
 
-  const createNOAAItems = async (dataRecords: any, dataTypes: IDataType[]) => {
+  const createNOAAItems = async (items: IItem[], dataTypes: IDataType[]) => {
     await updateWeatherDataset(dataTypes);
-    const items = arrayify(dataRecords);
     // eslint-disable-next-line no-console
-    console.log("noaa-cdo ... createNOAAItems with " + dataRecords.length + " case(s)");
+    console.log("noaa-cdo ... createNOAAItems with " + items.length + " case(s)");
     await createItems(DSName, items);
-
     await codapInterface.sendRequest({
         "action": "create",
         "resource": "component",
@@ -161,6 +199,7 @@ export const useCODAPApi = () => {
   };
 
   return {
+    filterItems,
     createNOAAItems
   };
 };

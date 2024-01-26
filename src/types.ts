@@ -10,8 +10,8 @@ export interface AttrType {
 export type TOperators = "equals" | "doesNotEqual" | "greaterThan" | "greaterThanOrEqualTo" | "lessThan"
                             | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean";
 
-export const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal", greaterThan: "greater than", greaterThanOrEqualTo: "great than or equal to",
-lessThan: "less than", lessThanOrEqualTo: "less than or equal to", between: "between", top: "top", bottom: "bottom",
+export const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal", greaterThan: "is greater than", greaterThanOrEqualTo: "is greater than or equal to",
+lessThan: "is less than", lessThanOrEqualTo: "is less than or equal to", between: "between", top: "top", bottom: "bottom",
 aboveMean: "above mean", belowMean: "below mean"};
 export const operatorSymbolMap = {equals: "=", doesNotEqual: "≠", greaterThan: ">", greaterThanOrEqualTo: ">=", lessThan: "<", lessThanOrEqualTo: "<="};
 
@@ -69,7 +69,7 @@ export interface IPlace {
   latitude: number;
   longitude: number;
 }
-
+export interface IStation {station: IWeatherStation, distance: number}
 export interface IWeatherStation {
   country: string; // "US"
   state: string; // 2 char state name
@@ -86,18 +86,23 @@ export interface IWeatherStation {
 }
 
 interface IWeatherStationRange {
-  mindate: string | number;
-  maxdate: string | number;
+  mindate: string;
+  maxdate: string;
   latitude: number;
   longitude: number;
   name: string;
-  elevation?: string | number;
+  elevation: string;
   ids: IWeatherStationID[];
 }
 
 interface IWeatherStationID {
   type: string;
   id: string;
+}
+
+export interface ITimeZone {
+  gmtOffset: string;
+  name: string;
 }
 
 export interface IState {
@@ -112,8 +117,7 @@ export interface IState {
   endDate?: Date;
   units: IUnits;
   showModal?: "info" | "data-return-warning";
-  stationTimezoneOffset?: number;
-  stationTimezoneName?: string;
+  timezone?: ITimeZone;
   didUserSelectDate: boolean;
 }
 
@@ -133,7 +137,7 @@ export const dailyMonthlyAttrMap: AttrType[] = [
   {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
   {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
   {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
-  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
+  {name: "Average wind speed", abbr: "avgWind", unit: unitMap.speed}
 ];
 
 export const hourlyAttrMap: AttrType[] = [
@@ -148,9 +152,9 @@ export const hourlyAttrMap: AttrType[] = [
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",
-  frequencies: {hourly: {attrs: [], filters: []},
+  frequencies: {hourly: {attrs: hourlyAttrMap, filters: []},
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
-                monthly: {attrs: [], filters: []}},
+                monthly: {attrs: dailyMonthlyAttrMap, filters: []}},
   units: "standard",
   didUserSelectDate: false,
 };
@@ -242,4 +246,8 @@ export interface UnitMap {
 
 export interface IRecord {
   [key: string]: number | string | Date | IWeatherStation | IFrequency;
+}
+
+export interface IItem {
+  [key: string]: string;
 }
