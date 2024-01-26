@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
 import { createMap, selectStations } from "../utils/codapHelpers";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
-import { kStationsCollectionName } from "../constants";
+import { kStationsCollectionName, geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
 import { IPlace } from "../types";
 import { findNearestActiveStation } from "../utils/getWeatherStations";
@@ -10,7 +10,6 @@ import OpenMapIcon from "../assets/images/icon-map.svg";
 // import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
 import CurrentLocationIcon from "../assets/images/icon-current-location.svg";
-import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 
 import "./location-picker.scss";
 
@@ -26,7 +25,6 @@ export const LocationPicker = () => {
   const locationDivRef = useRef<HTMLDivElement>(null);
   const locationInputEl = useRef<HTMLInputElement>(null);
   const locationSelectionListEl = useRef<HTMLUListElement>(null);
-  const selectedLocation = location;
   const unitDistanceText = units === "standard" ? "mi" : "km";
   const stationDistance = weatherStationDistance && units === "standard"
                             ? Math.round((weatherStationDistance * 0.6 * 10) / 10)
