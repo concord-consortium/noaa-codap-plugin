@@ -1,10 +1,20 @@
 import { Attribute, Collection, DataContext, IDataType, IItem } from "../types";
 import { IResult, codapInterface, createItems, getDataContext } from "@concord-consortium/codap-plugin-api";
-import { DSCollection1, DSCollection2, DSName } from "../constants";
+import { DSCollection1, DSCollection2, DSName, kStationsCollectionName } from "../constants";
 import { useStateContext } from "./use-state";
+import { useEffect } from "react";
+import { createMap, selectStations } from "../utils/codapHelpers";
 
 export const useCODAPApi = () => {
   const {state} = useStateContext();
+
+  useEffect(() => {
+    if (state.weatherStation && state.isMapOpen) {
+      const zoom = state.zoomMap ? 7 : null;
+      createMap(kStationsCollectionName, {width: 500, height: 350}, [state.weatherStation.latitude, state.weatherStation.longitude], zoom);
+      selectStations([state.weatherStation.name]);
+    }
+  }, [state.isMapOpen, state.weatherStation, state.zoomMap]);
 
   const getNoaaDataContextSetupObject = () => {
     return {

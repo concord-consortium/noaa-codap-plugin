@@ -20,7 +20,7 @@ const hasDataset = async (name: string) => {
    return result.success === true;
 };
 
-const createMap = async (name: string, dimensions: IDimensions, center: ILatLong, zoom: number) => {
+const createMap = async (name: string, dimensions: IDimensions, center: ILatLong, zoom: number | null) => {
    let map;
 
    let componentListResult = await codapInterface.sendRequest({
