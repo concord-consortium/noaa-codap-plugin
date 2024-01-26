@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { IFrequency, IRecord, IUnits, IWeatherStation } from "../types";
+import { IFrequency, IRecord, ITimeZone, IUnits, IWeatherStation } from "../types";
 import { frequencyToReportTypeMap, nceiBaseURL } from "../constants";
 import { dataTypeStore } from "./noaaDataTypes";
 
@@ -19,23 +19,22 @@ export const convertUnits = (fromUnitSystem: IUnits, toUnitSystem: IUnits, data:
 
 interface IFormatData {
   data: IRecord[];
-  stationTimezoneOffset?: number;
-  stationTimezoneName?: string;
   units: IUnits;
   frequency: IFrequency;
   weatherStation: IWeatherStation;
+  timezone: ITimeZone;
 }
 
 export const formatData = (props: IFormatData) => {
-  const {data, stationTimezoneOffset, stationTimezoneName, units, frequency, weatherStation} = props;
+  const {data, timezone, units, frequency, weatherStation} = props;
   const database = frequencyToReportTypeMap[frequency];
   let dataRecords: any[] = [];
   data.forEach((r: any) => {
     const aValue = convertNOAARecordToValue(r, weatherStation, database);
     aValue.latitude = weatherStation.latitude;
     aValue.longitude = weatherStation.longitude;
-    aValue["UTC offset"] = stationTimezoneOffset || "";
-    aValue.timezone = stationTimezoneName || "";
+    aValue["UTC offset"] = timezone.gmtOffset;
+    aValue.timezone = timezone.name;
     aValue.elevation = weatherStation.elevation;
     aValue["report type"] = frequency;
     dataRecords.push(aValue);
@@ -51,7 +50,7 @@ export const decodeData = (iField: string, iValue: any, database: string) => {
 };
 
 export const convertNOAARecordToValue = (iRecord: IRecord, weatherStation: IWeatherStation, database: string) => {
-  let out: IRecord = {}; // to-do: add interface / type
+  let out: IRecord = {};
   Object.keys(iRecord).forEach(function (key: any) {
     let value = iRecord[key];
     let dataTypeName;
@@ -84,19 +83,20 @@ interface IComposeURL {
   frequency: IFrequency;
   attributes: string[];
   weatherStation: IWeatherStation;
-  stationTimezoneOffset?: number;
+  gmtOffset: string;
 }
 
 export const composeURL = (props: IComposeURL) => {
-  const { startDate, endDate, frequency, attributes, weatherStation, stationTimezoneOffset } = props;
+  const { startDate, endDate, frequency, attributes, weatherStation, gmtOffset } = props;
   const database = frequencyToReportTypeMap[frequency];
   const format = "YYYY-MM-DDThh:mm:ss";
   let sDate = dayjs(startDate);
   let eDate = dayjs(endDate);
+
   // adjust for local station time
-  if (database === "global-hourly" && stationTimezoneOffset) {
-      sDate = dayjs(startDate).subtract(stationTimezoneOffset, "hour");
-      eDate = dayjs(endDate).subtract(stationTimezoneOffset, "hour").add(1, "day");
+  if (database === "global-hourly") {
+    sDate = dayjs(startDate).subtract(Number(gmtOffset), "hour");
+    eDate = dayjs(endDate).subtract(Number(gmtOffset), "hour").add(1, "day");
   }
   const startDateString = dayjs(sDate).format(format);
   const endDateString = dayjs(eDate).format(format);

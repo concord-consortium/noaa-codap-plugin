@@ -26,7 +26,7 @@ const kInitialDimensions = {
 
 export const App = () => {
   const { state, setState } = useStateContext();
-  const { createNOAAItems } = useCODAPApi();
+  const { filterItems, createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const { showModal } = state;
@@ -52,11 +52,15 @@ export const App = () => {
   };
 
   const fetchSuccessHandler = async (data: any) => {
-    const {stationTimezoneOffset, weatherStation, selectedFrequency, startDate, endDate, units} = state;
-    if (data && weatherStation) {
+    const {startDate, endDate, units, selectedFrequency,
+      weatherStation, timezone} = state;
+    const allDefined = (startDate && endDate && units && selectedFrequency &&
+      weatherStation && timezone);
+
+    if (data && allDefined) {
       const formatDataProps = {
         data,
-        stationTimezoneOffset,
+        timezone,
         weatherStation,
         frequency: selectedFrequency,
         startDate,
@@ -64,11 +68,13 @@ export const App = () => {
         units
       };
       const dataRecords = formatData(formatDataProps);
+      const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
+      const filteredItems = filterItems(items);
       setStatusMessage("Sending weather records to CODAP");
-      await createNOAAItems(dataRecords, getSelectedDataTypes()).then(
+      await createNOAAItems(filteredItems, getSelectedDataTypes()).then(
         function (result: any) {
           setIsFetching(false);
-          setStatusMessage(`Retrieved ${dataRecords.length} cases`);
+          setStatusMessage(`Retrieved ${filteredItems.length} cases`);
           return result;
         },
         function (msg: string) {
@@ -100,9 +106,12 @@ export const App = () => {
   };
 
   const handleGetData = async () => {
-    const { location, startDate, endDate, selectedFrequency, weatherStation, stationTimezoneOffset } = state;
-    const attributes = state.frequencies[selectedFrequency].attrs.map(attr => attr.name);
-    if (location && attributes && startDate && endDate && weatherStation && selectedFrequency) {
+    const { location, startDate, endDate, weatherStation, frequencies,
+      selectedFrequency, timezone } = state;
+    const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
+    const allDefined = (startDate && endDate && location && weatherStation && timezone);
+
+    if (allDefined) {
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
         setStatusMessage("Fetching weather records from NOAA");
@@ -112,7 +121,7 @@ export const App = () => {
           frequency: selectedFrequency,
           weatherStation,
           attributes,
-          stationTimezoneOffset
+          gmtOffset: timezone.gmtOffset
         });
         try {
           const tRequest = new Request(tURL);
@@ -145,7 +154,7 @@ export const App = () => {
     <div className="App">
       <div className="header">
         <span>Retrieve weather data from observing stations.</span>
-        <InfoIcon title="Get further information about this CODAP plugin" onClick={handleOpenInfo}/>
+        <InfoIcon className="info-icon" title="Get further information about this CODAP plugin" onClick={handleOpenInfo}/>
       </div>
       <div className="header-divider" />
       <LocationPicker />

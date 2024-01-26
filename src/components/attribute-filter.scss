@@ -3,7 +3,7 @@ $filter-background-green: rgba(90, 249, 90, 0.25);
 $filter-green: #2dbe5e;
 
 .attribute-filter-container {
-
+  padding-bottom: 16px;
   .table-header {
     color: rgba(0, 0, 0, 0.48);
     font-size: 10px;
@@ -26,6 +26,7 @@ $filter-green: #2dbe5e;
     &.units-header {
       min-width: 36px;
       background-color: rgba(126, 126, 126, 0.3);
+      cursor: pointer;
     }
     &.filter-header {
       width: 41px;
@@ -60,6 +61,7 @@ $filter-green: #2dbe5e;
       color: #177991;
       font-size: 10px;
       box-sizing: border-box;
+      cursor: pointer;
 
       &.filtering {
         background-color: $filter-background-green;
@@ -86,7 +88,7 @@ $filter-green: #2dbe5e;
   }
 }
 
-table tr:nth-child(odd) {
+table tr:nth-child(even) {
   background-color: rgba(216, 216, 216, 0.3);
 }
 
@@ -130,6 +132,7 @@ table tr:nth-child(odd) {
         text-align: right;
         color: #177991;
         margin: 0 3px;
+        cursor: pointer;
       }
       svg {
         margin-right: 3px;
