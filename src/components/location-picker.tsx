@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
-import { createMap, selectStations } from "../utils/codapHelpers";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
-import { kStationsCollectionName, geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
+import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
 import { IPlace, IStation } from "../types";
 import { convertDistanceToStandard, findNearestActiveStations } from "../utils/getWeatherStations";
@@ -31,9 +30,10 @@ export const LocationPicker = () => {
   const stationSelectionListElRef = useRef<HTMLUListElement>(null);
   const firstStationListedRef = useRef<HTMLSpanElement>(null);
   const unitDistanceText = units === "standard" ? "mi" : "km";
-  const stationDistance = weatherStationDistance && units === "standard" ? convertDistanceToStandard(weatherStationDistance) : weatherStationDistance;
-
-
+  const stationDistance =
+          weatherStationDistance === undefined
+            ? 0 : units === "standard" ? convertDistanceToStandard(weatherStationDistance)
+                                        : weatherStationDistance;
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (event.target) {
@@ -212,6 +212,7 @@ export const LocationPicker = () => {
         placeNameSelected(locationPossibilities[selectedLocIdx]);
         setState(draft=>{
           draft.location = locationPossibilities[selectedLocIdx];
+          draft.zoomMap = true;
         });
       }
     }
@@ -220,7 +221,9 @@ export const LocationPicker = () => {
   const handlePlaceNameSelectionKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, index: number) => {
     if (e.key === "Enter") {
       placeNameSelected(locationPossibilities[index-1]);
-
+      setState(draft => {
+        draft.zoomMap = true;
+      });
     }
   };
 
@@ -237,6 +240,9 @@ export const LocationPicker = () => {
         });
       }
       setShowStationSelectionList(false);
+      setState(draft => {
+        draft.zoomMap = false;
+      });
     }
   };
 
@@ -249,6 +255,9 @@ export const LocationPicker = () => {
         draft.weatherStationDistance = stationPossibilities[index].distance;
       });
       setShowStationSelectionList(false);
+      setState(draft => {
+        draft.zoomMap = false;
+      });
     }
   };
 
@@ -277,10 +286,10 @@ export const LocationPicker = () => {
 
   const handleOpenMap = () => {
     if (weatherStation) {
-      createMap(kStationsCollectionName, {width: 500, height: 350}, [weatherStation.latitude, weatherStation.longitude], 7);
-      selectStations([weatherStation.name]);
-    } else if (location) {
-      createMap(kStationsCollectionName, {width: 500, height: 350}, [location.latitude, location.longitude], 7);
+      setState((draft) => {
+        draft.isMapOpen = true;
+        draft.zoomMap = true;
+      });
     }
   };
 

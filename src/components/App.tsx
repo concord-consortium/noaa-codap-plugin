@@ -7,7 +7,7 @@ import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherStations";
-import { createStationsDataset } from "../utils/codapHelpers";
+import { addNotificationHandler, createStationsDataset } from "../utils/codapHelpers";
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { dataTypeStore } from "../utils/noaaDataTypes";
@@ -31,7 +31,6 @@ export const App = () => {
   const { filterItems, createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
-  // const [listenerNotification, setListenerNotification] = useState<string>();
   const { showModal } = state;
   const weatherStations = getWeatherStations();
 
@@ -57,7 +56,7 @@ export const App = () => {
     };
 
     addNotificationHandler("notify",
-      `dataContextChangeNotice[${StationDSName}]`, async (req) => {
+      `dataContextChangeNotice[${StationDSName}]`, async (req: any) => {
         stationSelectionHandler(req);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -138,7 +137,7 @@ export const App = () => {
 
   const handleGetData = async () => {
     const { location, startDate, endDate, weatherStation, frequencies,
-      selectedFrequency, timezone } = state;
+      selectedFrequency, timezone, units } = state;
     const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
     const allDefined = (startDate && endDate && location && weatherStation && timezone);
 
@@ -152,7 +151,8 @@ export const App = () => {
           frequency: selectedFrequency,
           weatherStation,
           attributes,
-          gmtOffset: timezone.gmtOffset
+          gmtOffset: timezone.gmtOffset,
+          units
         });
         try {
           const tRequest = new Request(tURL);

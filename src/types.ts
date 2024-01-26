@@ -119,6 +119,8 @@ export interface IState {
   showModal?: "info" | "data-return-warning";
   timezone?: ITimeZone;
   didUserSelectDate: boolean;
+  isMapOpen: boolean;
+  zoomMap: boolean;
 }
 
 export const unitMap: UnitMap = {
@@ -157,6 +159,8 @@ export const DefaultState: IState = {
                 monthly: {attrs: dailyMonthlyAttrMap, filters: []}},
   units: "standard",
   didUserSelectDate: false,
+  isMapOpen: false,
+  zoomMap: false,
 };
 
 interface IDataTypeUnits {

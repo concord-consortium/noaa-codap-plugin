@@ -84,10 +84,11 @@ interface IComposeURL {
   attributes: string[];
   weatherStation: IWeatherStation;
   gmtOffset: string;
+  units: IUnits;
 }
 
 export const composeURL = (props: IComposeURL) => {
-  const { startDate, endDate, frequency, attributes, weatherStation, gmtOffset } = props;
+  const { startDate, endDate, frequency, attributes, weatherStation, gmtOffset, units } = props;
   const database = frequencyToReportTypeMap[frequency];
   const format = "YYYY-MM-DDThh:mm:ss";
   let sDate = dayjs(startDate);
@@ -108,7 +109,7 @@ export const composeURL = (props: IComposeURL) => {
   const tDataTypeIDClause = `dataTypes=${dataTypes.join()}`;
   const tStartDateClause = `startDate=${startDateString}`;
   const tEndDateClause = `endDate=${endDateString}`;
-  const tUnitClause = `units=metric`;
+  const tUnitClause = `units=${units}`;
   const tFormatClause = "format=json";
 
   let tURL = [nceiBaseURL, [tDatasetIDClause, tStationIDClause, tStartDateClause, tEndDateClause, tFormatClause, tDataTypeIDClause, tUnitClause].join(
