@@ -7,13 +7,13 @@ import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherStations";
-import { addNotificationHandler, createStationsDataset } from "../utils/codapHelpers";
+import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "../utils/codapHelpers";
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { dataTypeStore } from "../utils/noaaDataTypes";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { IDataType } from "../types";
-import { StationDSName } from "../constants";
+import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
 
@@ -36,7 +36,6 @@ export const App = () => {
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
-
 
     const stationSelectionHandler = async(req: any) =>{
       if (req.values.operation === "selectCases") {
@@ -63,9 +62,13 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
+    const minDate = state.startDate || new Date( -5364662060);
+    const maxDate = state.endDate || new Date(Date.now());
     adjustStationDataset(weatherStations); //change max data to "present"
     createStationsDataset(weatherStations); //send weather station data to CODAP
-  },[weatherStations]);
+    guaranteeGlobal(globalMinDate, Number(minDate)/1000);
+    guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
+  },[state.endDate, state.startDate, weatherStations]);
 
   const handleOpenInfo = () => {
     setState(draft => {

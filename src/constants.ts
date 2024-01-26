@@ -133,7 +133,7 @@ export const kWeatherStationCollectionAttrs = [
       name: "isActive",
       formula: `(number(maxdate="present"
                   ? date()
-                  : date(split(maxdate,'-',1), split(maxdate, ""-", 2), split(maxdate, "-", 3))) - wxMinDate)>0 and wxMaxDate-number(date(split(mindate,"-",1), split(mindate, "-", 2), split(mindate, "-", 3)))>0`,
+                  : date(split(maxdate,'-',1), split(maxdate, "-", 2), split(maxdate, "-", 3))) - wxMinDate)>0 and wxMaxDate-number(date(split(mindate,"-",1), split(mindate, "-", 2), split(mindate, "-", 3)))>0`,
       description: "whether the station was active in the Weather Plugin's requested date range",
       _categoryMap: {
           __order: [
