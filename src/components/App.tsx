@@ -13,6 +13,7 @@ import { useCODAPApi } from "../hooks/use-codap-api";
 import { dataTypeStore } from "../utils/noaaDataTypes";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { IDataType } from "../types";
+import { DataReturnWarning } from "./data-return-warning";
 
 import "./App.scss";
 
@@ -173,6 +174,7 @@ export const App = () => {
         <button className="get-data-button" disabled={isFetching} onClick={handleGetData}>Get Data</button>
       </div>
       {showModal === "info" && <InfoModal />}
+      {showModal === "data-return-warning" && <DataReturnWarning />}
     </div>
   );
 };
