@@ -4,7 +4,6 @@ import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
 import WarningIcon from "../../assets/icon-warning.svg";
-import ExitIcon from "../../assets/images/icon-exit.svg";
 import { defaultDates } from "../../constants";
 
 import "./date-range.scss";
@@ -15,7 +14,6 @@ export const DateRange = () => {
   const [selectedCalendar, setSelectedCalendar] = useState<string>(); // "start" | "end"
   const [showCalendars, setShowCalendars] = useState(false);
   const [showWarningIcon, setShowWarningIcon] = useState(false);
-  const [showWarningModal, setShowWarningModal] = useState(false);
   const frequencies = ["hourly", "daily", "monthly"] as IFrequency[];
 
   useEffect(() => {
@@ -77,13 +75,9 @@ export const DateRange = () => {
     setShowCalendars(false);
     setSelectedCalendar(undefined);
     if (showWarningIcon) {
-      setShowWarningModal(true);
-    }
-  };
-
-  const handleOuterModalClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (e.target === e.currentTarget) {
-      setShowWarningModal(false);
+      setState(draft => {
+        draft.showModal = "data-return-warning";
+      });
     }
   };
 
@@ -128,24 +122,6 @@ export const DateRange = () => {
           />
         }
       </div>
-      {
-        showWarningModal &&
-          <div className="warning-modal" onClick={handleOuterModalClick}>
-            <div className="warning-container">
-              <div className="warning-header">
-                <div className="warning-title">Data Return Warning</div>
-                <div className="warning-exit" onClick={() => setShowWarningModal(false)}><ExitIcon/></div>
-              </div>
-              <div className="warning-body">
-                Your current date range is likely to return too many results, which
-                may affect application performance.
-              </div>
-              <div className="warning-footer">
-                <button className="warning-button" onClick={() => setShowWarningModal(false)}>Close</button>
-              </div>
-            </div>
-          </div>
-        }
     </div>
   );
 };
