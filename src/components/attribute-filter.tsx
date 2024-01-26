@@ -196,7 +196,6 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
   // Change filter-operator-selection-container height if window is shorter than dropdown
   useEffect(() => {
     if (showOperatorSelectionModal) {
-      console.log("dropdownBottom && dropdownBottom > windowHeight", dropdownBottom, windowHeight, dropdownBottom && dropdownBottom > windowHeight);
       if (dropdownBottom && dropdownBottom > windowHeight) {
         const cutOffAmount = dropdownBottom - windowHeight;
         setOperatorSelectionListHeight({height: 190 - cutOffAmount - 3});
