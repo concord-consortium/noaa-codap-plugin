@@ -7,13 +7,15 @@ import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset } from "../utils/getWeatherStations";
-import { createStationsDataset } from "../utils/codapHelpers";
+import { addNotificationHandler, createStationsDataset } from "../utils/codapHelpers";
 import weatherStations from "../assets/data/weather-stations.json";
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { dataTypeStore } from "../utils/noaaDataTypes";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { IDataType } from "../types";
+import { StationDSName } from "../constants";
+import { geoLocSearch } from "../utils/geonameSearch";
 
 import "./App.scss";
 
@@ -29,13 +31,41 @@ export const App = () => {
   const { createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
+  // const [listenerNotification, setListenerNotification] = useState<string>();
   const { showModal } = state;
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+
+
+    const stationSelectionHandler = async(req: any) =>{
+      if (req.values.operation === "selectCases") {
+        const result = req.values.result;
+        const myCase = result && result.cases && result.cases[0];
+        if (myCase) {
+          const station = myCase.values;
+          const {latitude, longitude} = station;
+          const locationName = await geoLocSearch(latitude, longitude);
+          setState((draft) => {
+            draft.weatherStation = station;
+            draft.location = {name: locationName, latitude, longitude};
+            draft.weatherStationDistance = 0;
+          });
+        }
+      }
+    };
+
+    addNotificationHandler("notify",
+      `dataContextChangeNotice[${StationDSName}]`, async (req) => {
+        stationSelectionHandler(req);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     adjustStationDataset(weatherStations); //change max data to "present"
     createStationsDataset(weatherStations); //send weather station data to CODAP
-  }, []);
+  },[]);
 
   const handleOpenInfo = () => {
     setState(draft => {

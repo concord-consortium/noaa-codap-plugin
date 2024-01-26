@@ -27,9 +27,9 @@ export const LocationPicker = () => {
   const locationSelectionListEl = useRef<HTMLUListElement>(null);
   const selectedLocation = location;
   const unitDistanceText = units === "standard" ? "mi" : "km";
-  const stationDistance = state.weatherStationDistance && units === "standard"
+  const stationDistance = state.weatherStationDistance !== undefined && units === "standard"
                             ? Math.round((state.weatherStationDistance * 0.6 * 10) / 10)
-                            :state.weatherStationDistance &&  Math.round(state.weatherStationDistance * 10) / 10;
+                            :state.weatherStationDistance !== undefined &&  Math.round(state.weatherStationDistance * 10) / 10;
 
   useEffect(() => {
     if (locationInputEl.current?.value === "") {
@@ -193,7 +193,7 @@ export const LocationPicker = () => {
           <div className="selected-weather-station">
             { state.weatherStation &&
               <>
-                {state.weatherStationDistance &&
+                {state.weatherStationDistance !== undefined &&
                   <span className="station-distance">({stationDistance} {unitDistanceText}) </span>}
                 <span className="station-name">{state.weatherStation?.name}</span>
                 {/* <EditIcon />  hide this for now until implemented*/}
