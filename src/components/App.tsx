@@ -6,9 +6,8 @@ import { AttributesSelector } from "./attribute-selector";
 import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
-import { adjustStationDataset } from "../utils/getWeatherStations";
+import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherStations";
 import { createStationsDataset } from "../utils/codapHelpers";
-import weatherStations from "../assets/data/weather-stations.json";
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { dataTypeStore } from "../utils/noaaDataTypes";
@@ -30,12 +29,16 @@ export const App = () => {
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const { showModal } = state;
+  const weatherStations = getWeatherStations();
 
   useEffect(() => {
     initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+  }, []);
+
+  useEffect(() => {
     adjustStationDataset(weatherStations); //change max data to "present"
     createStationsDataset(weatherStations); //send weather station data to CODAP
-  }, []);
+  },[weatherStations]);
 
   const handleOpenInfo = () => {
     setState(draft => {
