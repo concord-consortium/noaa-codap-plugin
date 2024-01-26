@@ -145,3 +145,13 @@ export const kWeatherStationCollectionAttrs = [
       },
   }
 ];
+
+export const kOffsetMap = {
+  "-4": "AST",
+  "-5": "EST",
+  "-6": "CST",
+  "-7": "MST",
+  "-8": "PST",
+  "-9": "AKST",
+  "-10": "HST"
+};

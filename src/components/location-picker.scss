@@ -192,6 +192,9 @@
           margin-top: 2px;
           margin-left: -37px;
           width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
 
           &.geoname-candidate {
             background-color: #ddeff1;

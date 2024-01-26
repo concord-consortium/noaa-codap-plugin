@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
+import { createMap, selectStations } from "../utils/codapHelpers";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
+import { kStationsCollectionName, geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
 import { IPlace, IStation } from "../types";
 import { convertDistanceToStandard, findNearestActiveStations } from "../utils/getWeatherStations";
@@ -66,6 +68,7 @@ export const LocationPicker = () => {
   }, [isEditing]);
 
   useEffect(() => {
+<<<<<<< HEAD
     const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
     const _endDate = endDate ? endDate : new Date(Date.now());
       if (location) {
@@ -79,6 +82,33 @@ export const LocationPicker = () => {
               draft.weatherStation = stationList[0].station;
               draft.weatherStationDistance = stationList[0].distance;
             });
+        });
+              const fetchTimezone = async (lat: number, long: number) => {
+                let url = `${timezoneServiceURL}?lat=${lat}&lng=${long}&username=${geonamesUser}`;
+                let res = await fetch(url);
+                if (res) {
+                  if (res.ok) {
+                    const timezoneData = await res.json();
+                    const { gmtOffset } = timezoneData as { gmtOffset: keyof typeof kOffsetMap };
+                    setState((draft) => {
+                      draft.timezone = {
+                        gmtOffset,
+                        name: kOffsetMap[gmtOffset]
+                      };
+                    });
+                  } else {
+                    console.warn(res.statusText);
+                  }
+                } else {
+                  console.warn(`Failed to fetch timezone data for ${location}`);
+                }
+              };
+              fetchTimezone(location.latitude, location.longitude);
+            }
+          });
+      } else {
+        setState((draft) => {
+          draft.timezone = undefined;
         });
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -249,7 +279,12 @@ export const LocationPicker = () => {
   };
 
   const handleOpenMap = () => {
-    //send request to CODAP to open map with available weather stations
+    if (weatherStation) {
+      createMap(kStationsCollectionName, {width: 500, height: 350}, [weatherStation.latitude, weatherStation.longitude], 7);
+      selectStations([weatherStation.name]);
+    } else if (location) {
+      createMap(kStationsCollectionName, {width: 500, height: 350}, [location.latitude, location.longitude], 7);
+    }
   };
 
   return (
@@ -295,7 +330,7 @@ export const LocationPicker = () => {
             { location && !isEditing
                 ? <div>
                     <span className="selected-loc-intro">Stations near </span>
-                    <span className="selected-loc-name">{state.location?.name}</span>
+                    <span className="selected-loc-name">{location?.name}</span>
                   </div>
                 : <input ref={locationInputEl} className="location-input" type="text" placeholder={"Enter location or identifier here"}
                     onChange={handleLocationInputChange} onKeyDown={handleInputKeyDown} onBlur={handleLocationInputBlur}/>

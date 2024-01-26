@@ -100,6 +100,11 @@ interface IWeatherStationID {
   id: string;
 }
 
+export interface ITimeZone {
+  gmtOffset: string;
+  name: string;
+}
+
 export interface IState {
   location?: IPlace;
   weatherStation?: IWeatherStation;
@@ -112,8 +117,7 @@ export interface IState {
   endDate?: Date;
   units: IUnits;
   showModal?: "info" | "data-return-warning";
-  stationTimezoneOffset?: number;
-  stationTimezoneName?: string;
+  timezone?: ITimeZone;
   didUserSelectDate: boolean;
 }
 
@@ -133,7 +137,7 @@ export const dailyMonthlyAttrMap: AttrType[] = [
   {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
   {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
   {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
-  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
+  {name: "Average wind speed", abbr: "avgWind", unit: unitMap.speed}
 ];
 
 export const hourlyAttrMap: AttrType[] = [
@@ -148,9 +152,9 @@ export const hourlyAttrMap: AttrType[] = [
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",
-  frequencies: {hourly: {attrs: [], filters: []},
+  frequencies: {hourly: {attrs: hourlyAttrMap, filters: []},
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
-                monthly: {attrs: [], filters: []}},
+                monthly: {attrs: dailyMonthlyAttrMap, filters: []}},
   units: "standard",
   didUserSelectDate: false,
 };
@@ -242,4 +246,8 @@ export interface UnitMap {
 
 export interface IRecord {
   [key: string]: number | string | Date | IWeatherStation | IFrequency;
+}
+
+export interface IItem {
+  [key: string]: string;
 }
