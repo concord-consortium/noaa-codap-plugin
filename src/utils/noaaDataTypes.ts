@@ -8,8 +8,9 @@ import {
 } from "../constants";
 import { Unit, unitMap } from "../types";
 
+type ConvertUnitsFunc = (fromUnit: Unit, toUnit: Unit, value: string) => number;
 interface ConverterMap {
-  [key: string]: null | ((fromUnit: Unit, toUnit: Unit, value: number) => number);
+  [key: string]: null | ConvertUnitsFunc;
 }
 
 const converterMap: ConverterMap = {
@@ -21,42 +22,45 @@ const converterMap: ConverterMap = {
     pressure: null
 };
 
-function convertPrecip(fromUnit: Unit, toUnit: Unit, value: number) {
-    let k = 25.4;
-    if (!convertible(value)) {
-        return value;
-    } else if (fromUnit === "mm" && toUnit === "in") {
-        return value / k;
-    } else if (fromUnit === "in" && toUnit === "mm") {
-        return value * k;
-    } else {
-        return value;
-    }
+function convertPrecip(fromUnit: Unit, toUnit: Unit, value: string) {
+  let k = 25.4;
+  const numValue = Number(value);
+  if (!convertible(value)) {
+    return numValue;
+  } else if (fromUnit === "mm" && toUnit === "in") {
+    return numValue / k;
+  } else if (fromUnit === "in" && toUnit === "mm") {
+    return numValue * k;
+  } else {
+    return numValue;
+  }
 }
 
-function convertTemp(fromUnit: Unit, toUnit: Unit, value: number) {
-    if (!convertible(value)) {
-        return value;
-    } else if (fromUnit === "°C" && toUnit === "°F") {
-        return 1.8*value + 32;
-    } else if (fromUnit === "°F" && toUnit === "°C") {
-        return (value - 32) / 1.8;
-    } else {
-        return value;
-    }
+function convertTemp(fromUnit: Unit, toUnit: Unit, value: string) {
+  const numValue = Number(value);
+  if (!convertible(value)) {
+    return numValue;
+  } else if (fromUnit === "°C" && toUnit === "°F") {
+    return (1.8 * numValue) + 32;
+  } else if (fromUnit === "°F" && toUnit === "°C") {
+    return (numValue - 32) / 1.8;
+  } else {
+    return numValue;
+  }
 }
 
-function convertWindspeed(fromUnit: Unit, toUnit: Unit, value: number) {
-    let k=0.44704;
-    if (!convertible(value)) {
-        return value;
-    } else if (fromUnit === "m/s" && toUnit === "mph") {
-        return value / k;
-    } else if (fromUnit === "mph" && toUnit === "m/s") {
-        return value * k;
-    } else {
-        return value;
-    }
+function convertWindspeed(fromUnit: Unit, toUnit: Unit, value: string) {
+  const numValue = Number(value);
+  let k=0.44704;
+  if (!convertible(value)) {
+    return numValue;
+  } else if (fromUnit === "m/s" && toUnit === "mph") {
+    return numValue / k;
+  } else if (fromUnit === "mph" && toUnit === "m/s") {
+    return numValue * k;
+  } else {
+    return numValue;
+  }
 }
 
 function formatNthCurry(n: number, separator: string, multiplier: number) {
@@ -100,7 +104,7 @@ class NoaaType {
   description: string;
   datasetList: string[];
   decode: undefined | ({ [key: string]: (value: any) => number|undefined });
-  convertUnits: null | ((fromUnit: Unit, toUnit: Unit, value: number) => number);
+  convertUnits: null | ConvertUnitsFunc;
 
   constructor(
       sourceName: string,
@@ -167,6 +171,12 @@ function findAllBySourceName(targetName: string) {
   });
 }
 
+function findByAbbr (abbr: string) {
+  return dataTypes.find(function (dataType) {
+    return abbr === dataType.name;
+  });
+}
+
 function findByName(targetName: string) {
   return dataTypes.find(function (dataType) {
       return targetName === dataType.description;
@@ -188,6 +198,7 @@ const dataTypeStore = {
   findByName,
   findAllByNoaaDataset,
   findAll,
+  findByAbbr
 };
 
 export {NoaaType, dataTypeStore};
