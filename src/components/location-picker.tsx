@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
+import { createMap, selectStations } from "../utils/codapHelpers";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
+import { kStationsCollectionName } from "../constants";
 import { useStateContext } from "../hooks/use-state";
 import { IPlace } from "../types";
 import { findNearestActiveStation } from "../utils/getWeatherStations";
@@ -24,14 +26,11 @@ export const LocationPicker = () => {
   const locationDivRef = useRef<HTMLDivElement>(null);
   const locationInputEl = useRef<HTMLInputElement>(null);
   const locationSelectionListEl = useRef<HTMLUListElement>(null);
+  const selectedLocation = location;
   const unitDistanceText = units === "standard" ? "mi" : "km";
   const stationDistance = weatherStationDistance && units === "standard"
                             ? Math.round((weatherStationDistance * 0.6 * 10) / 10)
                             : weatherStationDistance &&  Math.round(weatherStationDistance * 10) / 10;
-
-  const handleOpenMap = () => {
-    //send request to CODAP to open map with available weather stations
-  };
 
   useEffect(() => {
     if (locationInputEl.current?.value === "") {
@@ -201,6 +200,15 @@ export const LocationPicker = () => {
 
   const handleLocationInputClick = () => {
     setIsEditing(true);
+  };
+
+  const handleOpenMap = () => {
+    if (weatherStation) {
+      createMap(kStationsCollectionName, {width: 500, height: 350}, [weatherStation.latitude, weatherStation.longitude], 7);
+      selectStations([weatherStation.name]);
+    } else if (location) {
+      createMap(kStationsCollectionName, {width: 500, height: 350}, [location.latitude, location.longitude], 7);
+    }
   };
 
   return (

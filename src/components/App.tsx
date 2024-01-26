@@ -154,7 +154,7 @@ export const App = () => {
     <div className="App">
       <div className="header">
         <span>Retrieve weather data from observing stations.</span>
-        <InfoIcon title="Get further information about this CODAP plugin" onClick={handleOpenInfo}/>
+        <InfoIcon className="info-icon" title="Get further information about this CODAP plugin" onClick={handleOpenInfo}/>
       </div>
       <div className="header-divider" />
       <LocationPicker />

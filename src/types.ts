@@ -137,7 +137,7 @@ export const dailyMonthlyAttrMap: AttrType[] = [
   {name: "Average temperature", abbr: "tAvg", unit: unitMap.temperature},
   {name: "Precipitation", abbr: "precip", unit: unitMap.precipitation},
   {name: "Snowfall", abbr: "snow", unit: unitMap.precipitation},
-  {name: "Average windspeed", abbr: "avgWind", unit: unitMap.speed}
+  {name: "Average wind speed", abbr: "avgWind", unit: unitMap.speed}
 ];
 
 export const hourlyAttrMap: AttrType[] = [
@@ -152,9 +152,9 @@ export const hourlyAttrMap: AttrType[] = [
 
 export const DefaultState: IState = {
   selectedFrequency: "daily",
-  frequencies: {hourly: {attrs: [], filters: []},
+  frequencies: {hourly: {attrs: hourlyAttrMap, filters: []},
                 daily: {attrs: dailyMonthlyAttrMap, filters: []},
-                monthly: {attrs: [], filters: []}},
+                monthly: {attrs: dailyMonthlyAttrMap, filters: []}},
   units: "standard",
   didUserSelectDate: false,
 };
