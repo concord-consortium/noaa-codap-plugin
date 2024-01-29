@@ -3,20 +3,6 @@ import { IFrequency, IRecord, ITimeZone, IUnits, IWeatherStation } from "../type
 import { frequencyToReportTypeMap, nceiBaseURL } from "../constants";
 import { dataTypeStore } from "./noaaDataTypes";
 
-export const convertUnits = (fromUnitSystem: IUnits, toUnitSystem: IUnits, data: any) => {
-  if (fromUnitSystem === toUnitSystem) {
-    return;
-  }
-  data.forEach(function (item: any) {
-    Object.keys(item).forEach(function (prop) {
-      let dataType = dataTypeStore.findByName(prop);
-      if (dataType && dataType.convertUnits) {
-        item[prop] = dataType.convertUnits(dataType.units[fromUnitSystem], dataType.units[toUnitSystem], item[prop]);
-      }
-    });
-  });
-};
-
 interface IFormatData {
   data: IRecord[];
   units: IUnits;
@@ -26,7 +12,7 @@ interface IFormatData {
 }
 
 export const formatData = (props: IFormatData) => {
-  const {data, timezone, units, frequency, weatherStation} = props;
+  const {data, timezone, frequency, weatherStation} = props;
   const database = frequencyToReportTypeMap[frequency];
   let dataRecords: any[] = [];
   data.forEach((r: any) => {
@@ -39,12 +25,11 @@ export const formatData = (props: IFormatData) => {
     aValue["report type"] = frequency;
     dataRecords.push(aValue);
   });
-  convertUnits("metric", units, dataRecords);
   return dataRecords;
 };
 
 export const decodeData = (iField: string, iValue: any, database: string) => {
-  let dataType = dataTypeStore.findByName(iField);
+  let dataType = dataTypeStore.findByAbbr(iField);
   let decoder = dataType && dataType.decode && dataType.decode[database];
   return decoder ? decoder(iValue) : iValue;
 };

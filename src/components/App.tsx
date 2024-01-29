@@ -10,7 +10,6 @@ import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherSta
 import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "../utils/codapHelpers";
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
-import { dataTypeStore } from "../utils/noaaDataTypes";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { IDataType } from "../types";
 import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
@@ -23,7 +22,7 @@ const kPluginName = "NOAA Weather Station Data";
 const kVersion = "0014";
 const kInitialDimensions = {
   width: 360,
-  height: 650
+  height: 670
 };
 
 export const App = () => {
@@ -49,6 +48,7 @@ export const App = () => {
             draft.weatherStation = station;
             draft.location = {name: locationName, latitude, longitude};
             draft.weatherStationDistance = 0;
+            draft.zoomMap = false;
           });
         }
       }
@@ -76,14 +76,6 @@ export const App = () => {
     });
   };
 
-  const getSelectedDataTypes = () => {
-    const { selectedFrequency } = state;
-    const attributes = state.frequencies[selectedFrequency].attrs.map(attr => attr.name);
-    return attributes.map((attr) => {
-      return dataTypeStore.findByName(attr);
-    }) as IDataType[];
-  };
-
   const fetchSuccessHandler = async (data: any) => {
     const {startDate, endDate, units, selectedFrequency,
       weatherStation, timezone} = state;
@@ -104,7 +96,7 @@ export const App = () => {
       const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
       const filteredItems = filterItems(items);
       setStatusMessage("Sending weather records to CODAP");
-      await createNOAAItems(filteredItems, getSelectedDataTypes()).then(
+      await createNOAAItems(filteredItems).then(
         function (result: any) {
           setIsFetching(false);
           setStatusMessage(`Retrieved ${filteredItems.length} cases`);

@@ -255,3 +255,7 @@ export interface IRecord {
 export interface IItem {
   [key: string]: string;
 }
+
+export interface ICODAPItem {
+  [key: string]: any;
+}

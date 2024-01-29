@@ -289,9 +289,13 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
     } else if (operator === "aboveMean" || operator === "belowMean") {
       return null;
     } else if (operator === "top" || operator === "bottom") {
-      return <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value" defaultValue={`${currentFilterValue || "100"}`}></input>;
+      return  <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value"
+                    defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "100"}`}>
+              </input>;
     } else {
-      return <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value" defaultValue={`${currentFilterValue} ${currentAttr?.unit[units]}`}></input>;
+      return  <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value"
+                defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "100"} ${currentAttr?.unit[units]}`}>
+              </input>;
     }
   };
 
