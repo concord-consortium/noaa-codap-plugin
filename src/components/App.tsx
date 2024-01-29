@@ -23,7 +23,7 @@ const kPluginName = "NOAA Weather Station Data";
 const kVersion = "0014";
 const kInitialDimensions = {
   width: 360,
-  height: 650
+  height: 670
 };
 
 export const App = () => {
