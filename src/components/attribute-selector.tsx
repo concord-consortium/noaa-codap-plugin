@@ -49,18 +49,18 @@ export const AttributesSelector = () => {
   const toggleAttributeSelect = (e: React.MouseEvent<HTMLDivElement>) => {
     const selectedAttrName = e.currentTarget.textContent;
     const selectedAttr = attributeList.find(a => a.name === selectedAttrName);
+    console.log("selectedAttr", selectedAttr, selectedAttrName);
     const filters = selectedAttrsAndFiltersForFrequency.filters;
     setState(draft => {
       const draftAttrNames = draft.frequencies[selectedFrequency].attrs.map(a => {return a.name;});
       if (allSelected) {
         setAllSelected(false);
         draft.frequencies[selectedFrequency] = {attrs: [], filters};
-        selectedAttr && draft.frequencies[selectedFrequency].attrs.push(selectedAttr);
-      }
-      if (selectedAttrName) {
-        const attrIndex = draftAttrNames.indexOf(selectedAttrName);
-        if (selectedAttr) {
+        selectedAttr !== undefined && draft.frequencies[selectedFrequency].attrs.push(selectedAttr);
+      } else if (selectedAttrName) {
+        if (selectedAttr !== undefined) {
           if (draftAttrNames.includes(selectedAttrName)) {
+            const attrIndex = draftAttrNames.indexOf(selectedAttrName);
             if (attrIndex !== null) {
               draft.frequencies[selectedFrequency].attrs.splice(attrIndex, 1);
             }
@@ -69,6 +69,7 @@ export const AttributesSelector = () => {
           }
         }
       }
+      console.log("draft.frequencies[selectedFrequency].attrs", draft.frequencies[selectedFrequency].attrs);
     });
   };
 
