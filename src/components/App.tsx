@@ -14,6 +14,8 @@ import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { StationDSName } from "../constants";
 import { geoLocSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
+import { IState } from "../types";
+import dayjs from "dayjs";
 
 import "./App.scss";
 
@@ -33,7 +35,40 @@ export const App = () => {
   const weatherStations = getWeatherStations();
 
   useEffect(() => {
-    initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+
+    const init = async () => {
+      const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions}) as IState;
+      console.log("newState", newState);
+
+      // plugins in new documents return an empty object for the interactive state
+      // so ignore the new state and keep the default starting state in that case
+      if (Object.keys(newState || {}).length > 0) {
+        setState((draft) => {
+          draft.location = newState.location;
+          draft.selectedFrequency = newState.selectedFrequency;
+          draft.units = newState.units;
+          draft.timezone = newState.timezone;
+          draft.weatherStation = newState.weatherStation;
+          draft.weatherStationDistance = newState.weatherStationDistance;
+          draft.zoomMap = newState.zoomMap;
+          draft.frequencies = newState.frequencies;
+          draft.didUserSelectDate = newState.didUserSelectDate;
+          draft.isMapOpen = newState.isMapOpen;
+
+          // to-do: convert end date and start date strings to Date objects
+          const startDateStr = newState.startDate;
+          const endDateStr = newState.endDate;
+          if (startDateStr) {
+            draft.startDate = dayjs(startDateStr).toDate();
+          }
+          if (endDateStr) {
+            draft.endDate = dayjs(endDateStr).toDate();
+          }
+        });
+      }
+    };
+
+    init();
 
 
     const stationSelectionHandler = async(req: any) =>{
