@@ -206,8 +206,10 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
   },[dropdownBottom, showOperatorSelectionModal, windowHeight]);
 
   const handleReset = () => {
-    setOperator(currentAttrFilter?.operator || "equals");
-    setShowFilterModal(false);
+    setOperator("equals");
+    if (filterValueInputElRef.current) {
+      filterValueInputElRef.current.value = "0";
+    }
   };
 
   const handleSubmitFilter = () => {
@@ -294,7 +296,7 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
               </input>;
     } else {
       return  <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value"
-                defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "100"} ${currentAttr?.unit[units]}`}>
+                defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "0"} ${currentAttr?.unit[units]}`}>
               </input>;
     }
   };
