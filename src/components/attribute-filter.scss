@@ -105,7 +105,7 @@ table tr:nth-child(even) {
   box-sizing: border-box;
 
   &.wide {
-    width: 217px;
+    width: 227px;
     left: 114px;
   }
 
@@ -208,7 +208,7 @@ table tr:nth-child(even) {
   }
 
   .filter-operator-selection-container {
-    width: 165px;
+    width: 180px;
     max-height: 190px;
     padding: 9px 12px 5px 9px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
@@ -226,6 +226,7 @@ table tr:nth-child(even) {
       height: 176px;
       outline: none;
       box-sizing: border-box;
+      overflow: hidden;
 
       option {
         font-family: "Montserrat", sans-serif;
