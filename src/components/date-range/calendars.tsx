@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import "./calendars.scss";
 import { Calendar } from "./calendar";
 import { useStateContext } from "../../hooks/use-state";
+
+import "./calendars.scss";
 
 interface ICalendarsProps {
   selectedCalendar: string | undefined;
