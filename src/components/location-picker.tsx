@@ -342,7 +342,7 @@ export const LocationPicker = () => {
                     onChange={handleLocationInputChange} onKeyDown={handleInputKeyDown} onBlur={handleLocationInputBlur}/>
             }
           </div>
-          { isEditing &&
+          {(isEditing && locationInputEl.current?.value !=="") &&
             <ul
               ref={locationSelectionListElRef}
               className={classnames("location-selection-list", {"show": showSelectionList, "short" : showMapButton})}
