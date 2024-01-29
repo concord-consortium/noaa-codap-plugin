@@ -22,6 +22,7 @@ export const LocationPicker = () => {
   const [stationPossibilities, setStationPossibilities] = useState<IStation[]>([]);
   const [showStationSelectionList, setShowStationSelectionList] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoveredStationIndex, setStationHoveredIndex] = useState<number | null>(null);
   const [arrowedIndex, setArrowedIndex] = useState<number>(-1);
   const [distanceWidth, setDistanceWidth] = useState<number>(0);
   const locationDivRef = useRef<HTMLDivElement>(null);
@@ -150,7 +151,7 @@ export const LocationPicker = () => {
       draft.weatherStation = station;
     });
     setShowStationSelectionList(false);
-    setHoveredIndex(null);
+    setStationHoveredIndex(null);
     setArrowedIndex(-1);
   };
 
@@ -193,6 +194,10 @@ export const LocationPicker = () => {
 
   const handleLocationHover = (index: number | null) => {
     setHoveredIndex(index);
+  };
+
+  const handleStationHover = (index: number | null) => {
+    setStationHoveredIndex(index);
   };
 
   const handleLocationInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -314,8 +319,9 @@ export const LocationPicker = () => {
                   const stationDistanceText = units === "standard" ? convertDistanceToStandard(station.distance) : station.distance;
                   return (
                     <li key={`${station}-${idx}`} data-ix={`${idx}`} value={station.station.ICAO}
-                        className={classnames("station-selection", {"selected-station": station.station.name === state.weatherStation?.name})}
-                        onMouseOver={()=>handleLocationHover(idx)} onClick={(e)=>handleStationSelection(e)} onKeyDown={(e)=>handleStationSelectionKeyDown(e,idx)}>
+                        className={classnames("station-selection", {"station-candidate": hoveredStationIndex === idx},
+                                    {"selected-station": station.station.name === state.weatherStation?.name})}
+                        onMouseOver={()=>handleStationHover(idx)} onClick={(e)=>handleStationSelection(e)} onKeyDown={(e)=>handleStationSelectionKeyDown(e,idx)}>
                       <span className="station-distance" ref={idx === 0 ? firstStationListedRef : null} style={{width: distanceWidth}}>
                         {stationDistanceText.toFixed(1)} {unitDistanceText} {idx === 0 && `from ${state.location?.name}`}
                       </span>

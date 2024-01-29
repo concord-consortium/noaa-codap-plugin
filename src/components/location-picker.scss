@@ -93,6 +93,9 @@
             color: $teal-dark-75;
             min-width: 120px;
           }
+          &.station-candidate {
+            background-color: #ddeff1;
+          }
           &.selected-station {
             background-color: $teal-medium;
           }
