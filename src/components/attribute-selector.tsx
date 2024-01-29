@@ -49,7 +49,6 @@ export const AttributesSelector = () => {
   const toggleAttributeSelect = (e: React.MouseEvent<HTMLDivElement>) => {
     const selectedAttrName = e.currentTarget.textContent;
     const selectedAttr = attributeList.find(a => a.name === selectedAttrName);
-    console.log("selectedAttr", selectedAttr, selectedAttrName);
     const filters = selectedAttrsAndFiltersForFrequency.filters;
     setState(draft => {
       const draftAttrNames = draft.frequencies[selectedFrequency].attrs.map(a => {return a.name;});
@@ -69,7 +68,6 @@ export const AttributesSelector = () => {
           }
         }
       }
-      console.log("draft.frequencies[selectedFrequency].attrs", draft.frequencies[selectedFrequency].attrs);
     });
   };
 
