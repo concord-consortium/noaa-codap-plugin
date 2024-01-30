@@ -316,11 +316,15 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
       return null;
     } else if (operator === "top" || operator === "bottom") {
       return  <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value"
-                    defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "100"}`}>
+                    defaultValue={`${Array.isArray(currentFilterValue)
+                                      ? currentFilterValue[0]
+                                      : currentFilterValue ? currentFilterValue : "100"}`}>
               </input>;
     } else {
       return  <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value"
-                defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "0"} ${currentAttr?.unit[units]}`}>
+                defaultValue={`${Array.isArray(currentFilterValue)
+                                  ? currentFilterValue[0]
+                                  : currentFilterValue ? currentFilterValue : "0"} ${currentAttr?.unit[units]}`}>
               </input>;
     }
   };
