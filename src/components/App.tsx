@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { initializePlugin } from "@concord-consortium/codap-plugin-api";
+import { ClientNotification, addComponentListener, initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
 import { AttributesSelector } from "./attribute-selector";
@@ -57,7 +57,17 @@ export const App = () => {
     addNotificationHandler("notify",
       `dataContextChangeNotice[${StationDSName}]`, async (req: any) => {
         stationSelectionHandler(req);
-      });
+    });
+    const createMapListener = (listenerRes: ClientNotification) => {
+      const { values } = listenerRes;
+      if (values.operation === "delete" && values.type === "DG.MapView" && values.name === "US Weather Stations") {
+        setState((draft) => {
+          draft.zoomMap = false;
+          draft.isMapOpen = false;
+        });
+      }
+    };
+    addComponentListener(createMapListener);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
