@@ -28,14 +28,14 @@ const kInitialDimensions = {
 
 export const App = () => {
   const { state, setState } = useStateContext();
+  const { showModal, location, weatherStation, startDate, endDate, timezone, units, frequencies, selectedFrequency } = state;
   const { filterItems, createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
-  const { showModal } = state;
+  const [disableGetData, setDisableGetData] = useState(true);
   const weatherStations = getWeatherStations();
 
   useEffect(() => {
-
     const init = async () => {
       const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions}) as IState;
       // plugins in new documents return an empty object for the interactive state
@@ -64,7 +64,6 @@ export const App = () => {
         });
       }
     };
-
     init();
 
     const stationSelectionHandler = async(req: any) =>{
@@ -84,11 +83,11 @@ export const App = () => {
         }
       }
     };
-
     addNotificationHandler("notify",
       `dataContextChangeNotice[${StationDSName}]`, async (req: any) => {
         stationSelectionHandler(req);
     });
+
     const createMapListener = (listenerRes: ClientNotification) => {
       const { values } = listenerRes;
       if (values.operation === "delete" && values.type === "DG.MapView" && values.name === "US Weather Stations") {
@@ -103,13 +102,18 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    const minDate = state.startDate || new Date( -5364662060);
-    const maxDate = state.endDate || new Date(Date.now());
+    const allDefined = (startDate && endDate && location && weatherStation);
+    setDisableGetData(!allDefined);
+  }, [location, endDate, startDate, weatherStation, timezone, units]);
+
+  useEffect(() => {
+    const minDate = startDate || new Date( -5364662060);
+    const maxDate = endDate || new Date(Date.now());
     adjustStationDataset(weatherStations); //change max data to "present"
     createStationsDataset(weatherStations); //send weather station data to CODAP
     guaranteeGlobal(globalMinDate, Number(minDate)/1000);
     guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
-  },[state.endDate, state.startDate, weatherStations]);
+  }, [endDate, startDate, weatherStations]);
 
   const handleOpenInfo = () => {
     setState(draft => {
@@ -118,8 +122,6 @@ export const App = () => {
   };
 
   const fetchSuccessHandler = async (data: any) => {
-    const {startDate, endDate, units, selectedFrequency,
-      weatherStation, timezone} = state;
     const allDefined = (startDate && endDate && units && selectedFrequency &&
       weatherStation && timezone);
 
@@ -172,12 +174,9 @@ export const App = () => {
   };
 
   const handleGetData = async () => {
-    const { location, startDate, endDate, weatherStation, frequencies,
-      selectedFrequency, timezone, units } = state;
-    const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
     const allDefined = (startDate && endDate && location && weatherStation && timezone);
-
     if (allDefined) {
+      const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
         setStatusMessage("Fetching weather records from NOAA");
@@ -229,12 +228,12 @@ export const App = () => {
       <DateRange />
       <div className="divider" />
       <AttributesSelector />
-      {state.frequencies[state.selectedFrequency].attrs.length > 0 && <AttributeFilter />}
+      {frequencies[selectedFrequency].attrs.length > 0 && <AttributeFilter />}
       <div className="divider" />
       <div className="footer">
         {statusMessage && <div>{statusMessage}</div>}
         <button className="clear-data-button">Clear Data</button>
-        <button className="get-data-button" disabled={isFetching} onClick={handleGetData}>Get Data</button>
+        <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}>Get Data</button>
       </div>
       {showModal === "info" && <InfoModal />}
       {showModal === "data-return-warning" && <DataReturnWarning />}
