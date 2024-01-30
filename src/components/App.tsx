@@ -15,6 +15,8 @@ import { IDataType } from "../types";
 import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
+import { IState } from "../types";
+import dayjs from "dayjs";
 
 import "./App.scss";
 
@@ -34,7 +36,37 @@ export const App = () => {
   const weatherStations = getWeatherStations();
 
   useEffect(() => {
-    initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+
+    const init = async () => {
+      const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions}) as IState;
+      // plugins in new documents return an empty object for the interactive state
+      // so ignore the new state and keep the default starting state in that case
+      if (Object.keys(newState || {}).length > 0) {
+        setState((draft) => {
+          draft.location = newState.location;
+          draft.selectedFrequency = newState.selectedFrequency;
+          draft.units = newState.units;
+          draft.timezone = newState.timezone;
+          draft.weatherStation = newState.weatherStation;
+          draft.weatherStationDistance = newState.weatherStationDistance;
+          draft.zoomMap = newState.zoomMap;
+          draft.frequencies = newState.frequencies;
+          draft.didUserSelectDate = newState.didUserSelectDate;
+          draft.isMapOpen = newState.isMapOpen;
+
+          const startDateStr = newState.startDate;
+          const endDateStr = newState.endDate;
+          if (startDateStr) {
+            draft.startDate = dayjs(startDateStr).toDate();
+          }
+          if (endDateStr) {
+            draft.endDate = dayjs(endDateStr).toDate();
+          }
+        });
+      }
+    };
+
+    init();
 
     const stationSelectionHandler = async(req: any) =>{
       if (req.values.operation === "selectCases") {
