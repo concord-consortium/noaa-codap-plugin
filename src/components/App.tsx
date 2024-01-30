@@ -29,14 +29,19 @@ const kInitialDimensions = {
   height: 670
 };
 
+interface IStatus {
+  status: "success" | "error" | "fetching";
+  message: string;
+  icon: JSX.Element;
+}
+
 export const App = () => {
   const { state, setState } = useStateContext();
   const { showModal, location, weatherStation, startDate, endDate, timezone, units, frequencies, selectedFrequency } = state;
   const { filterItems, createNOAAItems } = useCODAPApi();
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusIcon, setStatusIcon] = useState<JSX.Element>();
   const [isFetching, setIsFetching] = useState(false);
   const [disableGetData, setDisableGetData] = useState(true);
+  const [status, setStatus] = useState<IStatus>();
   const weatherStations = getWeatherStations();
 
   useEffect(() => {
@@ -142,25 +147,38 @@ export const App = () => {
       const dataRecords = formatData(formatDataProps);
       const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
       const filteredItems = filterItems(items);
-      setStatusMessage("Sending weather records to CODAP");
-      setStatusIcon(<ProgressIcon className="status-icon progress"/>);
+      setStatus({
+        status: "fetching",
+        message: "Sending weather records to CODAP",
+        icon: <ProgressIcon className="status-icon progress"/>
+      });
       await createNOAAItems(filteredItems).then(
         function (result: any) {
           setIsFetching(false);
-          setStatusIcon(<DoneIcon className="done"/>);
-          setStatusMessage(`Retrieved ${filteredItems.length} cases`);
+          setStatus({
+            status: "success",
+            message: `Retrieved ${filteredItems.length} cases`,
+            icon: <DoneIcon/>
+          });
           return result;
         },
         function (msg: string) {
+          console.log("Error creating items: " + msg);
           setIsFetching(false);
-          setStatusIcon(<WarningIcon className="warning"/>);
-          setStatusMessage(msg);
+          setStatus({
+            status: "error",
+            message: msg,
+            icon: <WarningIcon/>
+          });
         }
       );
     } else {
       setIsFetching(false);
-      setStatusIcon(<WarningIcon className="warning"/>);
-      setStatusMessage("No data retrieved");
+      setStatus({
+        status: "error",
+        message: "No data retrieved",
+        icon: <WarningIcon/>
+      });
     }
   };
 
@@ -178,8 +196,11 @@ export const App = () => {
     console.warn("fetchErrorHandler: " + resultText);
     console.warn("fetchErrorHandler error: " + message);
     setIsFetching(false);
-    setStatusIcon(<WarningIcon className="warning"/>);
-    setStatusMessage(message);
+    setStatus({
+      status: "error",
+      message,
+      icon: <WarningIcon/>
+    });
   };
 
   const handleGetData = async () => {
@@ -188,8 +209,11 @@ export const App = () => {
       const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
-        setStatusMessage("Fetching weather records from NOAA");
-        setStatusIcon(<ProgressIcon className="progress"/>);
+        setStatus({
+          status: "fetching",
+          message: "Fetching weather records from NOAA",
+          icon: <ProgressIcon className="status-icon progress"/>
+        });
         const tURL = composeURL({
           startDate,
           endDate,
@@ -221,7 +245,11 @@ export const App = () => {
           fetchErrorHandler(error, msg);
         }
       } else {
-        setStatusMessage("End date must be on or after start date");
+        setStatus({
+          status: "error",
+          message: "End date must be on or after start date",
+          icon: <WarningIcon/>
+        });
       }
     }
   };
@@ -242,8 +270,8 @@ export const App = () => {
       <div className="divider" />
       <div className={"footer"}>
         <div className="status-update">
-          <div className="status-icon">{statusIcon ? statusIcon: ""}</div>
-          <div className="status-message">{statusMessage ? statusMessage: ""}</div>
+          <div className="status-icon">{status ? status.icon : ""}</div>
+          <div className={`status-message ${status?.status}`}>{status ? status.message : ""}</div>
         </div>
         <div>
           <button className="clear-data-button">Clear Data</button>
