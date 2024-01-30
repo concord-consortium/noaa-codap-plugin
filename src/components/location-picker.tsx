@@ -320,7 +320,7 @@ export const LocationPicker = () => {
                   return (
                     <li key={`${station}-${idx}`} data-ix={`${idx}`} value={station.station.ICAO}
                         className={classnames("station-selection", {"station-candidate": hoveredStationIndex === idx},
-                                    {"selected-station": station.station.name === state.weatherStation?.name})}
+                                    {"selected-station": (station.station.name === state.weatherStation?.name && hoveredStationIndex === null)})}
                         onMouseOver={()=>handleStationHover(idx)} onClick={(e)=>handleStationSelection(e)} onKeyDown={(e)=>handleStationSelectionKeyDown(e,idx)}>
                       <span className="station-distance" ref={idx === 0 ? firstStationListedRef : null} style={{width: distanceWidth}}>
                         {stationDistanceText.toFixed(1)} {unitDistanceText} {idx === 0 && `from ${state.location?.name}`}
