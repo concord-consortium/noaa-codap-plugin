@@ -3,7 +3,7 @@ import { IFrequency } from "../../types";
 import { useStateContext } from "../../hooks/use-state";
 import { DateSelector } from "./date-selector";
 import { Calendars } from "./calendars";
-import WarningIcon from "../../assets/icon-warning.svg";
+import WarningIcon from "../../assets/images/icon-warning.svg";
 import { defaultDates } from "../../constants";
 
 import "./date-range.scss";

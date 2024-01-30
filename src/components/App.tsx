@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import { ClientNotification, addComponentListener, initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
@@ -8,14 +9,16 @@ import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherStations";
 import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "../utils/codapHelpers";
-import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
 import { IState } from "../types";
-import dayjs from "dayjs";
+import InfoIcon from "../assets/images/icon-info.svg";
+import ProgressIcon from "../assets/images/icon-progress-indicator.svg";
+import DoneIcon from "../assets/images/icon-done.svg";
+import WarningIcon from "../assets/images/icon-warning.svg";
 
 import "./App.scss";
 
@@ -31,6 +34,7 @@ export const App = () => {
   const { showModal, location, weatherStation, startDate, endDate, timezone, units, frequencies, selectedFrequency } = state;
   const { filterItems, createNOAAItems } = useCODAPApi();
   const [statusMessage, setStatusMessage] = useState("");
+  const [statusIcon, setStatusIcon] = useState<JSX.Element>();
   const [isFetching, setIsFetching] = useState(false);
   const [disableGetData, setDisableGetData] = useState(true);
   const weatherStations = getWeatherStations();
@@ -139,19 +143,23 @@ export const App = () => {
       const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
       const filteredItems = filterItems(items);
       setStatusMessage("Sending weather records to CODAP");
+      setStatusIcon(<ProgressIcon className="status-icon progress"/>);
       await createNOAAItems(filteredItems).then(
         function (result: any) {
           setIsFetching(false);
+          setStatusIcon(<DoneIcon className="done"/>);
           setStatusMessage(`Retrieved ${filteredItems.length} cases`);
           return result;
         },
         function (msg: string) {
           setIsFetching(false);
+          setStatusIcon(<WarningIcon className="warning"/>);
           setStatusMessage(msg);
         }
       );
     } else {
       setIsFetching(false);
+      setStatusIcon(<WarningIcon className="warning"/>);
       setStatusMessage("No data retrieved");
     }
   };
@@ -170,6 +178,7 @@ export const App = () => {
     console.warn("fetchErrorHandler: " + resultText);
     console.warn("fetchErrorHandler error: " + message);
     setIsFetching(false);
+    setStatusIcon(<WarningIcon className="warning"/>);
     setStatusMessage(message);
   };
 
@@ -180,6 +189,7 @@ export const App = () => {
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
         setStatusMessage("Fetching weather records from NOAA");
+        setStatusIcon(<ProgressIcon className="progress"/>);
         const tURL = composeURL({
           startDate,
           endDate,
@@ -230,10 +240,15 @@ export const App = () => {
       <AttributesSelector />
       {frequencies[selectedFrequency].attrs.length > 0 && <AttributeFilter />}
       <div className="divider" />
-      <div className="footer">
-        {statusMessage && <div>{statusMessage}</div>}
-        <button className="clear-data-button">Clear Data</button>
-        <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}>Get Data</button>
+      <div className={"footer"}>
+        <div className="status-update">
+          <div className="status-icon">{statusIcon ? statusIcon: ""}</div>
+          <div className="status-message">{statusMessage ? statusMessage: ""}</div>
+        </div>
+        <div>
+          <button className="clear-data-button">Clear Data</button>
+          <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}>Get Data</button>
+        </div>
       </div>
       {showModal === "info" && <InfoModal />}
       {showModal === "data-return-warning" && <DataReturnWarning />}

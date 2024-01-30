@@ -38,33 +38,65 @@
     display: flex;
     align-items: center;
     width: 100%;
-    justify-content: right;
+    justify-content: space-between;
     margin: 21px 0;
 
-    .clear-data-button {
-      border: none;
-      color: #72bfca;
-      background-color: white;
-      cursor: pointer;
-    }
-    .get-data-button {
-      width: 82px;
-      height: 31px;
-      margin: 0 0 0 13px;
-      border-radius: 3px;
-      border: solid 1px #000;
-      background-color: #fff;
-      color: #000;
-      margin-right: 15px;
-      cursor: pointer;
-      &:hover {
-        background-color: rgba(198, 198, 198, 0.25);
+    .status-update {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      .status-icon {
+        .progress {
+         animation-name: spin;
+         animation-duration: 1000ms;
+         animation-iteration-count: infinite;
+
+        }
       }
-      &:disabled {
-        cursor: default;
-        color: #a2a2a2;
-        border: solid 1px #a2a2a2;
+      .status-message {
+        width: 120px;
       }
     }
+
+      .clear-data-button {
+        border: none;
+        color: #72bfca;
+        background-color: white;
+        cursor: pointer;
+        font-family: 'Montserrat', sans-serif;
+        padding: 0px;
+      }
+      .get-data-button {
+        width: 82px;
+        height: 31px;
+        margin-left: 13px;
+        border-radius: 3px;
+        border: solid 1px #000;
+        background-color: #fff;
+        color: #000;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        &:hover {
+          background-color: rgba(198, 198, 198, 0.25);
+        }
+        &:disabled {
+          cursor: default;
+          color: #a2a2a2;
+          border: solid 1px #a2a2a2;
+        }
+      }
+
+
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
