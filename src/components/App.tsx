@@ -163,7 +163,6 @@ export const App = () => {
           return result;
         },
         function (msg: string) {
-          console.log("Error creating items: " + msg);
           setIsFetching(false);
           setStatus({
             status: "error",
