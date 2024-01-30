@@ -57,6 +57,9 @@
       color: #000;
       margin-right: 15px;
       cursor: pointer;
+      &:hover {
+        background-color: rgba(198, 198, 198, 0.25);
+      }
       &:disabled {
         cursor: default;
         color: #a2a2a2;
