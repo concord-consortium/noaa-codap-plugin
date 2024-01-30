@@ -11,7 +11,6 @@ import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "
 import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
-import { IDataType } from "../types";
 import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
