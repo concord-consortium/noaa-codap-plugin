@@ -147,6 +147,7 @@ export const dailyMonthlyAttrMap: AttrType[] = [
 
 export const hourlyAttrMap: AttrType[] = [
   {name: "Dew Point", abbr: "Dew", unit: unitMap.temperature},
+  {name: "Visibility", abbr: "Vis", unit: unitMap.distance},
   {name: "Barometric Pressure at sea level", abbr: "Pressure", unit: unitMap.pressure},
   {name: "Air temperature", abbr: "Temp", unit: unitMap.temperature},
   {name: "Wind direction", abbr: "WDir", unit: unitMap.angle},

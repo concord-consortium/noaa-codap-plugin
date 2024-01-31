@@ -15,12 +15,26 @@ interface ConverterMap {
 
 const converterMap: ConverterMap = {
     angle: null,
-    distance: null,
+    distance: convertVis,
     temperature: convertTemp,
     precipitation: convertPrecip,
     speed: convertWindspeed,
     pressure: null
 };
+
+function convertVis(fromUnit: Unit, toUnit: Unit, value: string) {
+  let k = 0.9144;
+  const numValue = Number(value);
+  if (!convertible(value)) {
+    return numValue;
+  } else if (fromUnit === "m" && toUnit === "yd") {
+    return numValue / k;
+  } else if (fromUnit === "yd" && toUnit === "m") {
+    return numValue * k;
+  } else {
+    return numValue;
+  }
+}
 
 function convertPrecip(fromUnit: Unit, toUnit: Unit, value: string) {
   let k = 25.4;
@@ -151,7 +165,7 @@ const dataTypes = [
       {"global-hourly": extractHourlyPressure}),
   new NoaaType("TMP", "temp", kUnitTypeTemp, "Air temperature",
       ["global-hourly"], {"global-hourly": extractHourlyTemp}),
-  new NoaaType("VIS", "vis", kUnitTypeDistance, "Visibility",
+  new NoaaType("VIS", "Vis", kUnitTypeDistance, "Visibility",
       ["global-hourly"], {"global-hourly": extractHourlyVisibility}),
   new NoaaType("WND", "WDir", kUnitTypeAngle, "Wind direction",
       ["global-hourly"], {"global-hourly": extractHourlyWindDirection}),
