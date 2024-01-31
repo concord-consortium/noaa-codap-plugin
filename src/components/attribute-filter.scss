@@ -124,6 +124,7 @@ table tr:nth-child(even) {
       flex-direction: row;
       align-items: center;
       justify-content: flex-end;
+      cursor: pointer;
 
       .filter-operator{
         font-family: "Montserrat", sans-serif;
@@ -189,6 +190,7 @@ table tr:nth-child(even) {
       background-color: #fff;
       font-size: 12px;
       font-weight: 500;
+      cursor: pointer;
 
       &.reset {
         border: none;
