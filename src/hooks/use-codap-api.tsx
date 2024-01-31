@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useStateContext } from "./use-state";
 import { Attribute, Collection, DataContext, ICODAPItem, IDataType, IItem } from "../types";
 import { IResult, codapInterface, createItems, getAllItems, getDataContext } from "@concord-consortium/codap-plugin-api";
-import { DSCollection1, DSCollection2, DSName, kStationsCollectionName } from "../constants";
+import { DSCollection1, DSCollection2, DSName, kStationsDatasetName } from "../constants";
 import { clearData, createMap, selectStations } from "../utils/codapHelpers";
 import { dataTypeStore } from "../utils/noaaDataTypes";
 
@@ -15,7 +15,7 @@ export const useCODAPApi = () => {
   useEffect(() => {
     if (weatherStation && isMapOpen) {
       const zoom = zoomMap ? 7 : null;
-      createMap(kStationsCollectionName, {width: 500, height: 350}, [weatherStation.latitude, weatherStation.longitude], zoom);
+      createMap(kStationsDatasetName, {width: 500, height: 350}, [weatherStation.latitude, weatherStation.longitude], zoom);
       selectStations([weatherStation.name]);
     }
   }, [isMapOpen, weatherStation, zoomMap]);
