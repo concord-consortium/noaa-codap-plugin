@@ -60,7 +60,6 @@ export const App = () => {
           draft.zoomMap = newState.zoomMap;
           draft.frequencies = newState.frequencies;
           draft.didUserSelectDate = newState.didUserSelectDate;
-          draft.showMapButton = newState.showMapButton;
           draft.isMapOpen = newState.isMapOpen;
 
           const startDateStr = newState.startDate;

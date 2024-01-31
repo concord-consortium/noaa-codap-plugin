@@ -14,7 +14,8 @@ import "./location-picker.scss";
 
 export const LocationPicker = () => {
   const {state, setState} = useStateContext();
-  const {units, location, weatherStation, weatherStationDistance, startDate, endDate, showMapButton} = state;
+  const {units, location, weatherStation, weatherStationDistance, startDate, endDate} = state;
+  const [showMapButton, setShowMapButton] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
   const [showSelectionList, setShowSelectionList] = useState(false);
@@ -66,6 +67,12 @@ export const LocationPicker = () => {
       locationInputEl.current?.focus();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (location) {
+      setShowMapButton(true);
+    }
+  }, [location]);
 
   useEffect(() => {
     const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
@@ -136,10 +143,10 @@ export const LocationPicker = () => {
   const placeNameSelected = (place: IPlace | undefined) => {
     setState(draft => {
       draft.location = place;
-      draft.showMapButton = true;
     });
     setShowSelectionList(false);
     setIsEditing(false);
+    setShowMapButton(true);
     setLocationPossibilities([]);
     setHoveredIndex(null);
     setArrowedIndex(-1);
@@ -272,8 +279,8 @@ export const LocationPicker = () => {
       geoLocSearch(lat, long).then((currPosName) => {
         setState(draft => {
           draft.location = {name: currPosName, latitude: lat, longitude: long};
-          draft.showMapButton = true;
         });
+        setShowMapButton(true);
         setIsEditing(false);
         setShowSelectionList(false);
       });
