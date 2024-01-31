@@ -1,6 +1,6 @@
 @import "./vars.scss";
-$filter-background-green: rgba(90, 249, 90, 0.25);
-$filter-background-green-hover: rgba(90, 249, 90, 0.5);
+$filter-background-green-25: rgba(90, 249, 90, 0.25);
+$filter-background-green-60: rgba(90, 249, 90, 0.6);
 
 $filter-green: #2dbe5e;
 
@@ -29,6 +29,10 @@ $filter-green: #2dbe5e;
       min-width: 36px;
       background-color: rgba(126, 126, 126, 0.3);
       cursor: pointer;
+      &:hover {
+        background-color: rgba(126, 126, 126, 0.6);
+        color: white;
+      }
     }
     &.filter-header {
       width: 41px;
@@ -66,18 +70,18 @@ $filter-green: #2dbe5e;
       cursor: pointer;
 
       &.filtering {
-        background-color: $filter-background-green;
+        background-color: $filter-background-green-25;
         color: $filter-green;
       }
       &.has-filter {
-        background-color: $filter-background-green;
+        background-color: $filter-background-green-25;
         color: $filter-green;
         &:hover {
-          background-color: $filter-background-green-hover;
+          background-color: $filter-background-green-60;
         }
       }
       &:hover {
-        background-color: $teal-light;
+        background-color: $teal-light-60;
       }
       .filter-value-container {
         display: flex;
