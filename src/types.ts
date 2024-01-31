@@ -124,6 +124,7 @@ export interface IState {
   didUserSelectDate: boolean;
   isMapOpen: boolean;
   zoomMap: boolean;
+  showMapButton?: boolean;
 }
 
 export const unitMap: UnitMap = {
