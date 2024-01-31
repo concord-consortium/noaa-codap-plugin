@@ -157,7 +157,7 @@ const dataTypes = [
       ["global-hourly"], {"global-hourly": extractHourlyWindDirection}),
   new NoaaType("WND", "wSpeed", kUnitTypeSpeed, "Wind speed",
       ["global-hourly"], {"global-hourly": extractHourlyWindspeed}),
-  new NoaaType("AA1", "precip", kUnitTypePrecip, "Precipitation in last hour",
+  new NoaaType("AA1", "Precip", kUnitTypePrecip, "Precipitation in last hour",
       ["global-hourly"], {"global-hourly": extractHourlyPrecipitation}),
 ];
 
