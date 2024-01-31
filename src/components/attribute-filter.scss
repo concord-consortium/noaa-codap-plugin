@@ -1,5 +1,7 @@
 @import "./vars.scss";
-$filter-background-green: rgba(90, 249, 90, 0.25);
+$filter-background-green-25: rgba(90, 249, 90, 0.25);
+$filter-background-green-60: rgba(90, 249, 90, 0.6);
+
 $filter-green: #2dbe5e;
 
 .attribute-filter-container {
@@ -27,6 +29,10 @@ $filter-green: #2dbe5e;
       min-width: 36px;
       background-color: rgba(126, 126, 126, 0.3);
       cursor: pointer;
+      &:hover {
+        background-color: rgba(126, 126, 126, 0.6);
+        color: white;
+      }
     }
     &.filter-header {
       width: 41px;
@@ -64,12 +70,18 @@ $filter-green: #2dbe5e;
       cursor: pointer;
 
       &.filtering {
-        background-color: $filter-background-green;
+        background-color: $filter-background-green-25;
         color: $filter-green;
       }
       &.has-filter {
-        background-color: $filter-background-green;
+        background-color: $filter-background-green-25;
         color: $filter-green;
+        &:hover {
+          background-color: $filter-background-green-60;
+        }
+      }
+      &:hover {
+        background-color: $teal-light-60;
       }
       .filter-value-container {
         display: flex;
@@ -124,6 +136,7 @@ table tr:nth-child(even) {
       flex-direction: row;
       align-items: center;
       justify-content: flex-end;
+      cursor: pointer;
 
       .filter-operator{
         font-family: "Montserrat", sans-serif;
@@ -189,6 +202,7 @@ table tr:nth-child(even) {
       background-color: #fff;
       font-size: 12px;
       font-weight: 500;
+      cursor: pointer;
 
       &.reset {
         border: none;
@@ -209,7 +223,7 @@ table tr:nth-child(even) {
 
   .filter-operator-selection-container {
     width: 180px;
-    max-height: 190px;
+    max-height: 210px;
     padding: 9px 12px 5px 9px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
     background-color: #fff;
@@ -223,7 +237,7 @@ table tr:nth-child(even) {
     .operator-selection {
       border: none;
       width: 100%;
-      height: 176px;
+      height: 192px;
       outline: none;
       box-sizing: border-box;
       overflow: hidden;

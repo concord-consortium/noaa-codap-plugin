@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import { ClientNotification, addComponentListener, initializePlugin } from "@concord-consortium/codap-plugin-api";
 import { LocationPicker } from "./location-picker";
 import { DateRange } from "./date-range/date-range";
@@ -8,13 +9,16 @@ import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset, calculateDistance, getWeatherStations } from "../utils/getWeatherStations";
 import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "../utils/codapHelpers";
-import InfoIcon from "../assets/images/icon-info.svg";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
-// import { IDataType } from "../types";
 import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch, geoNameSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
+import { IState } from "../types";
+import InfoIcon from "../assets/images/icon-info.svg";
+import ProgressIcon from "../assets/images/icon-progress-indicator.svg";
+import DoneIcon from "../assets/images/icon-done.svg";
+import WarningIcon from "../assets/images/icon-warning.svg";
 
 import "./App.scss";
 
@@ -25,16 +29,51 @@ const kInitialDimensions = {
   height: 670
 };
 
+interface IStatus {
+  status: "success" | "error" | "fetching";
+  message: string;
+  icon: JSX.Element;
+}
+
 export const App = () => {
   const { state, setState } = useStateContext();
+  const { showModal, location, weatherStation, startDate, endDate, timezone, units, frequencies, selectedFrequency } = state;
   const { filterItems, createNOAAItems } = useCODAPApi();
-  const [statusMessage, setStatusMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
-  const { showModal } = state;
+  const [disableGetData, setDisableGetData] = useState(true);
+  const [status, setStatus] = useState<IStatus>();
   const weatherStations = getWeatherStations();
 
   useEffect(() => {
-    initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+    const init = async () => {
+      const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions}) as IState;
+      // plugins in new documents return an empty object for the interactive state
+      // so ignore the new state and keep the default starting state in that case
+      if (Object.keys(newState || {}).length > 0) {
+        setState((draft) => {
+          draft.location = newState.location;
+          draft.selectedFrequency = newState.selectedFrequency;
+          draft.units = newState.units;
+          draft.timezone = newState.timezone;
+          draft.weatherStation = newState.weatherStation;
+          draft.weatherStationDistance = newState.weatherStationDistance;
+          draft.zoomMap = newState.zoomMap;
+          draft.frequencies = newState.frequencies;
+          draft.didUserSelectDate = newState.didUserSelectDate;
+          draft.isMapOpen = newState.isMapOpen;
+
+          const startDateStr = newState.startDate;
+          const endDateStr = newState.endDate;
+          if (startDateStr) {
+            draft.startDate = dayjs(startDateStr).toDate();
+          }
+          if (endDateStr) {
+            draft.endDate = dayjs(endDateStr).toDate();
+          }
+        });
+      }
+    };
+    init();
 
     const stationSelectionHandler = async(req: any) =>{
       if (req.values.operation === "selectCases") {
@@ -56,11 +95,11 @@ export const App = () => {
         }
       }
     };
-
     addNotificationHandler("notify",
       `dataContextChangeNotice[${StationDSName}]`, async (req: any) => {
         stationSelectionHandler(req);
     });
+
     const createMapListener = (listenerRes: ClientNotification) => {
       const { values } = listenerRes;
       if (values.operation === "delete" && values.type === "DG.MapView" && values.name === "US Weather Stations") {
@@ -75,13 +114,18 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    const minDate = state.startDate || new Date( -5364662060);
-    const maxDate = state.endDate || new Date(Date.now());
+    const allDefined = (startDate && endDate && location && weatherStation);
+    setDisableGetData(!allDefined);
+  }, [location, endDate, startDate, weatherStation, timezone, units]);
+
+  useEffect(() => {
+    const minDate = startDate || new Date( -5364662060);
+    const maxDate = endDate || new Date(Date.now());
     adjustStationDataset(weatherStations); //change max data to "present"
     createStationsDataset(weatherStations); //send weather station data to CODAP
     guaranteeGlobal(globalMinDate, Number(minDate)/1000);
     guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
-  },[state.endDate, state.startDate, weatherStations]);
+  }, [endDate, startDate, weatherStations]);
 
   const handleOpenInfo = () => {
     setState(draft => {
@@ -90,8 +134,6 @@ export const App = () => {
   };
 
   const fetchSuccessHandler = async (data: any) => {
-    const {startDate, endDate, units, selectedFrequency,
-      weatherStation, timezone} = state;
     const allDefined = (startDate && endDate && units && selectedFrequency &&
       weatherStation && timezone);
 
@@ -108,21 +150,37 @@ export const App = () => {
       const dataRecords = formatData(formatDataProps);
       const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
       const filteredItems = filterItems(items);
-      setStatusMessage("Sending weather records to CODAP");
+      setStatus({
+        status: "fetching",
+        message: "Sending weather records to CODAP",
+        icon: <ProgressIcon className="status-icon progress"/>
+      });
       await createNOAAItems(filteredItems).then(
         function (result: any) {
           setIsFetching(false);
-          setStatusMessage(`Retrieved ${filteredItems.length} cases`);
+          setStatus({
+            status: "success",
+            message: `Retrieved ${filteredItems.length} cases`,
+            icon: <DoneIcon/>
+          });
           return result;
         },
         function (msg: string) {
           setIsFetching(false);
-          setStatusMessage(msg);
+          setStatus({
+            status: "error",
+            message: msg,
+            icon: <WarningIcon/>
+          });
         }
       );
     } else {
       setIsFetching(false);
-      setStatusMessage("No data retrieved");
+      setStatus({
+        status: "error",
+        message: "No data retrieved",
+        icon: <WarningIcon/>
+      });
     }
   };
 
@@ -140,19 +198,24 @@ export const App = () => {
     console.warn("fetchErrorHandler: " + resultText);
     console.warn("fetchErrorHandler error: " + message);
     setIsFetching(false);
-    setStatusMessage(message);
+    setStatus({
+      status: "error",
+      message,
+      icon: <WarningIcon/>
+    });
   };
 
   const handleGetData = async () => {
-    const { location, startDate, endDate, weatherStation, frequencies,
-      selectedFrequency, timezone, units } = state;
-    const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
     const allDefined = (startDate && endDate && location && weatherStation && timezone);
-
     if (allDefined) {
+      const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
       const isEndDateAfterStartDate = endDate.getTime() >= startDate.getTime();
       if (isEndDateAfterStartDate) {
-        setStatusMessage("Fetching weather records from NOAA");
+        setStatus({
+          status: "fetching",
+          message: "Fetching weather records from NOAA",
+          icon: <ProgressIcon className="status-icon progress"/>
+        });
         const tURL = composeURL({
           startDate,
           endDate,
@@ -184,7 +247,11 @@ export const App = () => {
           fetchErrorHandler(error, msg);
         }
       } else {
-        setStatusMessage("End date must be on or after start date");
+        setStatus({
+          status: "error",
+          message: "End date must be on or after start date",
+          icon: <WarningIcon/>
+        });
       }
     }
   };
@@ -201,12 +268,17 @@ export const App = () => {
       <DateRange />
       <div className="divider" />
       <AttributesSelector />
-      {state.frequencies[state.selectedFrequency].attrs.length > 0 && <AttributeFilter />}
+      {frequencies[selectedFrequency].attrs.length > 0 && <AttributeFilter />}
       <div className="divider" />
-      <div className="footer">
-        {statusMessage && <div>{statusMessage}</div>}
-        <button className="clear-data-button">Clear Data</button>
-        <button className="get-data-button" disabled={isFetching} onClick={handleGetData}>Get Data</button>
+      <div className={"footer"}>
+        <div className="status-update">
+          <div className="status-icon">{status ? status.icon : ""}</div>
+          <div className={`status-message ${status?.status}`}>{status ? status.message : ""}</div>
+        </div>
+        <div>
+          <button className="clear-data-button">Clear Data</button>
+          <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}>Get Data</button>
+        </div>
       </div>
       {showModal === "info" && <InfoModal />}
       {showModal === "data-return-warning" && <DataReturnWarning />}

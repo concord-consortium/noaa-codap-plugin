@@ -11,7 +11,9 @@ import {
   operatorSymbolMap,
   operatorTextMap,
   dailyMonthlyAttrMap,
-  hourlyAttrMap
+  hourlyAttrMap,
+  IAboveMeanFilter,
+  IBelowMeanFilter
 } from "../types";
 import EditIcon from "../assets/images/icon-edit.svg";
 
@@ -39,14 +41,13 @@ export const AttributeFilter = () => {
   }, [attrMap, frequencies, selectedFrequency]);
 
   useEffect(()=>{
-    const hasFilters = selectedAttrMap.some(selectedAttr => {
+    const anyFilters = selectedAttrMap.some(selectedAttr => {
       const filter = frequencies[selectedFrequency].filters.find(f => f.attribute === selectedAttr.name);
-      return filter !== undefined;
+      const notAllFilter = frequencies[selectedFrequency].filters.find(f => f.operator !== "all");
+      return filter !== undefined || notAllFilter !== undefined;
     });
 
-    if (hasFilters) {
-      setHasFilter(true);
-    }
+      setHasFilter(anyFilters);
   },[frequencies, selectedAttrMap, selectedFrequency]);
 
   const handleFilterClick = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
@@ -83,10 +84,10 @@ export const AttributeFilter = () => {
               let filterValue;
               const attrFilter = frequencies[selectedFrequency].filters.find(f => f.attribute === attr.name);
               if (attrFilter) {
-                const filterAboveOrBelowMean = (attrFilter.operator === "aboveMean" || attrFilter?.operator === "belowMean");
+                const noValueFilter = (attrFilter.operator === "aboveMean" || attrFilter.operator === "belowMean" || attrFilter.operator === "all") ;
                 filterValue = attributeToFilter === attr && showFilterModal
                   ? "--"
-                  : filterAboveOrBelowMean
+                  : noValueFilter
                       ? `${operatorTextMap[attrFilter.operator]}`
                       : attrFilter.operator === "between"
                           ? `${attrFilter.lowerValue} ${attr.unit[units]} - ${attrFilter.upperValue} ${attr.unit[units]}`
@@ -103,7 +104,7 @@ export const AttributeFilter = () => {
                   <td className="filter-abbr">{attr.abbr}</td>
                   <td className="filter-units" >{attr.unit[units]}</td>
                   <td className={classnames("filter-filter", {"filtering": idx === filteringIndex && showFilterModal,
-                                              "has-filter": !showFilterModal && attrFilter})}
+                                              "has-filter": attrFilter && attrFilter.operator !== "all"})}
                       onClick={(e)=>handleFilterClick(e,idx)}>
                     <div className="filter-value-container">
                       <span>{filterValue}</span>
@@ -140,7 +141,7 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
   const {frequencies, units, selectedFrequency} = state;
   const currentAttr = frequencies[selectedFrequency].attrs.find(a => a.name === attr.name);
   const currentAttrFilter = frequencies[selectedFrequency].filters.find(f => f.attribute === attr.name);
-  const noValueFilter = currentAttrFilter?.operator === "aboveMean" || currentAttrFilter?.operator === "belowMean";
+  const noValueFilter = currentAttrFilter?.operator === "aboveMean" || currentAttrFilter?.operator === "belowMean" || currentAttrFilter?.operator === "all";
   const currentFilterValue: number | [number, number] | undefined  =
           (currentAttrFilter && !noValueFilter)
             ? currentAttrFilter?.operator === "between"
@@ -198,78 +199,94 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
     if (showOperatorSelectionModal) {
       if (dropdownBottom && dropdownBottom > windowHeight) {
         const cutOffAmount = dropdownBottom - windowHeight;
-        setOperatorSelectionListHeight({height: 190 - cutOffAmount - 3});
+        setOperatorSelectionListHeight({height: 206 - cutOffAmount - 3});
       } else {
-        setOperatorSelectionListHeight({height: 190});
+        setOperatorSelectionListHeight({height: 206});
       }
     }
   },[dropdownBottom, showOperatorSelectionModal, windowHeight]);
 
   const handleReset = () => {
-    setOperator("equals");
+    setOperator("all");
     if (filterValueInputElRef.current) {
-      filterValueInputElRef.current.value = "0";
+      filterValueInputElRef.current.value = "";
     }
   };
 
   const handleSubmitFilter = () => {
-    switch (operator) {
-      case "between":
-        if (filterLowerValueInputElRef.current && filterUpperValueInputElRef.current) {
-          const lowerInputValue = parseFloat(filterLowerValueInputElRef.current.value);
-          const upperInputValue = parseFloat(filterUpperValueInputElRef.current.value);
-          setState(draft => {
-            const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
-            if (existingFilter) {
-              (existingFilter as IBetweenFilter).operator = operator;
-              (existingFilter as IBetweenFilter).lowerValue = lowerInputValue;
-              (existingFilter as IBetweenFilter).upperValue = upperInputValue;
-            } else {
+    setState(draft => {
+      const existingFilter = frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
+      const attrFilterIndex = existingFilter && frequencies[selectedFrequency].filters.indexOf(existingFilter);
+      const existingFilterDraft = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
+      if (existingFilter) {
+        switch (operator) {
+          case "between":
+            if (filterLowerValueInputElRef.current && filterUpperValueInputElRef.current) {
+              const lowerInputValue = parseFloat(filterLowerValueInputElRef.current.value);
+              const upperInputValue = parseFloat(filterUpperValueInputElRef.current.value);
+              (existingFilterDraft as IBetweenFilter).operator = operator;
+              (existingFilterDraft as IBetweenFilter).lowerValue = lowerInputValue;
+              (existingFilterDraft as IBetweenFilter).upperValue = upperInputValue;
+            }
+            break;
+          case "top":
+          case "bottom":
+            if (filterValueTopBottomInputElRef.current) {
+              const inputValue = parseFloat(filterValueTopBottomInputElRef.current.value);
+              (existingFilterDraft as ITopFilter | IBottomFilter).operator = operator;
+              (existingFilterDraft as ITopFilter | IBottomFilter).value = inputValue;
+            }
+            break;
+          case "aboveMean":
+          case "belowMean":
+            (existingFilterDraft as IAboveMeanFilter | IBelowMeanFilter).operator = operator;
+            break;
+          case "all":
+            if (attrFilterIndex !== undefined) {
+              draft.frequencies[selectedFrequency].filters.splice(attrFilterIndex, 1);
+            }
+            break;
+          default:
+            if (filterValueInputElRef.current) {
+              const inputValue = parseFloat(filterValueInputElRef.current.value);
+              (existingFilterDraft as ISingleValueFilter).operator = operator;
+              (existingFilterDraft as ISingleValueFilter).value = inputValue;
+            }
+        }
+      } else {
+        switch (operator) {
+          case "between":
+            if (filterLowerValueInputElRef.current && filterUpperValueInputElRef.current) {
+              const lowerInputValue = parseFloat(filterLowerValueInputElRef.current.value);
+              const upperInputValue = parseFloat(filterUpperValueInputElRef.current.value);
               draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator, lowerValue: lowerInputValue, upperValue: upperInputValue});
             }
-          });
-        }
-        break;
-      case "top":
-      case "bottom":
-        if (filterValueTopBottomInputElRef.current) {
-          const inputValue = parseFloat(filterValueTopBottomInputElRef.current.value);
-          setState(draft => {
-            const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
-            if (existingFilter) {
-              (existingFilter as ITopFilter | IBottomFilter).operator = operator;
-              (existingFilter as ITopFilter | IBottomFilter).value = inputValue;
-            } else {
+            break;
+          case "top":
+          case "bottom":
+            if (filterValueTopBottomInputElRef.current) {
+              const inputValue = parseFloat(filterValueTopBottomInputElRef.current.value);
               draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator, value: inputValue});
+
             }
-          });
-        }
-        break;
-      case "aboveMean":
-      case "belowMean":
-        setState(draft => {
-          const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
-          if (existingFilter) {
-            existingFilter.operator = operator;
-          } else {
+            break;
+          case "aboveMean":
+          case "belowMean":
             draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator});
-          }
-        });
-        break;
-      default:
-        if (filterValueInputElRef.current) {
-          const inputValue = parseFloat(filterValueInputElRef.current.value);
-          setState(draft => {
-            const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
-            if (existingFilter) {
-              (existingFilter as ISingleValueFilter).operator = operator;
-              (existingFilter as ISingleValueFilter).value = inputValue;
-            } else {
+            break;
+          case "all":
+            if (attrFilterIndex !== undefined) {
+              draft.frequencies[selectedFrequency].filters.splice(attrFilterIndex, 1);
+            }
+            break;
+          default:
+            if (filterValueInputElRef.current) {
+              const inputValue = parseFloat(filterValueInputElRef.current.value);
               draft.frequencies[selectedFrequency].filters.push({attribute: attr.name, operator, value: inputValue});
             }
-          });
         }
-    }
+      }
+    });
     setShowFilterModal(false);
   };
 
@@ -288,15 +305,19 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
           </input>
         </div>
       );
-    } else if (operator === "aboveMean" || operator === "belowMean") {
+    } else if (operator === "aboveMean" || operator === "belowMean" || operator === "all") {
       return null;
     } else if (operator === "top" || operator === "bottom") {
       return  <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value"
-                    defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "100"}`}>
+                    defaultValue={`${Array.isArray(currentFilterValue)
+                                      ? currentFilterValue[0]
+                                      : currentFilterValue ? currentFilterValue : "100"}`}>
               </input>;
     } else {
       return  <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value"
-                defaultValue={`${Array.isArray(currentFilterValue) ? currentFilterValue[0] : "0"} ${currentAttr?.unit[units]}`}>
+                defaultValue={`${Array.isArray(currentFilterValue)
+                                  ? currentFilterValue[0]
+                                  : currentFilterValue ? currentFilterValue : "0"} ${currentAttr?.unit[units]}`}>
               </input>;
     }
   };
@@ -333,7 +354,7 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
       </div>
       {showOperatorSelectionModal &&
         <div ref={operatorSelectionModalRef} className="filter-operator-selection-container" style={operatorSelectionListHeight}>
-          <select className="operator-selection" size={11} onChange={handleSelectFilterOperator}>
+          <select className="operator-selection" size={12} onChange={handleSelectFilterOperator}>
             <option value="equals">{operatorTextMap.equals} ...</option>
             <option value="doesNotEqual">{operatorTextMap.doesNotEqual} ...</option>
             <option value="greaterThan">{operatorTextMap.greaterThan} ...</option>
@@ -345,6 +366,7 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
             <option value="bottom">{operatorTextMap.bottom} ...</option>
             <option value="aboveMean">{operatorTextMap.aboveMean}</option>
             <option value="belowMean">{operatorTextMap.belowMean}</option>
+            <option value="all">{operatorTextMap.all}</option>
           </select>
         </div>
       }

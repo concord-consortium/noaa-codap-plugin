@@ -8,11 +8,11 @@ export interface AttrType {
 }
 
 export type TOperators = "equals" | "doesNotEqual" | "greaterThan" | "greaterThanOrEqualTo" | "lessThan"
-                            | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean";
+                            | "lessThanOrEqualTo" | "between" | "top" | "bottom" | "aboveMean" | "belowMean" | "all";
 
 export const operatorTextMap = {equals: "equals", doesNotEqual: "does not equal", greaterThan: "is greater than", greaterThanOrEqualTo: "is greater than or equal to",
 lessThan: "is less than", lessThanOrEqualTo: "is less than or equal to", between: "between", top: "top", bottom: "bottom",
-aboveMean: "above mean", belowMean: "below mean"};
+aboveMean: "above mean", belowMean: "below mean", all: "all"};
 export const operatorSymbolMap = {equals: "=", doesNotEqual: "≠", greaterThan: ">", greaterThanOrEqualTo: ">=", lessThan: "<", lessThanOrEqualTo: "<="};
 
 export interface IBaseFilter {
@@ -61,8 +61,11 @@ export interface IAboveMeanFilter extends IBaseFilter {
 export interface IBelowMeanFilter extends IBaseFilter {
   operator: "belowMean",
 }
+export interface IAllFilter extends IBaseFilter {
+  operator: "all",
+}
 export type ISingleValueFilter =IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | ITopFilter | IBottomFilter;
-export type IFilter = IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter;
+export type IFilter = IEqualsFilter | IDoesNotEqualFilter | IGreaterThanFilter | IGreaterThanOrEqualToFilter | ILessThanFilter | ILessThanOrEqualToFilter | IBetweenFilter | ITopFilter | IBottomFilter | IAboveMeanFilter | IBelowMeanFilter | IAllFilter;
 
 export interface IPlace {
   name: string;
