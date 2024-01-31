@@ -7,7 +7,7 @@ const kDefaultMaxRows = 4;
 const kGeonamesUser = "codap";
 
 
-async function geoNameSearch(searchString: string, maxRows?: number): Promise<IPlace[] | undefined> {
+export const geoNameSearch = async (searchString: string, maxRows?: number): Promise<IPlace[] | undefined> =>{
   const userClause = `username=${kGeonamesUser}`;
   const countryClause = "country=US";
   const maxRowsClause = `maxRows=${maxRows || kDefaultMaxRows}`;
@@ -34,7 +34,7 @@ async function geoNameSearch(searchString: string, maxRows?: number): Promise<IP
       });
     }
   }
-}
+};
 
 export const autoComplete = async(inputEl: HTMLInputElement) => {
   let thisQuery = inputEl.value;

@@ -14,7 +14,7 @@ import "./location-picker.scss";
 
 export const LocationPicker = () => {
   const {state, setState} = useStateContext();
-  const {units, location, weatherStation, weatherStationDistance, startDate, endDate} = state;
+  const {units, location, weatherStation, weatherStationDistance, startDate, endDate, didUserSelectStationFromMap} = state;
   const [showMapButton, setShowMapButton] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
@@ -71,7 +71,7 @@ export const LocationPicker = () => {
   useEffect(() => {
     const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
     const _endDate = endDate ? endDate : new Date(Date.now());
-    if (location) {
+    if (location && !didUserSelectStationFromMap) {
       findNearestActiveStations(location.latitude, location.longitude, _startDate, _endDate)
         .then((stationList: IStation[]) => {
           if (stationList) {
@@ -110,7 +110,7 @@ export const LocationPicker = () => {
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[endDate, isEditing, location, startDate]);
+  },[endDate, isEditing, location, startDate, didUserSelectStationFromMap]);
 
   useEffect(() => {
     if (showStationSelectionList) {
@@ -137,6 +137,7 @@ export const LocationPicker = () => {
   const placeNameSelected = (place: IPlace | undefined) => {
     setState(draft => {
       draft.location = place;
+      draft.didUserSelectStationFromMap = false;
     });
     setShowSelectionList(false);
     setIsEditing(false);
@@ -149,6 +150,7 @@ export const LocationPicker = () => {
   const stationSelected = (station: IWeatherStation | undefined) => {
     setState(draft => {
       draft.weatherStation = station;
+      draft.didUserSelectStationFromMap = false;
     });
     setShowStationSelectionList(false);
     setStationHoveredIndex(null);
@@ -218,6 +220,7 @@ export const LocationPicker = () => {
         setState(draft=>{
           draft.location = locationPossibilities[selectedLocIdx];
           draft.zoomMap = true;
+          draft.didUserSelectStationFromMap = false;
         });
       }
     }
@@ -240,6 +243,7 @@ export const LocationPicker = () => {
         const selectedStation = stationPossibilities[selectedLocIdx].station;
         stationSelected(selectedStation);
         setState(draft => {
+          draft.didUserSelectStationFromMap = false;
           draft.weatherStation = selectedStation;
           draft.weatherStationDistance = stationPossibilities[selectedLocIdx].distance;
         });
@@ -273,6 +277,7 @@ export const LocationPicker = () => {
       geoLocSearch(lat, long).then((currPosName) => {
         setState(draft => {
           draft.location = {name: currPosName, latitude: lat, longitude: long};
+          draft.didUserSelectStationFromMap = false;
         });
         setShowMapButton(true);
         setIsEditing(false);

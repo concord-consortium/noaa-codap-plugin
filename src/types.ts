@@ -121,6 +121,7 @@ export interface IState {
   didUserSelectDate: boolean;
   isMapOpen: boolean;
   zoomMap: boolean;
+  didUserSelectStationFromMap: boolean;
 }
 
 export const unitMap: UnitMap = {
@@ -161,6 +162,7 @@ export const DefaultState: IState = {
   didUserSelectDate: false,
   isMapOpen: false,
   zoomMap: false,
+  didUserSelectStationFromMap: false,
 };
 
 interface IDataTypeUnits {
