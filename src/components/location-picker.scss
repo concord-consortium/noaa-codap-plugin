@@ -226,6 +226,10 @@
       top: 0;
       right: 12px;
       cursor: pointer;
+
+      &:hover {
+        background-color: $teal-light-25;
+      }
     }
   }
 }
