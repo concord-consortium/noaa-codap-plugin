@@ -1,20 +1,76 @@
-import { Attribute, Collection, DataContext, IDataType, IItem } from "../types";
-import { IResult, codapInterface, createItems, getDataContext } from "@concord-consortium/codap-plugin-api";
-import { DSCollection1, DSCollection2, DSName, kStationsCollectionName } from "../constants";
+import { useEffect, useState } from "react";
 import { useStateContext } from "./use-state";
-import { useEffect } from "react";
-import { createMap, selectStations } from "../utils/codapHelpers";
+import { Attribute, Collection, DataContext, ICODAPItem, IDataType, IItem } from "../types";
+import { IResult, codapInterface, createItems, getAllItems, getDataContext } from "@concord-consortium/codap-plugin-api";
+import { DSCollection1, DSCollection2, DSName, kStationsCollectionName } from "../constants";
+import { clearData, createMap, selectStations } from "../utils/codapHelpers";
+import { dataTypeStore } from "../utils/noaaDataTypes";
 
 export const useCODAPApi = () => {
   const {state} = useStateContext();
+  const [ selectedDataTypes, setSelectedDataTypes ] = useState<IDataType[]>([]);
+  const { frequencies, selectedFrequency, weatherStation, units, isMapOpen, zoomMap } = state;
+  const { attrs } = frequencies[selectedFrequency];
 
   useEffect(() => {
-    if (state.weatherStation && state.isMapOpen) {
-      const zoom = state.zoomMap ? 7 : null;
-      createMap(kStationsCollectionName, {width: 500, height: 350}, [state.weatherStation.latitude, state.weatherStation.longitude], zoom);
-      selectStations([state.weatherStation.name]);
+    if (weatherStation && isMapOpen) {
+      const zoom = zoomMap ? 7 : null;
+      createMap(kStationsCollectionName, {width: 500, height: 350}, [weatherStation.latitude, weatherStation.longitude], zoom);
+      selectStations([weatherStation.name]);
     }
-  }, [state.isMapOpen, state.weatherStation, state.zoomMap]);
+  }, [isMapOpen, weatherStation, zoomMap]);
+
+  useEffect(() => {
+    const attributes = frequencies[selectedFrequency].attrs.map(attr => attr.name);
+    const dataTypes = attributes.map((attr) => {
+      return dataTypeStore.findByName(attr);
+    }) as IDataType[];
+    setSelectedDataTypes(dataTypes);
+  }, [selectedFrequency, frequencies, attrs]);
+
+  const createNOAAItems = async (items: IItem[]) => {
+    await updateWeatherDataset(selectedDataTypes);
+    // eslint-disable-next-line no-console
+    console.log("noaa-cdo ... createNOAAItems with " + items.length + " case(s)");
+    await createItems(DSName, items);
+    await codapInterface.sendRequest({
+      "action": "create",
+      "resource": "component",
+      "values": {
+        "type": "caseTable",
+        "dataContext": DSName,
+        "horizontalScrollOffset": 500
+      }
+    });
+  };
+
+  useEffect(() => {
+    const updateUnitsInCODAP = async () => {
+      let doesDataCtxExist = await getDataContext(DSName);
+      if (!doesDataCtxExist || !doesDataCtxExist.success) {
+        return;
+      }
+      const oldUnits = units === "metric" ? "standard" : "metric";
+      // fetch existing items in existing dataset
+      let allItemsRes = await getAllItems(DSName);
+      let allItems = allItemsRes.values.map((item: {id: string, values: ICODAPItem}) => item.values);
+      // convert from old units to new units
+      allItems.forEach(function (item: ICODAPItem) {
+        Object.keys(item).forEach(function (attrName) {
+          let dataType = dataTypeStore.findByAbbr(attrName);
+          if (dataType && dataType.convertUnits) {
+            item[attrName] = dataType.convertUnits(dataType.units[oldUnits], dataType.units[units], item[attrName]);
+          }
+        });
+      });
+      // clear dataset
+      await clearData(DSName);
+      // insert items
+      await createNOAAItems(allItems);
+    };
+    updateUnitsInCODAP();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [units]);
 
   const getNoaaDataContextSetupObject = () => {
     return {
@@ -69,14 +125,13 @@ export const useCODAPApi = () => {
  };
 
  const createAttribute = (datasetName: string, collectionName: string, dataType: IDataType) => {
-  const {units} = state;
   return codapInterface.sendRequest({
-      action: "create",
-      resource: "dataContext[" + datasetName + "].collection[" + collectionName + "].attribute",
-      values: {
-          name: dataType.name,
-          unit: dataType.units[units],
-          description: dataType.description
+    action: "create",
+    resource: "dataContext[" + datasetName + "].collection[" + collectionName + "].attribute",
+    values: {
+        name: dataType.name,
+        unit: dataType.units[units],
+        description: dataType.description
       }
     });
   };
@@ -101,7 +156,6 @@ export const useCODAPApi = () => {
  };
 
   const updateWeatherDataset = async (dataTypes: IDataType[]) => {
-    const {units} = state;
     let result = await getDataContext(DSName);
 
     if (!result || !result.success) {
@@ -123,34 +177,33 @@ export const useCODAPApi = () => {
     const attrDefs: Attribute[] = [];
 
     dataSetDef.collections.forEach(function (collection: Collection) {
-        collection.attrs.forEach(function (attr) {
-            attrDefs.push(attr);
-        });
+      collection.attrs.forEach(function (attr) {
+          attrDefs.push(attr);
+      });
     });
 
     const lastCollection = dataSetDef.collections[dataSetDef.collections.length - 1];
     const promises = dataTypes.map(function (dataType) {
-        const attrName = dataType.name;
-        const attrDef = attrDefs.find(function (ad) {
-            return ad.name === attrName;
-        });
-        if (!attrDef) {
-            return createAttribute(DSName, lastCollection.name, dataType);
-        } else {
-            let unit = dataType.units[units];
-            if (attrDef.unit !== unit) {
-                return updateAttributeUnit(dataSetDef, attrName, unit);
-            } else {
-                return Promise.resolve("Unknown attribute.");
-            }
-        }
+      const attrName = dataType.name;
+      const attrDef = attrDefs.find(function (ad) {
+          return ad.name === attrName;
+      });
+      if (!attrDef) {
+          return createAttribute(DSName, lastCollection.name, dataType);
+      } else {
+          let unit = dataType.units[units];
+          if (attrDef.unit !== unit) {
+              return updateAttributeUnit(dataSetDef, attrName, unit);
+          } else {
+              return Promise.resolve("Unknown attribute.");
+          }
+      }
     });
     return Promise.all(promises);
   };
 
   const filterItems = (items: IItem[]) => {
-    const { selectedFrequency, frequencies } = state;
-    const { attrs, filters } = frequencies[selectedFrequency];
+    const { filters } = frequencies[selectedFrequency];
     const filteredItems = items.filter((item: IItem) => {
       const allFiltersMatch: boolean[] = [];
       filters.forEach((filter) => {
@@ -190,22 +243,6 @@ export const useCODAPApi = () => {
       return allFiltersMatch.every((match) => match === true);
     });
     return filteredItems;
-  };
-
-  const createNOAAItems = async (items: IItem[], dataTypes: IDataType[]) => {
-    await updateWeatherDataset(dataTypes);
-    // eslint-disable-next-line no-console
-    console.log("noaa-cdo ... createNOAAItems with " + items.length + " case(s)");
-    await createItems(DSName, items);
-    await codapInterface.sendRequest({
-        "action": "create",
-        "resource": "component",
-        "values": {
-            "type": "caseTable",
-            "dataContext": DSName,
-            "horizontalScrollOffset": 500
-        }
-    });
   };
 
   return {

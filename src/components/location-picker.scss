@@ -34,6 +34,7 @@
         flex-direction: row;
         align-items: center;
         max-width: 245px;
+        cursor: pointer;
 
         .station-distance {
           font-style: italic;
@@ -78,6 +79,7 @@
           justify-content: space-between;
           padding: 2px 0;
           gap: 4px;
+          cursor: pointer;
 
           .station-name {
             overflow: hidden;
@@ -92,6 +94,9 @@
             text-overflow: ellipsis;
             color: $teal-dark-75;
             min-width: 120px;
+          }
+          &.station-candidate {
+            background-color: #ddeff1;
           }
           &.selected-station {
             background-color: $teal-medium;
@@ -220,6 +225,7 @@
       padding: 0;
       top: 0;
       right: 12px;
+      cursor: pointer;
     }
   }
 }

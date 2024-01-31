@@ -33,50 +33,50 @@ const createMap = async (name: string, dimensions: IDimensions, center: ILatLong
    }
 
    if (!map) {
-       let result = await codapInterface.sendRequest({
-           action: "create", resource: "component", values: {
-               type: "map",
-               name,
-               dimensions,
-               dataContextName: name,
-               legendAttributeName: "isActive"
-           }
-       }) as IResult;
-       if (result.success) {
-           map = result.values;
-       }
+      let result = await codapInterface.sendRequest({
+        action: "create", resource: "component", values: {
+            type: "map",
+            name,
+            dimensions,
+            dataContextName: name,
+            legendAttributeName: "isActive"
+        }
+      }) as IResult;
+      if (result.success) {
+        map = result.values;
+      }
    }
    if (map && center && (zoom != null)) {
-       return centerAndZoomMap(map.id, center, zoom);
+      return centerAndZoomMap(map.id, center, zoom);
    } else {
-       return selectComponent(map.id);
+      return selectComponent(map.id);
    }
 };
 
 const centerAndZoomMap = (mapName: string, center: ILatLong, zoom: number) => {
-   return new Promise<void>((resolve) => {
-       setTimeout(function () {
-           codapInterface.sendRequest({
-               action: "update",
-               resource: `component[${mapName}]`,
-               values: {
-                   center,
-                   zoom: 4
-               }
-           });
-           setTimeout(function () {
-               codapInterface.sendRequest({
-                   action: "update",
-                   resource: `component[${mapName}]`,
-                   values: {
-                       zoom
-                   }
-               });
+  return new Promise<void>((resolve) => {
+    setTimeout(function () {
+      codapInterface.sendRequest({
+        action: "update",
+        resource: `component[${mapName}]`,
+        values: {
+            center,
+            zoom: 4
+        }
+      });
+      setTimeout(function () {
+        codapInterface.sendRequest({
+          action: "update",
+          resource: `component[${mapName}]`,
+          values: {
+              zoom
+          }
+        });
 
-           }, 500);
-       }, 2000);
-       resolve();
-   });
+      }, 500);
+    }, 2000);
+    resolve();
+  });
 };
 
 const hasMap = async () => {
