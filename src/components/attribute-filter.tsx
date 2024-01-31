@@ -84,7 +84,7 @@ export const AttributeFilter = () => {
               let filterValue;
               const attrFilter = frequencies[selectedFrequency].filters.find(f => f.attribute === attr.name);
               if (attrFilter) {
-                const noValueFilter = (attrFilter.operator === "aboveMean" || attrFilter?.operator === "belowMean" || attrFilter?.operator === "all") ;
+                const noValueFilter = (attrFilter.operator === "aboveMean" || attrFilter.operator === "belowMean" || attrFilter.operator === "all") ;
                 filterValue = attributeToFilter === attr && showFilterModal
                   ? "--"
                   : noValueFilter
