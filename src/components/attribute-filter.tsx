@@ -11,7 +11,9 @@ import {
   operatorSymbolMap,
   operatorTextMap,
   dailyMonthlyAttrMap,
-  hourlyAttrMap
+  hourlyAttrMap,
+  IAboveMeanFilter,
+  IBelowMeanFilter
 } from "../types";
 import EditIcon from "../assets/images/icon-edit.svg";
 
@@ -206,16 +208,6 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
 
   const handleReset = () => {
     setOperator("all");
-    setState(draft => {
-      const filterAttrNames = frequencies[selectedFrequency].attrs.map(a => {return a.name;});
-      const existingFilter = frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
-      if (existingFilter) {
-        const attrFilterIndex = filterAttrNames.indexOf(existingFilter.attribute);
-        if (attrFilterIndex !== null) {
-          draft.frequencies[selectedFrequency].filters.splice(attrFilterIndex, 1);
-        }
-      }
-    });
     if (filterValueInputElRef.current) {
       filterValueInputElRef.current.value = "";
     }
@@ -223,30 +215,31 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
 
   const handleSubmitFilter = () => {
     setState(draft => {
-      const existingFilter = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
+      const existingFilter = frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
       const attrFilterIndex = existingFilter && frequencies[selectedFrequency].filters.indexOf(existingFilter);
+      const existingFilterDraft = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
       if (existingFilter) {
         switch (operator) {
           case "between":
             if (filterLowerValueInputElRef.current && filterUpperValueInputElRef.current) {
               const lowerInputValue = parseFloat(filterLowerValueInputElRef.current.value);
               const upperInputValue = parseFloat(filterUpperValueInputElRef.current.value);
-              (existingFilter as IBetweenFilter).operator = operator;
-              (existingFilter as IBetweenFilter).lowerValue = lowerInputValue;
-              (existingFilter as IBetweenFilter).upperValue = upperInputValue;
+              (existingFilterDraft as IBetweenFilter).operator = operator;
+              (existingFilterDraft as IBetweenFilter).lowerValue = lowerInputValue;
+              (existingFilterDraft as IBetweenFilter).upperValue = upperInputValue;
             }
             break;
           case "top":
           case "bottom":
             if (filterValueTopBottomInputElRef.current) {
               const inputValue = parseFloat(filterValueTopBottomInputElRef.current.value);
-              (existingFilter as ITopFilter | IBottomFilter).operator = operator;
-              (existingFilter as ITopFilter | IBottomFilter).value = inputValue;
+              (existingFilterDraft as ITopFilter | IBottomFilter).operator = operator;
+              (existingFilterDraft as ITopFilter | IBottomFilter).value = inputValue;
             }
             break;
           case "aboveMean":
           case "belowMean":
-            existingFilter.operator = operator;
+            (existingFilterDraft as IAboveMeanFilter | IBelowMeanFilter).operator = operator;
             break;
           case "all":
             if (attrFilterIndex !== undefined) {
@@ -256,8 +249,8 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
           default:
             if (filterValueInputElRef.current) {
               const inputValue = parseFloat(filterValueInputElRef.current.value);
-              (existingFilter as ISingleValueFilter).operator = operator;
-              (existingFilter as ISingleValueFilter).value = inputValue;
+              (existingFilterDraft as ISingleValueFilter).operator = operator;
+              (existingFilterDraft as ISingleValueFilter).value = inputValue;
             }
         }
       } else {
