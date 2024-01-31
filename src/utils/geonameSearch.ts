@@ -57,7 +57,7 @@ export const geoLocSearch = async (lat: number, long: number) => {
     const response = await fetch(url);
     if (response.ok) {
       const data = await response.json();
-      return `${data?.geonames?.[0]?.name}, ${data?.geonames?.[0]?.adminCode1}` || "Unknown Location";
+      return `${data?.geonames?.[0]?.name}, ${data?.geonames?.[0]?.adminCode1}, ${data?.geonames?.[0]?.distance}` || "Unknown Location";
     } else {
       return Promise.reject(response.statusText);
     }
