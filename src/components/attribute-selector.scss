@@ -1,3 +1,5 @@
+@import "./vars.scss";
+
 .attribute-selection-container {
   margin-top: 12px;
 
@@ -33,12 +35,12 @@
         cursor: pointer;
         height: 16px;
         width: 61px;
-        border: solid 1px #a2a2a2;
+        border: solid 1px $medium-gray;
         background-color: #fff;
         font-family: "Montserrat", sans-serif;
         font-size: 10px;
         font-weight: 500;
-        color: #a2a2a2;
+        color: $medium-gray;
         cursor: pointer;
         &.left {
           border-radius: 15px 0 0 15px;
@@ -51,9 +53,9 @@
         }
 
         &.selected-unit {
-          border: solid 1px rgba(114, 191, 202, 0.25);
-          background-color: rgba(114, 191, 202, 0.25);
-          color: #177991;
+          border: solid 1px $teal-light-25;
+          background-color: $teal-light-25;
+          color: $teal-dark;
           font-weight: 600;
         }
       }
@@ -73,36 +75,36 @@
       margin: 0 5px 5px 0;
       padding: 0 11px;
       border-radius: 16px;
-      border: solid 1px #a2a2a2;
+      border: solid 1px $medium-gray;
       background-color: #fff;
       font-size: 12px;
       font-weight: 500;
-      color: #a2a2a2;
+      color: $medium-gray;
       cursor: pointer;
 
       &:hover {
-        border: solid 1px rgba(0, 144, 164, 0.25);
-        background-color: rgba(0, 144, 164, 0.32);
-        color: #177991;
+        border: solid 1px $teal-medium-25;
+        background-color: $teal-medium-32;
+        color: $teal-dark;
       }
       &.selected {
-        border: solid 1px rgba(114, 191, 202, 0.25);
-        background-color: rgba(114, 191, 202, 0.25);
-        color:#177991;
+        border: solid 1px $teal-light-25;
+        background-color: $teal-light-25;
+        color:$teal-dark;
         &:hover {
-          border: solid 1px rgba(0, 144, 164, 0.25);
-          background-color: rgba(0, 144, 164, 0.32);
-          color: #177991;
+          border: solid 1px $teal-medium-25;
+          background-color: $teal-medium-32;
+          color: $teal-dark;
         }
       }
       &.disabled {
-        border: solid 1px #a2a2a2;
-        background-color: rgba(198, 198, 198, 0.25);
+        border: solid 1px $medium-gray;
+        background-color: $dark-gray-25;
       }
       &.all {
-        border: solid 1px #a2a2a2;
-        background-color: rgba(198, 198, 198, 0.25);
-        color: #a2a2a2;
+        border: solid 1px $medium-gray;
+        background-color: $dark-gray-25;
+        color: $medium-gray;
 
         &:hover {
           border: solid 1px rgba(19, 79, 88, 0.25);
