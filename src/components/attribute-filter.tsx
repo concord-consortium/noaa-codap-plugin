@@ -50,6 +50,11 @@ export const AttributeFilter = () => {
       setHasFilter(anyFilters);
   },[frequencies, selectedAttrMap, selectedFrequency]);
 
+  //close filter modal if user changes selectedFrequency
+  useEffect(()=>{
+    setShowFilterModal(false);
+  },[selectedFrequency]);
+
   const handleFilterClick = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const top = rect.bottom + window.scrollY;
