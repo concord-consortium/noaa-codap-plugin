@@ -69,6 +69,12 @@ export const LocationPicker = () => {
   }, [isEditing]);
 
   useEffect(() => {
+    if (location) {
+      setShowMapButton(true);
+    }
+  }, [location]);
+
+  useEffect(() => {
     const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
     const _endDate = endDate ? endDate : new Date(Date.now());
     if (location && !didUserSelectStationFromMap) {
