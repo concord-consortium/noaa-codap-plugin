@@ -11,8 +11,21 @@ interface IFormatData {
   timezone: ITimeZone;
 }
 
+const convertUnits = (data: any[]) => {
+  const convertedData = data.map(function (item) {
+    Object.keys(item).forEach(function (attrName) {
+      let dataType = dataTypeStore.findByAbbr(attrName);
+      if (dataType && dataType.convertUnits) {
+        item[attrName] = dataType.convertUnits(dataType.units.metric, dataType.units.standard, item[attrName]);
+      }
+    });
+    return item;
+  });
+  return convertedData;
+};
+
 export const formatData = (props: IFormatData) => {
-  const {data, timezone, frequency, weatherStation} = props;
+  const {data, timezone, frequency, weatherStation, units} = props;
   const database = frequencyToReportTypeMap[frequency];
   let dataRecords: any[] = [];
   data.forEach((r: any) => {
@@ -25,7 +38,7 @@ export const formatData = (props: IFormatData) => {
     aValue["report type"] = frequency;
     dataRecords.push(aValue);
   });
-  return dataRecords;
+  return units === "standard" ? convertUnits(dataRecords) : dataRecords;
 };
 
 export const decodeData = (iField: string, iValue: any, database: string) => {
@@ -69,11 +82,10 @@ interface IComposeURL {
   attributes: string[];
   weatherStation: IWeatherStation;
   gmtOffset: string;
-  units: IUnits;
 }
 
 export const composeURL = (props: IComposeURL) => {
-  const { startDate, endDate, frequency, attributes, weatherStation, gmtOffset, units } = props;
+  const { startDate, endDate, frequency, attributes, weatherStation, gmtOffset } = props;
   const database = frequencyToReportTypeMap[frequency];
   const format = "YYYY-MM-DDThh:mm:ss";
   let sDate = dayjs(startDate);
@@ -94,7 +106,7 @@ export const composeURL = (props: IComposeURL) => {
   const tDataTypeIDClause = `dataTypes=${dataTypes.join()}`;
   const tStartDateClause = `startDate=${startDateString}`;
   const tEndDateClause = `endDate=${endDateString}`;
-  const tUnitClause = `units=${units}`;
+  const tUnitClause = `units=metric`;
   const tFormatClause = "format=json";
 
   let tURL = [nceiBaseURL, [tDatasetIDClause, tStationIDClause, tStartDateClause, tEndDateClause, tFormatClause, tDataTypeIDClause, tUnitClause].join(

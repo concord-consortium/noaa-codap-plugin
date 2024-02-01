@@ -222,8 +222,7 @@ export const App = () => {
           frequency: selectedFrequency,
           weatherStation,
           attributes,
-          gmtOffset: timezone.gmtOffset,
-          units
+          gmtOffset: timezone.gmtOffset
         });
         try {
           const tRequest = new Request(tURL);
