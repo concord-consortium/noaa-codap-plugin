@@ -225,8 +225,10 @@ export const LocationPicker = () => {
         placeNameSelected(locationPossibilities[selectedLocIdx]);
         setState(draft=>{
           draft.location = locationPossibilities[selectedLocIdx];
-          draft.zoomMap = true;
           draft.didUserSelectStationFromMap = false;
+          if (state.isMapOpen) {
+            draft.zoomMap = true;
+          }
         });
       }
     }
