@@ -82,12 +82,15 @@ export const App = () => {
         if (myCase) {
           const station = myCase.values;
           const {latitude, longitude} = station;
-          const locationName = await geoLocSearch(latitude, longitude);
+          const locationInfo = await geoLocSearch(latitude, longitude);
+          const locale = `${locationInfo.split(",")[0]}, ${locationInfo.split(",")[1]}`;
+          const distance = Number(locationInfo.split(",")[2]);
           setState((draft) => {
             draft.weatherStation = station;
-            draft.location = {name: locationName, latitude, longitude};
-            draft.weatherStationDistance = 0;
+            draft.location = {name: locale, latitude, longitude};
+            draft.weatherStationDistance = distance;
             draft.zoomMap = false;
+            draft.didUserSelectStationFromMap = true;
           });
         }
       }

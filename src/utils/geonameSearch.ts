@@ -7,7 +7,7 @@ const kDefaultMaxRows = 4;
 const kGeonamesUser = "codap";
 
 
-async function geoNameSearch(searchString: string, maxRows?: number): Promise<IPlace[] | undefined> {
+export const geoNameSearch = async (searchString: string, maxRows?: number): Promise<IPlace[] | undefined> =>{
   const userClause = `username=${kGeonamesUser}`;
   const countryClause = "country=US";
   const maxRowsClause = `maxRows=${maxRows || kDefaultMaxRows}`;
@@ -34,7 +34,7 @@ async function geoNameSearch(searchString: string, maxRows?: number): Promise<IP
       });
     }
   }
-}
+};
 
 export const autoComplete = async(inputEl: HTMLInputElement) => {
   let thisQuery = inputEl.value;
@@ -57,7 +57,7 @@ export const geoLocSearch = async (lat: number, long: number) => {
     const response = await fetch(url);
     if (response.ok) {
       const data = await response.json();
-      return `${data?.geonames?.[0]?.name}, ${data?.geonames?.[0]?.adminCode1}` || "Unknown Location";
+      return `${data?.geonames?.[0]?.name}, ${data?.geonames?.[0]?.adminCode1}, ${data?.geonames?.[0]?.distance}` || "Unknown Location";
     } else {
       return Promise.reject(response.statusText);
     }
