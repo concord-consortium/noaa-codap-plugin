@@ -143,20 +143,6 @@ const selectStations = async(stationNames: string[]) => {
   });
 };
 
-const clearData = async (datasetName: string) =>{
-   let result = await getDataContext(datasetName);
-   if (result.success) {
-       let dc = result.values;
-       let lastCollection = dc.collections[dc.collections.length-1];
-       return await codapInterface.sendRequest({
-           action: "delete",
-           resource: `dataContext[${datasetName}].collection[${lastCollection.name}].allCases`
-       });
-   } else {
-       return Promise.resolve({success: true});
-   }
-};
-
 const deleteAttributes = async (datasetName: string, collectionName: string, attributeNames: string[]) => {
    let attrDeletePromises = attributeNames.map(function (attrName) {
        return codapInterface.sendRequest({
@@ -214,7 +200,6 @@ const guaranteeGlobal = async (name: string, value: any) => {
 export {
   addNotificationHandler,
   centerAndZoomMap,
-  clearData,
   createMap,
   createStationsDataset,
   deleteAttributes,
