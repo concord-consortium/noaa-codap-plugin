@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
 import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
+import { dataTypeStore } from "../utils/noaaDataTypes";
 
 import "./attribute-selector.scss";
 
@@ -24,8 +25,34 @@ export const AttributesSelector = () => {
   }, [attributeList.length, frequencies, selectedFrequency]);
 
   const handleUnitsClicked = () => {
+    const newUnits = units === "standard" ? "metric" : "standard";
+    const newSelectedAttrFilters = frequencies[selectedFrequency].filters.map((filter) => {
+      const { attribute, operator } = filter;
+      const dataType = dataTypeStore.findByName(attribute);
+      if (dataType && dataType.convertUnits) {
+        const fromUnits = dataType.units[units];
+        const toUnits = dataType.units[newUnits];
+        if (operator === "between") {
+          const lowerValue = Math.round(dataType.convertUnits(fromUnits, toUnits, filter.lowerValue.toString()));
+          const upperValue = Math.round(dataType.convertUnits(fromUnits, toUnits, filter.upperValue.toString()));
+          return {
+            ...filter,
+            lowerValue,
+            upperValue
+          };
+        } else if (operator !== "top" && operator !== "bottom" && operator !== "aboveMean" && operator !== "belowMean" && operator !== "all") {
+          const value = Math.round(dataType.convertUnits(fromUnits, toUnits, filter.value.toString()));
+          return {
+            ...filter,
+            value
+          };
+        }
+      }
+      return filter;
+    });
     setState(draft => {
       draft.units = draft.units === "standard" ? "metric" : "standard";
+      draft.frequencies[selectedFrequency].filters = newSelectedAttrFilters;
     });
   };
 
