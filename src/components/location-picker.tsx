@@ -17,6 +17,7 @@ export const LocationPicker = () => {
   const {units, location, weatherStation, weatherStationDistance, startDate, endDate, didUserSelectStationFromMap} = state;
   const [showMapButton, setShowMapButton] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [candidateLocation, setCandidateLocation] = useState<string>("");
   const [locationPossibilities, setLocationPossibilities] = useState<IPlace[]>([]);
   const [showSelectionList, setShowSelectionList] = useState(false);
   const [stationPossibilities, setStationPossibilities] = useState<IStation[]>([]);
@@ -41,7 +42,7 @@ export const LocationPicker = () => {
         if (stationSelectionListElRef.current && !stationSelectionListElRef.current.contains(event.target as Node)) {
           setShowStationSelectionList(false);
         }
-        if (locationSelectionListElRef.current && !locationSelectionListElRef.current.contains(event.target as Node)) {
+        if (locationSelectionListElRef.current && !locationSelectionListElRef.current.contains(event.target as Node) && !locationDivRef.current?.contains(event.target as Node)) {
           setShowSelectionList(false);
           setIsEditing(false);
         }
@@ -65,6 +66,7 @@ export const LocationPicker = () => {
   useEffect(() => {
     if (isEditing) {
       locationInputEl.current?.focus();
+      locationInputEl.current?.select();
     }
   }, [isEditing]);
 
@@ -145,6 +147,7 @@ export const LocationPicker = () => {
       draft.location = place;
       draft.didUserSelectStationFromMap = false;
     });
+    setCandidateLocation(place?.name || "");
     setShowSelectionList(false);
     setIsEditing(false);
     setShowMapButton(true);
@@ -212,8 +215,10 @@ export const LocationPicker = () => {
     const target = e.target;
     if (target.value !== "") {
       getLocationList();
+      setCandidateLocation(target.value);
     } else {
       setIsEditing(false);
+      setCandidateLocation(location?.name || "");
     }
   };
 
@@ -287,15 +292,15 @@ export const LocationPicker = () => {
           draft.location = {name: currPosName, latitude: lat, longitude: long};
           draft.didUserSelectStationFromMap = false;
         });
-        setShowMapButton(true);
-        setIsEditing(false);
-        setShowSelectionList(false);
+        placeNameSelected({name: currPosName, latitude: lat, longitude: long});
       });
     });
   };
 
-  const handleLocationInputChange = () => {
+  const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCandidateLocation(e.target.value);
     getLocationList();
+    setShowSelectionList(true);
   };
 
   const handleLocationInputClick = () => {
@@ -358,7 +363,7 @@ export const LocationPicker = () => {
                     <span className="selected-loc-name">{location?.name}</span>
                   </div>
                 : <input ref={locationInputEl} className="location-input" type="text" placeholder={"Enter location or identifier here"}
-                    onChange={handleLocationInputChange} onKeyDown={handleInputKeyDown} onBlur={handleLocationInputBlur}/>
+                    value={candidateLocation} onChange={handleLocationInputChange} onKeyDown={handleInputKeyDown} onBlur={handleLocationInputBlur}/>
             }
           </div>
           {(isEditing && locationInputEl.current?.value !=="") &&
