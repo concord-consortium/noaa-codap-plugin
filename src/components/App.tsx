@@ -102,10 +102,11 @@ export const App = () => {
 
     const createMapListener = (listenerRes: ClientNotification) => {
       const { values } = listenerRes;
-      if (values.operation === "delete" && values.type === "DG.MapView" && values.name === "US Weather Stations") {
+      if (values.operation === "delete" && values.type === "DG.MapView" && values.name === "US-Weather-Stations") {
         setState((draft) => {
           draft.zoomMap = false;
           draft.isMapOpen = false;
+          draft.didUserSelectStationFromMap = false;
         });
       }
     };
@@ -222,8 +223,7 @@ export const App = () => {
           frequency: selectedFrequency,
           weatherStation,
           attributes,
-          gmtOffset: timezone.gmtOffset,
-          units
+          gmtOffset: timezone.gmtOffset
         });
         try {
           const tRequest = new Request(tURL);
