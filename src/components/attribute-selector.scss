@@ -42,6 +42,11 @@
         font-weight: 500;
         color: $medium-gray;
         cursor: pointer;
+        &:hover {
+          border-color: rgba(114, 191, 202, 0.25);
+          background-color: rgba(0, 144, 164, 0.32);
+          color: #177991;
+        }
         &.left {
           border-radius: 15px 0 0 15px;
           margin-right: 2px;
