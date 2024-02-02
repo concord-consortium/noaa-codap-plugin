@@ -3,7 +3,7 @@ import { useStateContext } from "./use-state";
 import { Attribute, Collection, DataContext, ICODAPItem, IDataType, IItem } from "../types";
 import { IResult, codapInterface, createItems, getAllItems, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { DSCollection1, DSCollection2, DSName, kStationsDatasetName } from "../constants";
-import { clearData, createMap, selectStations } from "../utils/codapHelpers";
+import { createMap, selectStations } from "../utils/codapHelpers";
 import { dataTypeStore } from "../utils/noaaDataTypes";
 
 export const useCODAPApi = () => {
@@ -245,8 +245,23 @@ export const useCODAPApi = () => {
     return filteredItems;
   };
 
+  const clearData = async (datasetName: string) =>{
+    let result = await getDataContext(datasetName);
+    if (result.success) {
+        let dc = result.values;
+        let lastCollection = dc.collections[dc.collections.length-1];
+        return await codapInterface.sendRequest({
+            action: "delete",
+            resource: `dataContext[${datasetName}].collection[${lastCollection.name}].allCases`
+        });
+    } else {
+        return Promise.resolve({success: true});
+    }
+ };
+
   return {
     filterItems,
-    createNOAAItems
+    clearData,
+    createNOAAItems,
   };
 };

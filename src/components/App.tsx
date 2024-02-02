@@ -11,7 +11,7 @@ import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherSta
 import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "../utils/codapHelpers";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
-import { StationDSName, globalMaxDate, globalMinDate } from "../constants";
+import { DSName, StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
 import { IState } from "../types";
@@ -38,7 +38,7 @@ interface IStatus {
 export const App = () => {
   const { state, setState } = useStateContext();
   const { showModal, location, weatherStation, startDate, endDate, timezone, units, frequencies, selectedFrequency } = state;
-  const { filterItems, createNOAAItems } = useCODAPApi();
+  const { filterItems, clearData, createNOAAItems } = useCODAPApi();
   const [isFetching, setIsFetching] = useState(false);
   const [disableGetData, setDisableGetData] = useState(true);
   const [status, setStatus] = useState<IStatus>();
@@ -256,6 +256,10 @@ export const App = () => {
     }
   };
 
+  const handleClearData = () => {
+    clearData(DSName);
+  };
+
   return (
     <div className="App">
       <div className="header">
@@ -276,7 +280,7 @@ export const App = () => {
           <div className={`status-message ${status?.status}`}>{status ? status.message : ""}</div>
         </div>
         <div>
-          <button className="clear-data-button">Clear Data</button>
+          <button className="clear-data-button" disabled={isFetching || disableGetData} onClick={handleClearData}>Clear Data</button>
           <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}>Get Data</button>
         </div>
       </div>
