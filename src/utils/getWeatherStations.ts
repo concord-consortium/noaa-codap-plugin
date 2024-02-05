@@ -5,14 +5,14 @@ import weatherStations from "../assets/data/weather-stations.json";
 /**
  * We assume that the station dataset was prepared in the past but
  * stations that were active at the time of preparation are still active.
- * If they reported within a week of the dataset"s max date, we mark the
+ * If they reported within a week of the dataset's max date, we mark the
  * max date as "present".
  */
-export const adjustStationDataset = (dataset: IWeatherStation[]) => {
-  const datasetArr = Array.from(dataset);
+export const adjustStationDataset = () => {
+  const datasetArr = Array.from(weatherStations);
   let maxDate: dayjs.Dayjs | null = null;
 
-  if (dataset) {
+  if (datasetArr) {
     maxDate = datasetArr.reduce((max, station) => {
       const date = dayjs(station.maxdate);
       if (!max || date.isAfter(max)) {
@@ -23,20 +23,33 @@ export const adjustStationDataset = (dataset: IWeatherStation[]) => {
 
     if (maxDate) {
       const refDate = maxDate.subtract(1, "week");
-      dataset.forEach(function (station) {
+      return datasetArr.map(station => {
         let d = dayjs(station.maxdate);
         if (d && d.isAfter(refDate)) {
-          station.maxdate = "present";
+          return {...station, maxdate: "present"};
+        } else {
+          return station;
         }
       });
     }
+    // if (maxDate) {
+    //   const refDate = maxDate.subtract(1, "week");
+    //   datasetArr.forEach(function (station) {
+    //     let d = dayjs(station.maxdate);
+    //     if (d && d.isAfter(refDate)) {
+    //       return {...station, maxdate: "present"};
+    //     } else {
+    //       return station;
+    //     }
+    //   });
+    // }
   }
-  return dataset;
+  return datasetArr;
 };
 
 export const findNearestActiveStations = async(targetLat: number, targetLong: number, fromDate: Date,
      toDate: Date) => {
-  const adjustedStationDataset = adjustStationDataset(weatherStations as IWeatherStation[]);
+  const adjustedStationDataset = adjustStationDataset();
   const fromMSecs = fromDate.getTime() ;
   const toMSecs = toDate.getTime();
   const nearestStations: IStation[] = [];
