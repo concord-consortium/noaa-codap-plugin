@@ -3,7 +3,7 @@ import classnames from "classnames";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
-import { IPlace, IStation } from "../types";
+import { IPlace, IStation, IWeatherStation } from "../types";
 import { convertDistanceToStandard, findNearestActiveStations } from "../utils/getWeatherStations";
 import { selectStations } from "../utils/codapHelpers";
 import OpenMapIcon from "../assets/images/icon-map.svg";
@@ -96,37 +96,19 @@ export const LocationPicker = () => {
   useEffect(() => {
     const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
     const _endDate = endDate ? endDate : new Date(Date.now());
-    if (location && !didUserSelectStationFromMap) {
+    if (location) {
       findNearestActiveStations(location.latitude, location.longitude, _startDate, _endDate)
         .then((stationList: IStation[]) => {
           if (stationList) {
             setStationPossibilities(stationList);
           }
-          setState((draft) => {
-            draft.weatherStation = stationList[0].station;
-            draft.weatherStationDistance = stationList[0].distance;
-          });
-      });
-      const fetchTimezone = async (lat: number, long: number) => {
-        let url = `${timezoneServiceURL}?lat=${lat}&lng=${long}&username=${geonamesUser}`;
-        let res = await fetch(url);
-        if (res) {
-          if (res.ok) {
-            const timezoneData = await res.json();
-            const { gmtOffset } = timezoneData as { gmtOffset: keyof typeof kOffsetMap };
+          if (stationList.length > 0 && !didUserSelectStationFromMap) {
             setState((draft) => {
-              draft.timezone = {
-                gmtOffset,
-                name: kOffsetMap[gmtOffset]
-              };
+              draft.weatherStation = stationList[0].station;
+              draft.weatherStationDistance = stationList[0].distance;
             });
-          } else {
-            console.warn(res.statusText);
           }
-        } else {
-          console.warn(`Failed to fetch timezone data for ${location}`);
-        }
-      };
+      });
       fetchTimezone(location.latitude, location.longitude);
     } else {
       setState((draft) => {
@@ -146,7 +128,27 @@ export const LocationPicker = () => {
     }
   },[showStationSelectionList]);
 
-  // Location selection functions
+  const fetchTimezone = async (lat: number, long: number) => {
+    let url = `${timezoneServiceURL}?lat=${lat}&lng=${long}&username=${geonamesUser}`;
+    let res = await fetch(url);
+    if (res) {
+      if (res.ok) {
+        const timezoneData = await res.json();
+        const { gmtOffset } = timezoneData as { gmtOffset: keyof typeof kOffsetMap };
+        setState((draft) => {
+          draft.timezone = {
+            gmtOffset,
+            name: kOffsetMap[gmtOffset]
+          };
+        });
+      } else {
+        console.warn(res.statusText);
+      }
+    } else {
+      console.warn(`Failed to fetch timezone data for ${location}`);
+    }
+  };
+
   const getLocationList = () => {
     if (locationInputEl.current) {
       autoComplete(locationInputEl.current)

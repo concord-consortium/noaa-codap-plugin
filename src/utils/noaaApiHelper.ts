@@ -34,7 +34,7 @@ export const formatData = (props: IFormatData) => {
     aValue.longitude = weatherStation.longitude;
     aValue["UTC offset"] = timezone.gmtOffset;
     aValue.timezone = timezone.name;
-    aValue.elevation = weatherStation.elevation;
+    aValue.elevation = weatherStation.elevation || "";
     aValue["report type"] = frequency;
     dataRecords.push(aValue);
   });
