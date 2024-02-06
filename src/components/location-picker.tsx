@@ -267,9 +267,7 @@ export const LocationPicker = () => {
 
   const handleLocationInputClick = () => {
     setIsEditing(true);
-    console.log("candidateLocation", candidateLocation, candidateLocation.length);
     if (candidateLocation.length >= 3) {
-      console.log("in handleLocationInputClick if");
       getLocationList();
     }
   };
