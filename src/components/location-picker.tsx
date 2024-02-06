@@ -3,8 +3,9 @@ import classnames from "classnames";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
-import { IPlace, IStation, IStatus } from "../types";
+import { IPlace, IStation, IWeatherStation, IStatus } from "../types";
 import { convertDistanceToStandard, findNearestActiveStations } from "../utils/getWeatherStations";
+import { selectStations } from "../utils/codapHelpers";
 import OpenMapIcon from "../assets/images/icon-map.svg";
 import EditIcon from "../assets/images/icon-edit.svg";
 import LocationIcon from "../assets/images/icon-location.svg";
@@ -51,6 +52,15 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
           setShowSelectionList(false);
           setIsEditing(false);
         }
+        if (locationInputEl.current && !locationInputEl.current.contains(event.target as Node) && !locationSelectionListElRef.current?.contains(event.target as Node) && !locationDivRef.current?.contains(event.target as Node)) {
+          setIsEditing(false);
+          setShowSelectionList(false);
+          setShowMapButton(false);
+          setState((draft) => {
+            draft.location = undefined;
+            draft.zoomMap = false;
+          });
+        }
       }
     }
 
@@ -60,6 +70,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
       // Unbind the event listener on clean up
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -80,6 +91,12 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
       setShowMapButton(true);
     }
   }, [location]);
+
+  useEffect(()=> {
+    if (isEditing && locationPossibilities.length > 0) {
+      setShowSelectionList(true);
+    }
+  }, [isEditing, locationPossibilities]);
 
   useEffect(() => {
     const _startDate = startDate ? startDate : new Date( -5364662060); // 1/1/1750
@@ -143,18 +160,24 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     if (locationInputEl.current) {
       autoComplete(locationInputEl.current)
         .then ((placeList: IPlace[] | undefined) => {
-                  if (placeList) {
-                    setLocationPossibilities(placeList);
-                    (isEditing && placeList.length > 0) && setShowSelectionList(true);
-                  }
+                if (placeList) {
+                  setLocationPossibilities(placeList);
+                }
               });
     }
   };
+
+  useEffect(() => {
+    if (isEditing) {
+      getLocationList();
+    }
+  }, [isEditing]);
 
   const placeNameSelected = (place: IPlace | undefined) => {
     setState(draft => {
       draft.location = place;
       draft.didUserSelectStationFromMap = false;
+      draft.zoomMap = true;
     });
     setCandidateLocation(place?.name || "");
     setShowSelectionList(false);
@@ -162,16 +185,6 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     setShowMapButton(true);
     setLocationPossibilities([]);
     setHoveredIndex(null);
-    setArrowedIndex(-1);
-  };
-
-  const stationSelected = (station: IWeatherStation | undefined) => {
-    setState(draft => {
-      draft.weatherStation = station;
-      draft.didUserSelectStationFromMap = false;
-    });
-    setShowStationSelectionList(false);
-    setStationHoveredIndex(null);
     setArrowedIndex(-1);
   };
 
@@ -216,10 +229,6 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     setHoveredIndex(index);
   };
 
-  const handleStationHover = (index: number | null) => {
-    setStationHoveredIndex(index);
-  };
-
   const handleLocationInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const target = e.target;
     if (target.value !== "") {
@@ -228,6 +237,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     } else {
       setIsEditing(false);
       setCandidateLocation(location?.name || "");
+      selectStations([]);
     }
   };
 
@@ -237,25 +247,39 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
       const selectedLocIdx = parseInt(target.dataset.ix, 10);
       if (selectedLocIdx >= 0) {
         placeNameSelected(locationPossibilities[selectedLocIdx]);
-        setState(draft=>{
-          draft.location = locationPossibilities[selectedLocIdx];
-          draft.didUserSelectStationFromMap = false;
-          if (state.isMapOpen) {
-            draft.zoomMap = true;
-          }
-        });
       }
     }
   };
 
-  const handlePlaceNameSelectionKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, index: number) => {
-    if (e.key === "Enter") {
-      placeNameSelected(locationPossibilities[index-1]);
-      setState(draft => {
-        draft.zoomMap = true;
+  const handleFindCurrentLocation = async() => {
+    navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
+      const lat = position.coords.latitude;
+      const long = position.coords.longitude;
+      geoLocSearch(lat, long).then((currPosName) => {
+        setState(draft => {
+          draft.location = {name: currPosName, latitude: lat, longitude: long};
+          draft.didUserSelectStationFromMap = false;
+        });
+        placeNameSelected({name: currPosName, latitude: lat, longitude: long});
       });
+    });
+  };
+
+  const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCandidateLocation(e.target.value);
+    if (e.target.value.length >= 3) {
+      getLocationList();
     }
   };
+
+  const handleLocationInputClick = () => {
+    setIsEditing(true);
+    if (candidateLocation.length >= 3) {
+      getLocationList();
+    }
+  };
+
+  // Station selection functions
 
   const handleStationSelection = (ev: React.MouseEvent<HTMLLIElement>) => {
     const target = ev.currentTarget;
@@ -292,28 +316,18 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     }
   };
 
-  const handleFindCurrentLocation = async() => {
-    navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
-      const lat = position.coords.latitude;
-      const long = position.coords.longitude;
-      geoLocSearch(lat, long).then((currPosName) => {
-        setState(draft => {
-          draft.location = {name: currPosName, latitude: lat, longitude: long};
-          draft.didUserSelectStationFromMap = false;
-        });
-        placeNameSelected({name: currPosName, latitude: lat, longitude: long});
-      });
+  const stationSelected = (station: IWeatherStation | undefined) => {
+    setState(draft => {
+      draft.weatherStation = station;
+      draft.didUserSelectStationFromMap = false;
     });
+    setShowStationSelectionList(false);
+    setStationHoveredIndex(null);
+    setArrowedIndex(-1);
   };
 
-  const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCandidateLocation(e.target.value);
-    getLocationList();
-    setShowSelectionList(true);
-  };
-
-  const handleLocationInputClick = () => {
-    setIsEditing(true);
+  const handleStationHover = (index: number | null) => {
+    setStationHoveredIndex(index);
   };
 
   const handleOpenMap = () => {
@@ -381,8 +395,8 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
               className={classnames("location-selection-list", {"show": showSelectionList, "short" : showMapButton})}
               onFocus={() => setHoveredIndex(null)}>
               <li className={classnames("current-location-wrapper", {"geoname-candidate": hoveredIndex === -1})}
-                  tabIndex={1} onClick={handleFindCurrentLocation} onMouseOver={() => handleLocationHover(null)}
-                  onKeyDown={(e)=>handlePlaceNameSelectionKeyDown(e, 0)}>
+                  tabIndex={1} onClick={handleFindCurrentLocation} onMouseOver={() => handleLocationHover(null)}>
+                  {/* onKeyDown={(e)=>handlePlaceNameSelectionKeyDown(e, 0)}> */}
                 <CurrentLocationIcon className="current-location-icon"/>
                 <span className="current-location">Use current location</span>
               </li>
@@ -391,7 +405,8 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
                     return (
                       <li  key={`${loc}-${idx}`} data-ix={`${idx}`} tabIndex={1}
                             className={classnames("location-selector-option", {"geoname-candidate": hoveredIndex === idx})}
-                            onMouseOver={()=>handleLocationHover(idx)} onClick={(e)=>handlePlaceNameSelection(e)} onKeyDown={(e)=>handlePlaceNameSelectionKeyDown(e,idx)}>
+                            onMouseOver={()=>handleLocationHover(idx)} onClick={(e)=>handlePlaceNameSelection(e)}>
+                               {/* onKeyDown={(e)=>handlePlaceNameSelectionKeyDown(e,idx)}> */}
                         <span className="location-name">{loc.name}</span>
                       </li>
                     );
