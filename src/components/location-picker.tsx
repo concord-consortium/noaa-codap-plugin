@@ -3,7 +3,7 @@ import classnames from "classnames";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
-import { IPlace, IStation } from "../types";
+import { IPlace, IStation, IWeatherStation } from "../types";
 import { convertDistanceToStandard, findNearestActiveStations } from "../utils/getWeatherStations";
 import OpenMapIcon from "../assets/images/icon-map.svg";
 import EditIcon from "../assets/images/icon-edit.svg";
