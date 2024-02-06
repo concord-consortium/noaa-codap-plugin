@@ -32,17 +32,6 @@ export const adjustStationDataset = () => {
         }
       });
     }
-    // if (maxDate) {
-    //   const refDate = maxDate.subtract(1, "week");
-    //   datasetArr.forEach(function (station) {
-    //     let d = dayjs(station.maxdate);
-    //     if (d && d.isAfter(refDate)) {
-    //       return {...station, maxdate: "present"};
-    //     } else {
-    //       return station;
-    //     }
-    //   });
-    // }
   }
   return datasetArr;
 };
