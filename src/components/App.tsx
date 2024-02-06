@@ -14,7 +14,7 @@ import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { DSName, StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch, geoNameSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
-import { IState } from "../types";
+import { IState, IStation, IStatus } from "../types";
 import InfoIcon from "../assets/images/icon-info.svg";
 import ProgressIcon from "../assets/images/icon-progress-indicator.svg";
 import DoneIcon from "../assets/images/icon-done.svg";
@@ -29,18 +29,13 @@ const kInitialDimensions = {
   height: 670
 };
 
-interface IStatus {
-  status: "success" | "error" | "fetching";
-  message: string;
-  icon: JSX.Element;
-}
-
 export const App = () => {
   const { state, setState } = useStateContext();
   const { showModal, location, weatherStation, startDate, endDate, timezone, units, frequencies, selectedFrequency } = state;
   const { filterItems, clearData, createNOAAItems } = useCODAPApi();
   const [isFetching, setIsFetching] = useState(false);
   const [disableGetData, setDisableGetData] = useState(true);
+  const [activeStations, setActiveStations] = useState<IStation[]>([]);
   const [status, setStatus] = useState<IStatus>();
   const weatherStations = getWeatherStations();
 
@@ -77,30 +72,6 @@ export const App = () => {
     adjustStationDataset(weatherStations); //change max data to "present"
     createStationsDataset(weatherStations); //send weather station data to CODAP
 
-    const stationSelectionHandler = async(req: any) =>{
-      if (req.values.operation === "selectCases") {
-        const result = req.values.result;
-        const myCase = result && result.cases && result.cases[0];
-        if (myCase) {
-          const station = myCase.values;
-          const {latitude, longitude} = station;
-          const locationInfo = await geoLocSearch(latitude, longitude);
-          const locale = `${locationInfo.split(",")[0]}, ${locationInfo.split(",")[1]}`;
-          const distance = Number(locationInfo.split(",")[2]);
-          const localeLatLong = await geoNameSearch(locale);
-          const localeLat = localeLatLong?.[0].latitude || longitude;
-          const localeLong = localeLatLong?.[0].longitude || longitude;
-
-          setState((draft) => {
-            draft.weatherStation = station;
-            draft.location = {name: locale, latitude: localeLat, longitude: localeLong};
-            draft.weatherStationDistance = distance;
-            draft.zoomMap = false;
-            draft.didUserSelectStationFromMap = true;
-          });
-        }
-      }
-    };
     addNotificationHandler("notify",
       `dataContextChangeNotice[${StationDSName}]`, async (req: any) => {
         stationSelectionHandler(req);
@@ -121,9 +92,26 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    const allDefined = (startDate && endDate && location && weatherStation);
+    if (activeStations.find(as => as.station.name === weatherStation?.name)) {
+      setStatus({
+        status: "success",
+        message: "Station is active for date range",
+        icon: <DoneIcon />
+      });
+    } else {
+      setDisableGetData(true);
+      setStatus({
+        status: "station-error",
+        message: "Station was inactive for date range",
+        icon: <WarningIcon />
+      });
+    }
+  }, [activeStations, weatherStation]);
+
+  useEffect(() => {
+    const allDefined = (startDate && endDate && location && weatherStation && status?.status !== "station-error");
     setDisableGetData(!allDefined);
-  }, [location, endDate, startDate, weatherStation, timezone, units]);
+  }, [location, endDate, startDate, weatherStation, timezone, units, status?.status]);
 
   useEffect(() => {
     const minDate = startDate || new Date( -5364662060);
@@ -131,6 +119,31 @@ export const App = () => {
     guaranteeGlobal(globalMinDate, Number(minDate)/1000);
     guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
   }, [endDate, startDate]);
+
+  const stationSelectionHandler = async(req: any) =>{
+    if (req.values.operation === "selectCases") {
+      const result = req.values.result;
+      const myCase = result && result.cases && result.cases[0];
+      if (myCase) {
+        const station = myCase.values;
+        const {latitude, longitude} = station;
+        const locationInfo = await geoLocSearch(latitude, longitude);
+        const locale = `${locationInfo.split(",")[0]}, ${locationInfo.split(",")[1]}`;
+        const distance = Number(locationInfo.split(",")[2]);
+        const localeLatLong = await geoNameSearch(locale);
+        const localeLat = localeLatLong?.[0].latitude || longitude;
+        const localeLong = localeLatLong?.[0].longitude || longitude;
+
+        setState((draft) => {
+          draft.weatherStation = station;
+          draft.location = {name: locale, latitude: localeLat, longitude: localeLong};
+          draft.weatherStationDistance = distance;
+          draft.zoomMap = false;
+          draft.didUserSelectStationFromMap = true;
+        });
+      }
+    }
+  };
 
   const handleOpenInfo = () => {
     setState(draft => {
@@ -271,7 +284,7 @@ export const App = () => {
         <InfoIcon className="info-icon" title="Get further information about this CODAP plugin" onClick={handleOpenInfo}/>
       </div>
       <div className="header-divider" />
-      <LocationPicker />
+      <LocationPicker setActiveStations={setActiveStations} setStatus={setStatus}/>
       <div className="divider" />
       <DateRange />
       <div className="divider" />

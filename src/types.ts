@@ -264,3 +264,9 @@ export interface IItem {
 export interface ICODAPItem {
   [key: string]: any;
 }
+
+export interface IStatus {
+  status: "success" | "error" | "fetching" | "station-error";
+  message: string;
+  icon: JSX.Element;
+}
