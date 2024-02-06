@@ -55,6 +55,7 @@ export const LocationPicker = () => {
       // Unbind the event listener on clean up
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -299,8 +300,10 @@ export const LocationPicker = () => {
 
   const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCandidateLocation(e.target.value);
-    getLocationList();
-    setShowSelectionList(true);
+    if (e.target.value.length > 3) {
+      getLocationList();
+      setShowSelectionList(true);
+    }
   };
 
   const handleLocationInputClick = () => {
