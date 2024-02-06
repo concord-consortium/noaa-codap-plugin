@@ -12,7 +12,7 @@ import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { DSName, StationDSName, globalMaxDate, globalMinDate } from "../constants";
-import { geoLocSearch } from "../utils/geonameSearch";
+import { geoLocSearch, geoNameSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
 import { IState } from "../types";
 import InfoIcon from "../assets/images/icon-info.svg";
@@ -74,6 +74,8 @@ export const App = () => {
       }
     };
     init();
+    adjustStationDataset(weatherStations); //change max data to "present"
+    createStationsDataset(weatherStations); //send weather station data to CODAP
 
     const stationSelectionHandler = async(req: any) =>{
       if (req.values.operation === "selectCases") {
@@ -85,9 +87,13 @@ export const App = () => {
           const locationInfo = await geoLocSearch(latitude, longitude);
           const locale = `${locationInfo.split(",")[0]}, ${locationInfo.split(",")[1]}`;
           const distance = Number(locationInfo.split(",")[2]);
+          const localeLatLong = await geoNameSearch(locale);
+          const localeLat = localeLatLong?.[0].latitude || longitude;
+          const localeLong = localeLatLong?.[0].longitude || longitude;
+
           setState((draft) => {
             draft.weatherStation = station;
-            draft.location = {name: locale, latitude, longitude};
+            draft.location = {name: locale, latitude: localeLat, longitude: localeLong};
             draft.weatherStationDistance = distance;
             draft.zoomMap = false;
             draft.didUserSelectStationFromMap = true;
@@ -122,11 +128,9 @@ export const App = () => {
   useEffect(() => {
     const minDate = startDate || new Date( -5364662060);
     const maxDate = endDate || new Date(Date.now());
-    adjustStationDataset(weatherStations); //change max data to "present"
-    createStationsDataset(weatherStations); //send weather station data to CODAP
     guaranteeGlobal(globalMinDate, Number(minDate)/1000);
     guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
-  }, [endDate, startDate, weatherStations]);
+  }, [endDate, startDate]);
 
   const handleOpenInfo = () => {
     setState(draft => {
