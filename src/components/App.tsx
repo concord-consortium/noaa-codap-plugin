@@ -74,8 +74,8 @@ export const App = () => {
       }
     };
     init();
-    adjustStationDataset(weatherStations); //change max data to "present"
-    createStationsDataset(weatherStations); //send weather station data to CODAP
+    const adjustedStationDataset = adjustStationDataset(); //change max data to "present"
+    createStationsDataset(adjustedStationDataset); //send weather station data to CODAP
 
     const stationSelectionHandler = async(req: any) =>{
       if (req.values.operation === "selectCases") {
@@ -128,8 +128,6 @@ export const App = () => {
   useEffect(() => {
     const minDate = startDate || new Date( -5364662060);
     const maxDate = endDate || new Date(Date.now());
-    const adjustedStationDataset = adjustStationDataset(); //change max data to "present"
-    createStationsDataset(adjustedStationDataset); //send weather station data to CODAP
     guaranteeGlobal(globalMinDate, Number(minDate)/1000);
     guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
   }, [endDate, startDate, weatherStations]);
