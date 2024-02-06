@@ -36,7 +36,7 @@ export const adjustStationDataset = () => {
   return datasetArr;
 };
 
-export const findNearestActiveStations = async(targetLat: number, targetLong: number, fromDate: Date,
+export const findNearestActiveStations = async (targetLat: number, targetLong: number, fromDate: Date,
      toDate: Date) => {
   const adjustedStationDataset = adjustStationDataset();
   const fromMSecs = fromDate.getTime() ;
@@ -67,12 +67,12 @@ export const findNearestActiveStations = async(targetLat: number, targetLong: nu
     }
 
     if (shouldInsert) {
+
       const distance = calculateDistance(targetLat, targetLong, station.latitude, station.longitude);
       const newStation = {station, distance};
       insertStation(newStation.station, newStation.distance);
     }
   }
-
   return nearestStations.slice(0, 5);
 };
 
