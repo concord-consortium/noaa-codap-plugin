@@ -73,7 +73,7 @@ export const findNearestActiveStations = async (targetLat: number, targetLong: n
       insertStation(newStation.station, newStation.distance);
     }
   }
-  return nearestStations.slice(0, 5);
+  return nearestStations;
 };
 
 function degreesToRadians(degrees: number): number {

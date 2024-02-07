@@ -3,7 +3,7 @@ import classnames from "classnames";
 import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
 import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
-import { IPlace, IStation, IWeatherStation } from "../types";
+import { IPlace, IStation, IWeatherStation, IStatus } from "../types";
 import { convertDistanceToStandard, findNearestActiveStations } from "../utils/getWeatherStations";
 import { selectStations } from "../utils/codapHelpers";
 import OpenMapIcon from "../assets/images/icon-map.svg";
@@ -13,7 +13,12 @@ import CurrentLocationIcon from "../assets/images/icon-current-location.svg";
 
 import "./location-picker.scss";
 
-export const LocationPicker = () => {
+interface IProps {
+  setActiveStations: (stations: IStation[]) => void;
+  setStatus: (status: IStatus) => void;
+}
+
+export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
   const {state, setState} = useStateContext();
   const {units, location, weatherStation, weatherStationDistance, startDate, endDate, didUserSelectStationFromMap} = state;
   const [showMapButton, setShowMapButton] = useState(false);
@@ -100,7 +105,9 @@ export const LocationPicker = () => {
       findNearestActiveStations(location.latitude, location.longitude, _startDate, _endDate)
         .then((stationList: IStation[]) => {
           if (stationList) {
-            setStationPossibilities(stationList);
+            setActiveStations(stationList);
+            setStationPossibilities(stationList.slice(0, 5));
+            (isEditing && stationList.length > 0) && setShowSelectionList(true);
           }
           if (stationList.length > 0 && !didUserSelectStationFromMap) {
             setState((draft) => {
