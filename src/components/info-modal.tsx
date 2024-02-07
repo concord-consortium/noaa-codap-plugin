@@ -19,7 +19,7 @@ export const InfoModal = () => {
       </div>
       <div className="modal-body">
         <div className="info-title">About</div>
-        <div className="info-container">
+        <div className="info-container" title="About this plugin">
           <p>These weather data come from the National Centers for Environmental Information (NCEI), part of the National Oceanic and Atmospheric Administration. Documentation is available at
             <a href="https://www.ncei.noaa.gov" target="_blank" rel="noreferrer"> https://www.ncei.noaa.gov</a>.
           </p>
@@ -30,7 +30,7 @@ export const InfoModal = () => {
         </div>
       </div>
       <div className="modal-footer">
-        <button className="modal-button" onClick={handleCloseModal}>Close</button>
+        <button className="modal-button" onClick={handleCloseModal} title="Hide this section">Close</button>
       </div>
     </div>
   );

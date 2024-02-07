@@ -266,9 +266,11 @@ export const App = () => {
 
   return (
     <div className="App">
-      <div className="header">
+      <div className="header" title="About this plugin">
         <span>Retrieve weather data from observing stations.</span>
-        <InfoIcon className="info-icon" title="Get further information about this CODAP plugin" onClick={handleOpenInfo}/>
+        <span title="Get further information about this CODAP plugin">
+          <InfoIcon className="info-icon" onClick={handleOpenInfo}/>
+        </span>
       </div>
       <div className="header-divider" />
       <LocationPicker />
@@ -284,8 +286,14 @@ export const App = () => {
           <div className={`status-message ${status?.status}`}>{status ? status.message : ""}</div>
         </div>
         <div>
-          <button className="clear-data-button" disabled={isFetching || disableGetData} onClick={handleClearData}>Clear Data</button>
-          <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}>Get Data</button>
+          <button className="clear-data-button" disabled={isFetching || disableGetData} onClick={handleClearData}
+            title="Clear weather data in CODAP.">
+              Clear Data
+          </button>
+          <button className="get-data-button" disabled={isFetching || disableGetData} onClick={handleGetData}
+            title="Fetch weather data from NOAA and send to CODAP">
+              Get Data
+          </button>
         </div>
       </div>
       {showModal === "info" && <InfoModal />}

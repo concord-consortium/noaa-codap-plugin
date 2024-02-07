@@ -101,15 +101,15 @@ export const AttributesSelector = () => {
   return (
     <div className="attribute-selection-container">
       <div className="attribute-selection-header">
-        <span className="attributes-title">Attributes</span>
-        <div className="units-selection">
+        <span className="attributes-title" title="Choose attributes of weather data to fetch">Attributes</span>
+        <div className="units-selection" title="Select unit system for fetched data: standard or metric">
           <label className="units-label">Units</label>
           <button className={classnames("units-switch left", {"selected-unit": units === "standard"})} onClick={handleUnitsClicked}>standard</button>
           <button className={classnames("units-switch right",{"selected-unit": units === "metric"} )} onClick={handleUnitsClicked}>metric</button>
         </div>
       </div>
       <div className="attribute-selection">
-        <div className={`attribute-button all ${allSelected ? "selected" : ""}`} onClick={toggleSelectAllAttrs}>
+        <div className={`attribute-button all ${allSelected ? "selected" : ""}`} onClick={toggleSelectAllAttrs} title="Select all attributes">
           All
         </div>
         { attributeNamesList.map(attr => {
