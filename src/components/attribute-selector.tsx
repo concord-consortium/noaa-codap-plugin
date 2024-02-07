@@ -33,15 +33,15 @@ export const AttributesSelector = () => {
         const fromUnits = dataType.units[units];
         const toUnits = dataType.units[newUnits];
         if (operator === "between") {
-          const lowerValue = Math.round(dataType.convertUnits(fromUnits, toUnits, filter.lowerValue.toString()));
-          const upperValue = Math.round(dataType.convertUnits(fromUnits, toUnits, filter.upperValue.toString()));
+          const lowerValue = parseFloat((dataType.convertUnits(fromUnits, toUnits, filter.lowerValue.toString())).toFixed(1));
+          const upperValue = parseFloat((dataType.convertUnits(fromUnits, toUnits, filter.upperValue.toString())).toFixed(1));
           return {
             ...filter,
             lowerValue,
             upperValue
           };
         } else if (operator !== "top" && operator !== "bottom" && operator !== "aboveMean" && operator !== "belowMean" && operator !== "all") {
-          const value = Math.round(dataType.convertUnits(fromUnits, toUnits, filter.value.toString()));
+          const value = parseFloat((dataType.convertUnits(fromUnits, toUnits, filter.value.toString())).toFixed(1));
           return {
             ...filter,
             value
