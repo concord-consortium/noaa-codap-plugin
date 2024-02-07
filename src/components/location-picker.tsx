@@ -342,8 +342,10 @@ export const LocationPicker = () => {
               { weatherStation &&
                 <>
                   <span className="station-distance">({stationDistance?.toFixed(1)} {unitDistanceText}) </span>
-                  <span className="station-name"> {weatherStation?.name}</span>
-                  <EditIcon />
+                  <span className="station-name" title="Which weather station from which to fetch data"> {weatherStation?.name}</span>
+                  <span title="Select a different station">
+                    <EditIcon />
+                  </span>
                 </>
               }
             </div>
@@ -369,7 +371,7 @@ export const LocationPicker = () => {
         }
       </div>
       <div className="location-input-container">
-        <div className="location-input-selection" onKeyDown={handleListKeyDown}>
+        <div className="location-input-selection" onKeyDown={handleListKeyDown} title="Enter a location">
           <div ref={locationDivRef} className={classnames("location-input-wrapper", {"short" : showMapButton, "editing": isEditing})}
                 onClick={handleLocationInputClick}>
             <LocationIcon />
@@ -389,7 +391,6 @@ export const LocationPicker = () => {
               onFocus={() => setHoveredIndex(null)}>
               <li className={classnames("current-location-wrapper", {"geoname-candidate": hoveredIndex === -1})}
                   tabIndex={1} onClick={handleFindCurrentLocation} onMouseOver={() => handleLocationHover(null)}>
-                  {/* onKeyDown={(e)=>handlePlaceNameSelectionKeyDown(e, 0)}> */}
                 <CurrentLocationIcon className="current-location-icon"/>
                 <span className="current-location">Use current location</span>
               </li>
@@ -409,7 +410,7 @@ export const LocationPicker = () => {
           }
         </div>
         { showMapButton &&
-          <button className="map-button" onClick={handleOpenMap}>
+          <button className="map-button" onClick={handleOpenMap} title="Pick a weather station from a map">
             <OpenMapIcon />
           </button>
         }

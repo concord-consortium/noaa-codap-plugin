@@ -17,7 +17,9 @@ export const DateSelector = ({onOpen, isSelected, placeholder, value}: IDatePick
   const selectedClass = isSelected ? "selected" : "";
   return (
     <div className={`date-selector ${placeHolderClass} ${selectedClass}`} onClick={onOpen}>
-      <CalendarMonthIcon/>
+      <span title="Select a date">
+        <CalendarMonthIcon/>
+      </span>
       {value ? dayjs(value).format("MM/DD/YYYY") : placeholder}
     </div>
   );

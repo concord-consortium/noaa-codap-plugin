@@ -80,7 +80,7 @@ export const AttributeFilter = () => {
             <tr>
               <th scope="col" className={classnames("table-header attribute-header", {"narrow": hasFilter})}>Attributes</th>
               <th scope="col" className="table-header abbr-header">abbr</th>
-              <th scope="col" className="table-header units-header"  onClick={handleUnitsToggle}>units</th>
+              <th scope="col" className="table-header units-header" onClick={handleUnitsToggle} title="Switch units from standard to metric">units</th>
               <th scope="col" className={classnames("table-header filter-header", {"wide": hasFilter})}>filter</th>
             </tr>
           </thead>
@@ -111,7 +111,7 @@ export const AttributeFilter = () => {
                   <td className={classnames("filter-filter", {"filtering": idx === filteringIndex && showFilterModal,
                                               "has-filter": attrFilter && attrFilter.operator !== "all"})}
                       onClick={(e)=>handleFilterClick(e,idx)}>
-                    <div className="filter-value-container">
+                    <div className="filter-value-container" title="Specify how to filter the fetched data">
                       <span>{filterValue}</span>
                       <EditIcon className="edit-icon" />
                     </div>
@@ -300,12 +300,12 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
     // key attribute forces inputs to rerender when operator changes
     if (operator === "between") {
       return (
-        <div className="between-inputs-wrapper" key={`${operator}-${units}`}>
+        <div className="between-inputs-wrapper" title="Enter a value" key={`${operator}-${units}`}>
           <input ref={filterLowerValueInputElRef} className="filter-value between-low-value"
             defaultValue={`${lowerVal} ${currentAttr?.unit[units]}`}>
           </input>
           <span>and</span>
-          <input ref={filterUpperValueInputElRef} className="filter-value between-upper-value"
+          <input ref={filterUpperValueInputElRef} title="Enter a value" className="filter-value between-upper-value"
             defaultValue={`${upperVal} ${currentAttr?.unit[units]}`}>
           </input>
         </div>
@@ -313,13 +313,13 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
     } else if (operator === "aboveMean" || operator === "belowMean" || operator === "all") {
       return null;
     } else if (operator === "top" || operator === "bottom") {
-      return  <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value"
+      return  <input ref={filterValueTopBottomInputElRef} key={`${operator}-${units}`} className="filter-value" title="Enter a value"
                     defaultValue={`${Array.isArray(currentFilterValue)
                                       ? currentFilterValue[0]
                                       : currentFilterValue ? currentFilterValue : "100"}`}>
               </input>;
     } else {
-      return  <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value"
+      return  <input ref={filterValueInputElRef} key={`${operator}-${units}`} className="filter-value" title="Enter a value"
                 defaultValue={`${Array.isArray(currentFilterValue)
                                   ? currentFilterValue[0]
                                   : currentFilterValue ? currentFilterValue : "0"} ${currentAttr?.unit[units]}`}>
@@ -344,7 +344,7 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
   return (
     <div className={classnames("filter-modal", {"wide": wideModal})} style={position}>
       <div className="filter-wrapper">
-        <div className="filter-operator-wrapper" onClick={handleChangeFilterOperator}>
+        <div className="filter-operator-wrapper" title="Select an operator" onClick={handleChangeFilterOperator}>
           <div className="filter-operator">
             {operatorTextMap[operator] || "equals"}
           </div>
@@ -354,8 +354,8 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
         {(operator === "top" || operator === "bottom") && <span>{` results`}</span>}
       </div>
       <div className="filter-modal-footer">
-        <button className="filter-button reset" onClick={handleReset}>Reset</button>
-        <button className="filter-button done" onClick={handleSubmitFilter}>Done</button>
+        <button className="filter-button reset" title="Revert to no filter" onClick={handleReset}>Reset</button>
+        <button className="filter-button done" title="Submit selected filter specifications" onClick={handleSubmitFilter}>Done</button>
       </div>
       {showOperatorSelectionModal &&
         <div ref={operatorSelectionModalRef} className="filter-operator-selection-container" style={operatorSelectionListHeight}>

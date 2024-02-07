@@ -84,8 +84,8 @@ export const DateRange = () => {
   return (
     <div className="date-range-container">
       <div className="date-range-header">
-        <div className="title">Date Range {showWarningIcon && <WarningIcon/>}</div>
-        <div className="data-frequency-selection">
+        <div className="title" title="Select a range of dates">Date Range {showWarningIcon && <WarningIcon/>}</div>
+        <div className="data-frequency-selection" title="Select hourly, daily, or monthly weather summaries">
           {frequencies.map(freq => {
             return (
               <button

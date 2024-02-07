@@ -49,7 +49,7 @@ export const Calendars = ({selectedCalendar, handleSelectCalendar, closeCalendar
               </>
             }
           </div>
-        <button className="close-calendar" onClick={closeCalendars}>Done</button>
+        <button className="close-calendar" onClick={closeCalendars} title="Submit date range selection">Done</button>
       </div>
     </div>
   );
