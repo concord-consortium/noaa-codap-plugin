@@ -36,8 +36,7 @@ export const geoNameSearch = async (searchString: string, maxRows?: number): Pro
   }
 };
 
-export const autoComplete = async(inputEl: HTMLInputElement) => {
-  let thisQuery = inputEl.value;
+export const autoComplete = async(thisQuery: string) => {
   try {
     let placeList = await geoNameSearch(thisQuery);
     placeList = placeList || [];
