@@ -123,7 +123,6 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[endDate, location, startDate]);
-  // },[endDate, location, startDate, didUserSelectStationFromMap]);
 
   useEffect(() => {
     if (showStationSelectionList) {
