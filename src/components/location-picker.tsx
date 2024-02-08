@@ -107,7 +107,6 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
           if (stationList) {
             setActiveStations(stationList);
             setStationPossibilities(stationList.slice(0, 5));
-            (isEditing && stationList.length > 0) && setShowSelectionList(true);
           }
           if (stationList.length > 0 && !didUserSelectStationFromMap) {
             setState((draft) => {
@@ -123,7 +122,8 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[endDate, isEditing, location, startDate, didUserSelectStationFromMap]);
+  },[endDate, location, startDate]);
+  // },[endDate, location, startDate, didUserSelectStationFromMap]);
 
   useEffect(() => {
     if (showStationSelectionList) {
@@ -280,6 +280,17 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
   };
 
   // Station selection functions
+  const stationSelected = (station: IWeatherStation | undefined, distance: number) => {
+    setState(draft => {
+      draft.weatherStation = station;
+      draft.weatherStationDistance = distance;
+      draft.didUserSelectStationFromMap = false;
+      draft.zoomMap = false;
+    });
+    setShowStationSelectionList(false);
+    setStationHoveredIndex(null);
+    setArrowedIndex(-1);
+  };
 
   const handleStationSelection = (ev: React.MouseEvent<HTMLLIElement>) => {
     const target = ev.currentTarget;
@@ -287,43 +298,16 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
       const selectedLocIdx = parseInt(target.dataset.ix, 10);
       if (selectedLocIdx >= 0) {
         const selectedStation = stationPossibilities[selectedLocIdx].station;
-        stationSelected(selectedStation);
-        setState(draft => {
-          draft.didUserSelectStationFromMap = false;
-          draft.weatherStation = selectedStation;
-          draft.weatherStationDistance = stationPossibilities[selectedLocIdx].distance;
-        });
+        stationSelected(selectedStation, stationPossibilities[selectedLocIdx].distance);
       }
-      setShowStationSelectionList(false);
-      setState(draft => {
-        draft.zoomMap = false;
-      });
     }
   };
 
   const handleStationSelectionKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, index: number) => {
     if (e.key === "Enter") {
       const selectedStation = stationPossibilities[index].station;
-      stationSelected(selectedStation);
-      setState(draft => {
-        draft.weatherStation = selectedStation;
-        draft.weatherStationDistance = stationPossibilities[index].distance;
-      });
-      setShowStationSelectionList(false);
-      setState(draft => {
-        draft.zoomMap = false;
-      });
+      stationSelected(selectedStation, stationPossibilities[index].distance);
     }
-  };
-
-  const stationSelected = (station: IWeatherStation | undefined) => {
-    setState(draft => {
-      draft.weatherStation = station;
-      draft.didUserSelectStationFromMap = false;
-    });
-    setShowStationSelectionList(false);
-    setStationHoveredIndex(null);
-    setArrowedIndex(-1);
   };
 
   const handleStationHover = (index: number | null) => {
