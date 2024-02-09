@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import classnames from "classnames";
-import { autoComplete, geoLocSearch } from "../utils/geonameSearch";
+import { autoComplete, geoLocSearch, geoNameSearch } from "../utils/geonameSearch";
 import { geonamesUser, kOffsetMap, timezoneServiceURL } from "../constants";
 import { useStateContext } from "../hooks/use-state";
 import { IPlace, IStation, IWeatherStation, IStatus } from "../types";
@@ -57,7 +57,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
           setShowSelectionList(false);
           setShowMapButton(false);
           setState((draft) => {
-            draft.location = undefined;
+            draft.location = locationInputEl.current?.value === "" ? undefined : location;
             draft.zoomMap = false;
           });
         }
@@ -71,7 +71,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     if (locationInputEl.current?.value === "") {
@@ -156,9 +156,10 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     }
   };
 
-  const getLocationList = () => {
-    if (locationInputEl.current) {
-      autoComplete(locationInputEl.current)
+  const getLocationList = (newLoc?: string) => {
+    const locationToUse = newLoc || locationInputEl.current?.value;
+    if (locationToUse) {
+      autoComplete(locationToUse)
         .then ((placeList: IPlace[] | undefined) => {
                 if (placeList) {
                   setLocationPossibilities(placeList);
@@ -168,10 +169,12 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
   };
 
   useEffect(() => {
-    if (isEditing) {
-      getLocationList();
+    if (isEditing || location) { //if location changes from map selection
+      const newLocation = location ? location.name : "";
+      setCandidateLocation(newLocation);
+      getLocationList(newLocation);
     }
-  }, [isEditing]);
+  }, [isEditing, location]);
 
   const placeNameSelected = (place: IPlace | undefined) => {
     setState(draft => {
@@ -182,13 +185,20 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     setCandidateLocation(place?.name || "");
     setShowSelectionList(false);
     setIsEditing(false);
-    setShowMapButton(true);
+    setShowMapButton(place?.name !== undefined);
     setLocationPossibilities([]);
     setHoveredIndex(null);
     setArrowedIndex(-1);
   };
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = async(e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      if (e.currentTarget.value) {
+        const locale = await geoNameSearch(e.currentTarget.value);
+        placeNameSelected(locale?.[0]);
+      }
+      setIsEditing(false);
+    } else
     if (e.key === "ArrowDown" && locationPossibilities.length > 0) {
       setHoveredIndex(0);
       setArrowedIndex(0);
@@ -234,6 +244,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     if (target.value !== "") {
       getLocationList();
       setCandidateLocation(target.value);
+      setState(draft => {draft.location = location;});
     } else {
       setIsEditing(false);
       setCandidateLocation(location?.name || "");
