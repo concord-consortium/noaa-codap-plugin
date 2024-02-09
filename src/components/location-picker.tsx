@@ -383,7 +383,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
                 onClick={handleLocationInputClick}>
             <LocationIcon />
             { location && !isEditing
-                ? <div>
+                ? <div className="selected-loc-wrapper">
                     <span className="selected-loc-intro">Stations near </span>
                     <span className="selected-loc-name">{location?.name}</span>
                   </div>
@@ -407,7 +407,6 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
                       <li  key={`${loc}-${idx}`} data-ix={`${idx}`} tabIndex={1}
                             className={classnames("location-selector-option", {"geoname-candidate": hoveredIndex === idx})}
                             onMouseOver={()=>handleLocationHover(idx)} onClick={(e)=>handlePlaceNameSelection(e)}>
-                               {/* onKeyDown={(e)=>handlePlaceNameSelectionKeyDown(e,idx)}> */}
                         <span className="location-name">{loc.name}</span>
                       </li>
                     );

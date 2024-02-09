@@ -137,6 +137,12 @@
           margin: 0 7px;
         }
 
+        .selected-loc-wrapper {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
         .location-input {
           outline: transparent;
           border: transparent;
