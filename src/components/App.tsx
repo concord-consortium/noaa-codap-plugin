@@ -98,7 +98,7 @@ export const App = () => {
         message: "Station is active for date range",
         icon: <DoneIcon />
       });
-    } else {
+    } else if (weatherStation) {
       setDisableGetData(true);
       setStatus({
         status: "station-error",
@@ -123,7 +123,8 @@ export const App = () => {
   const stationSelectionHandler = async(req: any) =>{
     if (req.values.operation === "selectCases") {
       const result = req.values.result;
-      const myCase = result && result.cases && result.cases[0];
+      console.log("result", result );
+      const myCase = result && (result.cases.length === 1) && result.cases[0];
       if (myCase) {
         const station = myCase.values;
         const {latitude, longitude} = station;
