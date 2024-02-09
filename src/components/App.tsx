@@ -123,7 +123,6 @@ export const App = () => {
   const stationSelectionHandler = async(req: any) =>{
     if (req.values.operation === "selectCases") {
       const result = req.values.result;
-      console.log("result", result );
       const myCase = result && (result.cases.length === 1) && result.cases[0];
       if (myCase) {
         const station = myCase.values;
