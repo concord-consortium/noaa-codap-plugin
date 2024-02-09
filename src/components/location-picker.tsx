@@ -55,7 +55,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
         if (locationInputEl.current && !locationInputEl.current.contains(event.target as Node) && !locationSelectionListElRef.current?.contains(event.target as Node) && !locationDivRef.current?.contains(event.target as Node)) {
           setIsEditing(false);
           setShowSelectionList(false);
-          setShowMapButton(false);
+          setShowMapButton(locationInputEl.current.value !== "");
           setState((draft) => {
             draft.location = locationInputEl.current?.value === "" ? undefined : location;
             draft.zoomMap = false;
@@ -88,7 +88,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
 
   useEffect(() => {
     if (location) {
-      setShowMapButton(true);
+      setShowMapButton(location !== undefined);
     }
   }, [location]);
 
@@ -184,7 +184,7 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
     setCandidateLocation(place?.name || "");
     setShowSelectionList(false);
     setIsEditing(false);
-    setShowMapButton(place?.name !== undefined);
+    setShowMapButton(place?.name !== undefined || (location !== undefined && locationInputEl.current?.value !== ""));
     setLocationPossibilities([]);
     setHoveredIndex(null);
     setArrowedIndex(-1);
@@ -192,11 +192,18 @@ export const LocationPicker = ({setActiveStations, setStatus}: IProps) => {
 
   const handleInputKeyDown = async(e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      if (e.currentTarget.value) {
+      if (e.currentTarget.value === "") {
+        setShowMapButton(false);
+        setState(draft => {
+          draft.location = undefined;
+          draft.weatherStation = undefined;
+        });
+      } else {
         const locale = await geoNameSearch(e.currentTarget.value);
         placeNameSelected(locale?.[0]);
       }
       setIsEditing(false);
+      locationInputEl.current?.blur();
     } else
     if (e.key === "ArrowDown" && locationPossibilities.length > 0) {
       setHoveredIndex(0);
