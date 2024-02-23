@@ -1,0 +1,4 @@
+npm run build
+rm -rf noaa-codap-plugin
+mv build noaa-codap-plugin
+rsync -av noaa-codap-plugin codap-server.concord.org:public_html
