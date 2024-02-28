@@ -184,7 +184,6 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("resize", handleResize);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Move modal to bottom of window if window is too short
