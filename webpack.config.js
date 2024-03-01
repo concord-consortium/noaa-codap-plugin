@@ -6,6 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const os = require('os');
+const CopyPlugin = require('copy-webpack-plugin');
 
 // DEPLOY_PATH is set by the s3-deploy-action its value will be:
 // `branch/[branch-name]/` or `version/[tag-name]/`
@@ -148,6 +149,11 @@ module.exports = (env, argv) => {
         publicPath: DEPLOY_PATH
       })] : []),
       new CleanWebpackPlugin(),
+      new CopyPlugin({
+        patterns: [
+          { from: 'src/assets/images/icon-noaa-weather.svg', to: 'assets/images/icon-noaa-weather.svg' },
+        ],
+      }),
     ]
   };
 };
