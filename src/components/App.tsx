@@ -47,6 +47,7 @@ export const App = () => {
       // so ignore the new state and keep the default starting state in that case
       // Check if newState is essentially empty
       if (Object.keys(newState || {}).length === 0) {
+        // eslint-disable-next-line no-console
         console.log("New state is empty, keeping default state.");
         return;
       }
