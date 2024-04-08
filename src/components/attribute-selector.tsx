@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import classnames from "classnames";
 import { useStateContext } from "../hooks/use-state";
-import { dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
+import { AttrType, dailyMonthlyAttrMap, hourlyAttrMap } from "../types";
 import { dataTypeStore } from "../utils/noaaDataTypes";
 
 import "./attribute-selector.scss";
@@ -78,7 +78,7 @@ export const AttributesSelector = () => {
     const selectedAttr = attributeList.find(a => a.name === selectedAttrName);
     const filters = selectedAttrsAndFiltersForFrequency.filters;
     setState(draft => {
-      const draftAttrNames = draft.frequencies[selectedFrequency].attrs.map(a => {return a.name;});
+      const draftAttrNames = draft.frequencies[selectedFrequency].attrs.map((a:AttrType) => {return a.name;});
       if (allSelected) {
         setAllSelected(false);
         draft.frequencies[selectedFrequency] = {attrs: [], filters};

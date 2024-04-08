@@ -13,7 +13,8 @@ import {
   dailyMonthlyAttrMap,
   hourlyAttrMap,
   IAboveMeanFilter,
-  IBelowMeanFilter
+  IBelowMeanFilter,
+  IFilter
 } from "../types";
 import EditIcon from "../assets/images/icon-edit.svg";
 
@@ -221,7 +222,7 @@ const FilterModal = ({attr, position, targetFilterBottom, setShowFilterModal, se
     setState(draft => {
       const existingFilter = frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
       const attrFilterIndex = existingFilter && frequencies[selectedFrequency].filters.indexOf(existingFilter);
-      const existingFilterDraft = draft.frequencies[selectedFrequency].filters.find(f=>f.attribute === attr.name);
+      const existingFilterDraft = draft.frequencies[selectedFrequency].filters.find((f: IFilter)=>f.attribute === attr.name);
       if (existingFilter) {
         switch (operator) {
           case "between":
