@@ -8,13 +8,13 @@ import { AttributeFilter } from "./attribute-filter";
 import { InfoModal } from "./info-modal";
 import { useStateContext } from "../hooks/use-state";
 import { adjustStationDataset, getWeatherStations } from "../utils/getWeatherStations";
-import { addNotificationHandler, createStationsDataset, guaranteeGlobal } from "../utils/codapHelpers";
+import { addNotificationHandler, createStationsDataset, guaranteeGlobal, hasMap } from "../utils/codapHelpers";
 import { useCODAPApi } from "../hooks/use-codap-api";
 import { composeURL, formatData } from "../utils/noaaApiHelper";
 import { DSName, StationDSName, globalMaxDate, globalMinDate } from "../constants";
 import { geoLocSearch, geoNameSearch } from "../utils/geonameSearch";
 import { DataReturnWarning } from "./data-return-warning";
-import { IState, IStation, IStatus } from "../types";
+import { IState, IStation, IStatus, ILegacyState } from "../types";
 import InfoIcon from "../assets/images/icon-info.svg";
 import ProgressIcon from "../assets/images/icon-progress-indicator.svg";
 import DoneIcon from "../assets/images/icon-done.svg";
@@ -41,32 +41,73 @@ export const App = () => {
 
   useEffect(() => {
     const init = async () => {
-      const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions}) as IState;
+      const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
+      const isMapOpen = await hasMap();
       // plugins in new documents return an empty object for the interactive state
       // so ignore the new state and keep the default starting state in that case
-      if (Object.keys(newState || {}).length > 0) {
-        setState((draft) => {
-          draft.location = newState.location;
-          draft.selectedFrequency = newState.selectedFrequency;
-          draft.units = newState.units;
-          draft.timezone = newState.timezone;
-          draft.weatherStation = newState.weatherStation;
-          draft.weatherStationDistance = newState.weatherStationDistance;
-          draft.zoomMap = newState.zoomMap;
-          draft.frequencies = newState.frequencies;
-          draft.didUserSelectDate = newState.didUserSelectDate;
-          draft.isMapOpen = newState.isMapOpen;
-
-          const startDateStr = newState.startDate;
-          const endDateStr = newState.endDate;
+      // Check if newState is essentially empty
+      if (Object.keys(newState || {}).length === 0) {
+        // eslint-disable-next-line no-console
+        console.log("New state is empty, keeping default state.");
+        return;
+      }
+      // legacy plugin uses sampleFrequency as key vs new plugin uses selectedFrequency
+      const isLegacy = "sampleFrequency" in newState;
+      let locale = "", localeLat=0, localeLong=0, distance=0;
+      if (isLegacy) {
+        const legacyState = newState as ILegacyState;
+        const legacyStation = legacyState.selectedStation;
+        const locationInfo = await geoLocSearch(legacyStation.latitude, legacyStation.longitude);
+        locale = `${locationInfo.split(",")[0]}, ${locationInfo.split(",")[1]}`;
+        distance = Number(locationInfo.split(",")[2]);
+        const localeLatLong = await geoNameSearch(locale);
+        localeLat = localeLatLong?.[0].latitude || legacyStation.latitude;
+        localeLong = localeLatLong?.[0].longitude || legacyStation.longitude;
+      }
+      setState((draft: IState) => {
+        if (isLegacy) {
+          draft.isMapOpen = isMapOpen;
+          const legacyState = newState as ILegacyState;
+          draft.selectedFrequency = legacyState.sampleFrequency;
+          draft.units = legacyState.unitSystem;
+          draft.didUserSelectDate = !!legacyState.userSelectedDate;
+          draft.weatherStation = legacyState.selectedStation;
+          draft.weatherStationDistance = distance;
+          draft.location = {name: locale, latitude: localeLat, longitude: localeLong};
+          const startDateStr = legacyState.startDate;
+          const endDateStr = legacyState.endDate;
+          if (draft.timezone) {
+            draft.timezone.gmtOffset = (legacyState.stationTimezoneOffset).toString();
+            draft.timezone.name = legacyState.stationTimezoneName;
+          }
           if (startDateStr) {
             draft.startDate = dayjs(startDateStr).toDate();
           }
           if (endDateStr) {
             draft.endDate = dayjs(endDateStr).toDate();
           }
-        });
-      }
+        } else {
+          const _newState = newState as IState;
+          draft.location = _newState.location;
+          draft.selectedFrequency = _newState.selectedFrequency;
+          draft.units = _newState.units;
+          draft.timezone = _newState.timezone;
+          draft.weatherStation = _newState.weatherStation;
+          draft.weatherStationDistance = _newState.weatherStationDistance;
+          draft.zoomMap = _newState.zoomMap;
+          draft.frequencies =_newState.frequencies;
+          draft.didUserSelectDate = _newState.didUserSelectDate;
+          draft.isMapOpen = _newState.isMapOpen;
+          const startDateStr = _newState.startDate;
+          const endDateStr = _newState.endDate;
+          if (startDateStr) {
+            draft.startDate = dayjs(startDateStr).toDate();
+          }
+          if (endDateStr) {
+            draft.endDate = dayjs(endDateStr).toDate();
+          }
+        }
+      });
     };
     init();
     const adjustedStationDataset = adjustStationDataset(); //change max data to "present"

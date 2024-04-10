@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStateContext } from "./use-state";
-import { Attribute, Collection, DataContext, ICODAPItem, IDataType, IItem } from "../types";
+import { Attribute, Collection, DataContext, DefaultState, ICODAPItem, IDataType, IItem } from "../types";
 import { IResult, codapInterface, createItems, getAllItems, getDataContext } from "@concord-consortium/codap-plugin-api";
 import { DSCollection1, DSCollection2, DSName, kStationsDatasetName } from "../constants";
 import { createMap, selectStations } from "../utils/codapHelpers";
@@ -10,7 +10,7 @@ export const useCODAPApi = () => {
   const {state} = useStateContext();
   const [ selectedDataTypes, setSelectedDataTypes ] = useState<IDataType[]>([]);
   const { frequencies, selectedFrequency, weatherStation, units, isMapOpen, zoomMap } = state;
-  const { attrs } = frequencies[selectedFrequency];
+  const { attrs } = frequencies ? frequencies[selectedFrequency] : DefaultState.frequencies.daily;
 
   useEffect(() => {
     if (weatherStation && isMapOpen) {

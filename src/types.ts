@@ -85,7 +85,7 @@ export interface IWeatherStation {
   maxdate: string; // "1973-01-01" || "present",
   isdID: string; // "72613014755,72613099999",
   ghcndID: string; // "USW00014755"
-  ranges: IWeatherStationRange[];
+  ranges?: IWeatherStationRange[];
 }
 
 interface IWeatherStationRange {
@@ -95,7 +95,7 @@ interface IWeatherStationRange {
   longitude: number;
   name: string;
   elevation?: string | number;
-  ids: IWeatherStationID[];
+  ids?: IWeatherStationID[];
 }
 
 interface IWeatherStationID {
@@ -106,6 +106,21 @@ interface IWeatherStationID {
 export interface ITimeZone {
   gmtOffset: string;
   name: string;
+}
+export interface ILegacyState {
+  database: string;
+  dateGranularity: string | null;
+  endDate: string;
+  isFetchable: boolean;
+  sampleFrequency: IFrequency;
+  selectedDataTypes: IDataType[];
+  length: number;
+  selectedStation: IWeatherStation;
+  startDate: string;
+  stationTimezoneName: string;
+  stationTimezoneOffset: number;
+  unitSystem: IUnits;
+  userSelectedDate: string | null;
 }
 
 export interface IState {
