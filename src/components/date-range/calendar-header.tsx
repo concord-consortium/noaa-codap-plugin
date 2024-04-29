@@ -59,7 +59,7 @@ export const CalendarHeader = ({calendarType, handleSelectCalendar}: ICalendarHe
     handleSelectCalendar();
   };
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newYear = Number(e.target.value);
     handleSetDate(new Date(newYear, month, day));
     handleSelectCalendar();
@@ -80,15 +80,15 @@ export const CalendarHeader = ({calendarType, handleSelectCalendar}: ICalendarHe
                   );
                 })}
               </select>
-              <input
-                className={`year select`}
-                value={year}
-                type="number"
-                min={1850}
-                max={new Date().getFullYear()}
-                step={1}
-                onChange={handleYearChange}
-              />
+              <select className={`year select`} value={year} onChange={handleYearChange}>
+                {Array.from({length: new Date().getFullYear() - 1850 + 1}, (_, i) => i + 1850).map((_year, ix) => {
+                  return (
+                    <option key={ix} value={_year}>
+                      {_year}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
             <div className={`arrow next`} onClick={handleNext}><ArrowForwardIosIcon/></div>
         </div>
