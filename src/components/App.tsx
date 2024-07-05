@@ -40,6 +40,7 @@ export const App = () => {
   const weatherStations = getWeatherStations();
 
   useEffect(() => {
+    console.log("| 0 | App []");
     const init = async () => {
       const newState = await initializePlugin({pluginName: kPluginName, version: kVersion, dimensions: kInitialDimensions});
       const isMapOpen = await hasMap();

@@ -122,7 +122,7 @@ export const kWeatherStationCollectionAttrs = [
       name: "elevation",
       unit: "ft",
       precision: "0",
-      type: "number"
+      type: "numeric",
   },
   { name: "isdID"},
   {
