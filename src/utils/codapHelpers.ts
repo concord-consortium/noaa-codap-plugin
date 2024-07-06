@@ -92,9 +92,7 @@ const hasMap = async () => {
 };
 
 const createStationsDataset = async (stations: IWeatherStation[]) => {
-  console.log("| 1 | createStationDataset...");
   let result = await createDataContext(kStationsDatasetName);
-  console.log("| 2 |   ...result: ", result);
   if (!result.success) {
       console.warn(`Dataset, "${kStationsDatasetName}", creation failed`);
       return;
