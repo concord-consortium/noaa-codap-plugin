@@ -29,6 +29,7 @@ export const useCODAPApi = () => {
   }, [selectedFrequency, frequencies, attrs]);
 
   const createNOAAItems = async (items: IItem[]) => {
+    console.log("| createNOAAItems from items: ", items);
     await updateWeatherDataset(selectedDataTypes);
     // eslint-disable-next-line no-console
     console.log("noaa-cdo ... createNOAAItems with " + items.length + " case(s)");

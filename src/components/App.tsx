@@ -197,7 +197,7 @@ export const App = () => {
     const allDefined = (startDate && endDate && units && selectedFrequency &&
       weatherStation && timezone);
 
-    if (data && allDefined) {
+    if (data.length && allDefined) {
       const formatDataProps = {
         data,
         timezone,
@@ -207,7 +207,10 @@ export const App = () => {
         endDate,
         units
       };
+      // so far traced up to here - no data when nothing
+      console.log("| formatDataProps.data: ", formatDataProps.data);
       const dataRecords = formatData(formatDataProps);
+      //console.log(" | dataRecords? ", dataRecords);
       const items = Array.isArray(dataRecords) ? dataRecords : [dataRecords];
       const filteredItems = filterItems(items);
       setStatus({
@@ -289,7 +292,10 @@ export const App = () => {
           const tResult = await fetch(tRequest, {mode: "cors"});
           setIsFetching(true);
           if (tResult.ok) {
+            console.log("| tResult: ", tResult);
             const theJSON = await tResult.json();
+            // it was empty...so keep going up
+            //console.log("| theJSON (if this empty then gotta dig more): ", theJSON);
             await fetchSuccessHandler(theJSON);
           } else {
             let result = await tResult.text();
