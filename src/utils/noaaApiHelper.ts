@@ -21,6 +21,7 @@ const convertUnits = (data: any[]) => {
     });
     return item;
   });
+  console.log("| returning some convertedData:", convertedData);
   return convertedData;
 };
 
