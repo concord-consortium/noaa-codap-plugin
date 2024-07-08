@@ -196,7 +196,7 @@ export const App = () => {
     const allDefined = (startDate && endDate && units && selectedFrequency &&
       weatherStation && timezone);
 
-    if (data && allDefined) {
+    if (data.length && allDefined) {
       const formatDataProps = {
         data,
         timezone,
