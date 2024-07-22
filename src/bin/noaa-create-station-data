@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+/* eslint-env node */
+/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports */
+const fs = require("fs");
+const {
+  configure,
+  normalizeGHCNDStation,
+  removeTransientStations,
+  printErrorAndExit,
+  writeDebugToFile,
+  findMatching,
+  consolidateISDStations,
+  combineTwoStations
+} = require("./noaa-station-utils");
+/* eslint-enable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports */
+
+
+function getFlatGHCNDStations(configuration) {
+  const rawText = fs.readFileSync(configuration.ghcndStationsFile, "utf8");
+  const ghcndStations = JSON.parse(rawText);
+  const filteredAndNormalizedStations = ghcndStations
+    .filter(stn => !!stn.id)
+    .map(normalizeGHCNDStation);
+  return filteredAndNormalizedStations;
+}
+
+function getProcessedISDStations(configuration) {
+  const rawText = fs.readFileSync(configuration.isdStationsFile);
+  const rawStations = JSON.parse(rawText);
+  const mergedIsdStations = consolidateISDStations(rawStations);
+  let legitStations = removeTransientStations(mergedIsdStations);
+  return legitStations;
+}
+
+function mergeInGHCNDStations(stations, ghcndStations) {
+  ghcndStations.forEach(function (normalizedStation) {
+    let existingStation = findMatching(stations, normalizedStation);
+    if (existingStation) {
+      console.error(`found match: ISD: "${existingStation.name}" >>>> GHCND: "${normalizedStation.name}"`);
+      combineTwoStations(existingStation, normalizedStation);
+    }
+  });
+  return stations;
+}
+
+function main() {
+  const configuration = configure();
+
+  try {
+    const ISDStations = getProcessedISDStations(configuration);
+    const GHCNDStations = getFlatGHCNDStations(configuration);
+    const mergedStations = mergeInGHCNDStations(ISDStations, GHCNDStations);
+    const dualIDStations = mergedStations.filter(stn => stn.ghcndID && stn.isdID);
+    writeDebugToFile(ISDStations, "ISDStations");
+    writeDebugToFile(GHCNDStations, "GHCNDStations");
+    writeDebugToFile(mergedStations, "mergedStations");
+    writeDebugToFile(dualIDStations, "dualIDStations");
+  }
+
+  catch (ex) {
+    printErrorAndExit(`Error reading input: ${ex}`);
+  }
+}
+
+main();
