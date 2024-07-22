@@ -2,6 +2,31 @@ import dayjs from "dayjs";
 import { IStation, IWeatherStation } from "../types";
 import weatherStations from "../assets/data/weather-stations.json";
 
+function getElevationsFromMetersString(elevation: number | string): number {
+  if (typeof elevation === "number") {
+    return elevation;
+  }
+
+  if (typeof elevation === "string") {
+    elevation = elevation.trim();
+    if (elevation === "") return 0;
+
+    const isNegative = elevation.startsWith("-");
+    if (elevation.startsWith("+") || isNegative) {
+      elevation = elevation.substring(1);
+    }
+
+    const elevationInMeters = parseFloat(elevation);
+    if (isNaN(elevationInMeters)) return 0;
+
+    const rawMeters = isNegative ? -elevationInMeters : elevationInMeters;
+    const meters = Math.round(rawMeters);
+    return meters;
+  }
+
+  return 0;
+}
+
 /**
  * We assume that the station dataset was prepared in the past but
  * stations that were active at the time of preparation are still active.
@@ -9,7 +34,17 @@ import weatherStations from "../assets/data/weather-stations.json";
  * max date as "present".
  */
 export const adjustStationDataset = () => {
-  const datasetArr = Array.from(weatherStations);
+  const datasetArrRaw = Array.from(weatherStations);
+  // make sure any elevation is a number
+
+  const datasetArr = datasetArrRaw.map(station => {
+    const newStation = {...station};
+    if (newStation.elevation) {
+      newStation.elevation = getElevationsFromMetersString(newStation.elevation);
+    }
+    return newStation;
+  });
+
   let maxDate: dayjs.Dayjs | null = null;
 
   if (datasetArr) {

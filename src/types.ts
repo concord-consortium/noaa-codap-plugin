@@ -79,7 +79,7 @@ export interface IWeatherStation {
   latitude: number;
   longitude: number;
   name: string;
-  elevation?: number;
+  elevation?: number | string;
   ICAO: string; // "KMWN"
   mindate: string; // "1973-01-01"
   maxdate: string; // "1973-01-01" || "present",

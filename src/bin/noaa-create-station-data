@@ -50,11 +50,13 @@ function main() {
     const ISDStations = getProcessedISDStations(configuration);
     const GHCNDStations = getFlatGHCNDStations(configuration);
     const mergedStations = mergeInGHCNDStations(ISDStations, GHCNDStations);
-    const dualIDStations = mergedStations.filter(stn => stn.ghcndID && stn.isdID);
+    const finalStations = mergedStations.filter(stn => stn.ghcndID && stn.isdID);
     writeDebugToFile(ISDStations, "ISDStations");
     writeDebugToFile(GHCNDStations, "GHCNDStations");
     writeDebugToFile(mergedStations, "mergedStations");
-    writeDebugToFile(dualIDStations, "dualIDStations");
+    writeDebugToFile(finalStations, "dualIDStations");
+
+    process.stdout.write(JSON.stringify(finalStations));
   }
 
   catch (ex) {

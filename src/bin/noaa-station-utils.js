@@ -7,13 +7,13 @@ const process = require("process");
 const path = require("path");
 /* eslint-enable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports */
 
-const kDeltaSq = 0.0001; // distance in degrees within which two stations are considered the same.
+//const kDeltaSq = 0.0001; // distance in degrees within which two stations are considered the same.
 
 
 function configure() {
   let configuration = {};
 
-  configuration.progName = process.argv[1].replace(/.*\//, '');
+  configuration.progName = process.argv[1].replace(/.*\//, "");
 
   let isdStationsFile = process.argv[2];
   if (!(isdStationsFile && fs.existsSync(isdStationsFile) ) ) {
@@ -47,8 +47,12 @@ function usage(configuration) {
 // This is a way to get a distance between two points on a sphere (Earth) given their latitudes and longitudes.
 const R = 6378137; // equatorial mean radius of Earth (in meters)
 
-function squared (x) { return x * x }
-function toRad (x) { return x * Math.PI / 180.0 }
+function squared (x) {
+  return x * x;
+}
+function toRad (x) {
+  return x * Math.PI / 180.0;
+}
 function hav (x) {
   return squared(Math.sin(x / 2));
 }
@@ -166,7 +170,7 @@ function normalizeISDStation(st) {
     latitude: st.latitude,
     longitude: st.longitude,
     name: st.name,
-    elevation: st.elevation,
+    elevation: getElevationsFromMetersString(st.elevation),
     ICAO: st.ICAO,
     mindate: st.mindate,
     maxdate: st.maxdate,
@@ -196,7 +200,7 @@ function normalizeGHCNDStation(st) {
     latitude: st.latitude,
     longitude: st.longitude,
     name: st.name,
-    elevation: st.elevation,
+    elevation: getElevationsFromMetersString(st.elevation),
     mindate: st.mindate,
     maxdate: st.maxdate,
     ghcndID: id,
