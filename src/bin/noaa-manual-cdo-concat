@@ -1,0 +1,19 @@
+#!/bin/bash
+# This script processes JSON files in a specified directory and outputs the concatenated results.
+# Usage: my-concat-script my-directory-of-json-files > myoutputfile.json
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 directory-of-json-files"
+  exit 1
+fi
+
+INPUT_DIR=$1
+
+if [ ! -d "$INPUT_DIR" ]; then
+  echo "Error: Directory $INPUT_DIR does not exist."
+  exit 1
+fi
+
+# Concatenating JSON files in $INPUT_DIR... and sending to jq... output via > to supplied output file"
+
+jq -s '.' "$INPUT_DIR"/*.json | jq [.[].results[]]
