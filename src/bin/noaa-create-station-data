@@ -33,13 +33,18 @@ function getProcessedISDStations(configuration) {
 }
 
 function mergeInGHCNDStations(stations, ghcndStations) {
+  const hoursMinutesSecondsString = Date.now().toString().substring(8);
+  const matchRecordsFile = `/tmp/matchRecords-${hoursMinutesSecondsString}.txt`;
   ghcndStations.forEach(function (normalizedStation) {
     let existingStation = findMatching(stations, normalizedStation);
     if (existingStation) {
-      console.error(`found match: ISD: "${existingStation.name}" >>>> GHCND: "${normalizedStation.name}"`);
+      const matchRecord = `found match: ISD: "${existingStation.name}" >>>> GHCND: "${normalizedStation.name}"\n`;
+      console.error(matchRecord);
+      fs.appendFileSync(matchRecordsFile, matchRecord, "utf8");
       combineTwoStations(existingStation, normalizedStation);
     }
   });
+  console.error(` ... Match records written to ${matchRecordsFile}`);
   return stations;
 }
 
@@ -54,7 +59,7 @@ function main() {
     writeDebugToFile(ISDStations, "ISDStations");
     writeDebugToFile(GHCNDStations, "GHCNDStations");
     writeDebugToFile(mergedStations, "mergedStations");
-    writeDebugToFile(finalStations, "dualIDStations");
+    writeDebugToFile(finalStations, "finalStations");
 
     process.stdout.write(JSON.stringify(finalStations));
   }

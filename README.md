@@ -13,14 +13,19 @@ The station dataset starts with a filtered, merged view of the NOAA ISD
 Historical Climatology Network) ids. To regenerate this data:
 ```shell script
 # fetch the current ISD dataset
-./bin/noaa-get-isd-weather-stations > /tmp/hourly-weather-stations.json
+./src/bin/noaa-get-isd-weather-stations > /tmp/hourly-weather-stations.json
 
-# fetch the current GHCN station data
-./bin/noaa-cdo-station-list-all > /tmp/cdo-station-list.json
+# fetch the current GHCN station data (this one takes maybe 10 minutes to run)
+./src/bin/noaa-cdo-station-list-all
 
-# create a merged dataset
-./bin/noaa-merge-station-data /tmp/hourly-weather-stations.json \
-    /tmp/cdo-station-list.json > assets/data/weather-stations.json
+# this will write the output to a file with a name like:
+#     /tmp/processed_noaa-cdo-station-list-all_16379.json
+# you will need to copy that file name to the next command
+# you can get it from the /tmp directory on your computer
+
+# create a merged dataset, using the files created above
+cd src
+node bin/noaa-create-station-data /tmp/hourly-weather-stations.json /tmp/processed_noaa-cdo-station-list-all_16379.json > assets/data/weather-stations.json
 ```
 *Important*: The second script, noaa-cdo-station-list-all, requires an access token.
 This can be obtained for no cost from https://www.ncdc.noaa.gov/cdo-web/webservices/v2.
@@ -28,7 +33,12 @@ Once obtained, this token should be placed in a text file named, .noaa_rc, in
 the current working directory or your home directory.
 Like:
 ```shell script
-CDO_TOKEN=[your token]
+CDO_TOKEN=sometoken
+```
+
+You can do it as a one-liner:
+```shell script
+echo "CDO_TOKEN=sometoken" > ~/.noaa_rc
 ```
 
 Execution of these scripts requires the following programs to be present in your

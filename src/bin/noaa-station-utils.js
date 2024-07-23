@@ -69,8 +69,8 @@ function haversineDistance (a, b) {
 }
 
 // Station matching constants
-const MAX_DISTANCE_KM = 3.5;
-const MAX_ELEVATION_DIFF = 50;
+const MAX_DISTANCE_KM = 2.5;
+const MAX_ELEVATION_DIFF = 30;
 
 function findMatching(stationList, candidateStation) {
   return stationList.find(function (station) {

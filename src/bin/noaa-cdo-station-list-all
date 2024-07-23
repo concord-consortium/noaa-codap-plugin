@@ -5,39 +5,66 @@
 # Requires a CDO Token obtainable through the CDO website.
 # CDO Token should be placed in ~/.noaa_rc
 #
+
 PROGNAME=$(basename $0)
 DIRNAME=$(dirname $0)
 
-USAGE="$PROGNAME lat long"
-
 . $DIRNAME/.noaa_rc
 . ~/.noaa_rc
-
-#if [ $# != 2 ]; then
-#  echo usage: $USAGE
-#  exit 1
-#fi
 
 TOKEN_PHRASE="token: $CDO_TOKEN"
 URL="$CDO_URL$CDO_ENDPOINT_STATIONS"
 
 function getSample() {
-  curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1" > $2
+  # curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1" > $2
+  local retries=0
+  local success=false
+  local max_retries=5
+  local backoff_time=2 # Initial backoff time in seconds
+
+  # Sometimes these curl requests return empty files or html error pages
+  # After a failure, we wait increasingly long amounts of time before retrying (until we hit max_retries)
+  # This has been effective to get the data to load (without it we get a lot of empty files, and breakage)
+  while [ $retries -lt $max_retries ] && [ "$success" = false ]; do
+    echo  "curl for batch $1 ..."
+    curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000&offset=$1" > $2
+    if [ -s $2 ] && (head -c 1 $2 | grep -qE '\{|\['); then
+      if jq empty $2 >/dev/null 2>&1; then
+        success=true
+        break
+      fi
+    fi
+    echo "Attempt $((retries+1)) failed. Retrying in $backoff_time seconds..."
+    sleep $backoff_time
+    backoff_time=$((backoff_time * 2)) # Exponential backoff
+    retries=$((retries + 1))
+  done
+
+  if [ "$success" = false ]; then
+    echo "Error: Failed to fetch valid JSON after $max_retries attempts."
+    exit 1
+  fi
 }
 
 mkdir /tmp/${PROGNAME}_$$
 i=1
 offset=$i
 while [ $i -lt 59 ] ; do
-f=/tmp/${PROGNAME}_$$/stations_${i}.json
-echo $offset $f
-getSample $offset $f
-i=$(expr $i + 1)
-offset=$(expr $i \* 1000 + 1)
+  f=/tmp/${PROGNAME}_$$/stations_${i}.json
+  echo $offset $f
+  getSample $offset $f
+  i=$(expr $i + 1)
+  offset=$(expr $i \* 1000 + 1)
 done
 
-jq -s '.' /tmp/${PROGNAME}_$$/*.json | jq [.[].results[]]
+echo "All JSON files downloaded and verified."
 
-rm -r /tmp/${PROGNAME}_$$
+combined_json="/tmp/combined_${PROGNAME}_$$.json"
+jq -s '.' /tmp/${PROGNAME}_$$/*.json > "$combined_json" && echo "Combined JSON saved to $combined_json"
+
+processed_json="/tmp/processed_${PROGNAME}_$$.json"
+jq '[.[].results[]]' "$combined_json" > "$processed_json" && echo "Processed JSON (flattened results) saved to $processed_json"
+
+# rm -r /tmp/${PROGNAME}_$$
 
 #curl -H "$TOKEN_PHRASE" "$URL?datasetid=GSOM&FIPS=50&locationid=FIPS:US&limit=1000"
