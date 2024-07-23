@@ -222,7 +222,7 @@ function mergeGHCNDStations(stations, ghcndStations) {
       let existingStation = findMatching(stations, normalizedStation);
       if (existingStation) {
         // eslint-disable-next-line no-console
-        console.log(`found match: "${existingStation.name}" "${normalizedStation.name}"` )
+        console.error(`found match: "${existingStation.name}" "${normalizedStation.name}"` )
         mergeStations(existingStation, normalizedStation);
       }
     });
@@ -257,12 +257,11 @@ function main() {
       let accessibleStations = mergedStations.filter(function (stn){
         return (stn.ghcndID && stn.isdID);
       });
-      // output resulting object
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(accessibleStations));
+      console.error(`... Writing ${accessibleStations.length} accessibleStations with both ISD and GHCND data`);
+      process.stdout.write(JSON.stringify(accessibleStations));
     } else {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(mergedStations));
+      console.error(`... Writing ${mergedStations.length} mergedStations with ISD data`);
+      process.stdout.write(JSON.stringify(mergedStations));
     }
   } catch (ex) {
     printErrorAndExit(`Error reading input: ${ex}`);
