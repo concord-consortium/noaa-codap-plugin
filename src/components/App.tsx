@@ -237,7 +237,7 @@ export const App = () => {
       setIsFetching(false);
       setStatus({
         status: "error",
-        message: "No data retrieved",
+        message: "No data retrieved. Try different frequency or station.",
         icon: <WarningIcon/>
       });
     }
