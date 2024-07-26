@@ -159,7 +159,24 @@ export const App = () => {
     const maxDate = endDate || new Date(Date.now());
     guaranteeGlobal(globalMinDate, Number(minDate)/1000);
     guaranteeGlobal(globalMaxDate, Number(maxDate)/1000);
-  }, [endDate, startDate, weatherStations]);
+    if (weatherStation && (!startDate || !endDate)) {
+      setStatus({
+        status: "error",
+        message: "Select a date range",
+        icon: <WarningIcon/>
+      });
+    }
+    // if the start date of the weather station is after the user's requested end date, then the station is inactive
+    const stationMinDate = new Date(weatherStation?.mindate || globalMinDate);
+    const stationNotActiveYet = stationMinDate > maxDate;
+    if (stationNotActiveYet) {
+      setStatus({
+        status: "station-error",
+        message: "Station was inactive for date range",
+        icon: <WarningIcon/>
+      });
+    }
+  }, [endDate, startDate, weatherStations, weatherStation]);
 
   const stationSelectionHandler = async(req: any) =>{
     if (req.values.operation === "selectCases") {
@@ -237,7 +254,7 @@ export const App = () => {
       setIsFetching(false);
       setStatus({
         status: "error",
-        message: "No data retrieved",
+        message: "No data retrieved. Change frequency or station.",
         icon: <WarningIcon/>
       });
     }
