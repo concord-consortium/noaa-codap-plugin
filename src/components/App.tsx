@@ -23,7 +23,7 @@ import WarningIcon from "../assets/images/icon-warning.svg";
 import "./App.scss";
 
 const kPluginName = "NOAA Weather Station Data";
-const kVersion = "0014";
+const kVersion = "v0.1.3";
 const kInitialDimensions = {
   width: 360,
   height: 670
