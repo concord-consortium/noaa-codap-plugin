@@ -11,6 +11,8 @@ $teal-dark: #177991;
   padding: 0 0 75px;
   background-color: #fff;
   z-index: 10;
+  user-select: text;
+
 
   .modal-header {
     width: 100%;
